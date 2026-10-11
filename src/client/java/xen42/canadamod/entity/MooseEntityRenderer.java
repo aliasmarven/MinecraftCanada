@@ -1,18 +1,18 @@
 package xen42.canadamod.entity;
 
-import net.minecraft.client.render.entity.EntityRendererFactory.Context;
-import net.minecraft.client.render.entity.MobEntityRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EquipmentSlot;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.CanadaModClient;
 import xen42.canadamod.entities.MooseEntity;
 
-public class MooseEntityRenderer extends MobEntityRenderer<MooseEntity, MooseEntityRenderState, MooseEntityModel> {
+public class MooseEntityRenderer extends MobRenderer<MooseEntity, MooseEntityRenderState, MooseEntityModel> {
 
     public MooseEntityRenderer(Context context) {
-        super(context, new MooseEntityModel(context.getPart(CanadaModClient.MODEL_MOOSE_LAYER)), 1.0f);
+        super(context, new MooseEntityModel(context.bakeLayer(CanadaModClient.MODEL_MOOSE_LAYER)), 1.0f);
     }
 
     @Override
@@ -21,26 +21,26 @@ public class MooseEntityRenderer extends MobEntityRenderer<MooseEntity, MooseEnt
     }
 
     @Override
-    public Identifier getTexture(MooseEntityRenderState state) {
-        return Identifier.of(CanadaMod.MOD_ID, "textures/entity/moose/moose.png");
+    public ResourceLocation getTextureLocation(MooseEntityRenderState state) {
+        return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/moose/moose.png");
     }
 
     @Override
-    protected void scale(MooseEntityRenderState state, MatrixStack matrices) {
-        if (state.baby) {
-            matrices.scale(0.5F, 0.5F, 0.5F); 
+    protected void scale(MooseEntityRenderState state, PoseStack matrices) {
+        if (state.isBaby) {
+            matrices.scale(0.5F, 0.5F, 0.5F);
         }
         super.scale(state, matrices);
     }
 
     @Override
-    public void updateRenderState(MooseEntity mooseEntity, MooseEntityRenderState mooseEntityRenderState, float f) {
-        super.updateRenderState(mooseEntity, mooseEntityRenderState, f);
-        mooseEntityRenderState.saddleStack = mooseEntity.getEquippedStack(EquipmentSlot.SADDLE).copy();
+    public void extractRenderState(MooseEntity mooseEntity, MooseEntityRenderState mooseEntityRenderState, float f) {
+        super.extractRenderState(mooseEntity, mooseEntityRenderState, f);
+        mooseEntityRenderState.saddleStack = mooseEntity.getItemBySlot(EquipmentSlot.SADDLE).copy();
         mooseEntityRenderState.leftAntlerMissing = mooseEntity.isLeftAntlerMissing();
         mooseEntityRenderState.rightAntlerMissing = mooseEntity.isRightAntlerMissing();
         mooseEntityRenderState.dashing = mooseEntity.isDashing();
-        
+
         mooseEntityRenderState.attackAnimationState.copyFrom(mooseEntity.attackAnimationState);
     }
 }

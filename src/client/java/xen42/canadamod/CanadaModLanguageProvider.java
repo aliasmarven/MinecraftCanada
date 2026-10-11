@@ -4,71 +4,71 @@ import java.util.concurrent.CompletableFuture;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
-import net.minecraft.block.Block;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.RegistryWrapper.WrapperLookup;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.village.VillagerProfession;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import xen42.canadamod.entities.MapleBoatEntity;
 
 public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
-    public CanadaModLanguageProvider(FabricDataOutput output, String languageCode, CompletableFuture<RegistryWrapper.WrapperLookup> registryLookup) {
+    public CanadaModLanguageProvider(FabricDataOutput output, String languageCode, CompletableFuture<HolderLookup.Provider> registryLookup) {
     	super(output, languageCode, registryLookup);
     }
 
-	public void generateTranslations(RegistryWrapper.WrapperLookup registryLookup, TranslationBuilder translationBuilder) {
+	public void generateTranslations(HolderLookup.Provider registryLookup, TranslationBuilder translationBuilder) {
 		generate(registryLookup, new ModTranslationBuilder(translationBuilder));
 	}
-	
+
 	public String processValue(String value) {
 		return value;
 	}
 
-	public abstract void generate(RegistryWrapper.WrapperLookup registryLookup, ModTranslationBuilder translationBuilder);
-	
+	public abstract void generate(HolderLookup.Provider registryLookup, ModTranslationBuilder translationBuilder);
+
 	public class ModTranslationBuilder implements TranslationBuilder {
 		private final TranslationBuilder original;
-		
+
 		public ModTranslationBuilder(TranslationBuilder original) {
 			this.original = original;
 		}
-		
+
 		@Override
 		public void add(String key, String value) {
 			original.add(key, processValue(value));
 		}
-		
+
 		@Override
 		public void add(Block block, String value) {
 			add(block.asItem(), value);
 		}
 
-		public void addVillagerProfession(RegistryKey<VillagerProfession> key, String value) {
-			add("entity." + key.getValue().getNamespace() + ".villager." + key.getValue().getPath(), value);
+		public void addVillagerProfession(ResourceKey<VillagerProfession> key, String value) {
+			add("entity." + key.location().getNamespace() + ".villager." + key.location().getPath(), value);
 		}
 
 		public void addFilledMap(TagKey<Structure> structure, String value) {
-			add("filled_map." + structure.id().getNamespace() + "." + structure.id().getPath(), value);
+			add("filled_map." + structure.location().getNamespace() + "." + structure.location().getPath(), value);
 		}
 	}
-	
+
 	public static class English extends CanadaModLanguageProvider {
 
-		public English(FabricDataOutput output, String languageCode, CompletableFuture<WrapperLookup> registryLookup) {
+		public English(FabricDataOutput output, String languageCode, CompletableFuture<Provider> registryLookup) {
 			super(output, languageCode, registryLookup);
 		}
 
-		public English(FabricDataOutput output, CompletableFuture<WrapperLookup> registryLookup) {
+		public English(FabricDataOutput output, CompletableFuture<Provider> registryLookup) {
 			this(output, "en_us", registryLookup);
 		}
 
 		@Override
-		public void generate(WrapperLookup registryLookup, ModTranslationBuilder translationBuilder) {
+		public void generate(Provider registryLookup, ModTranslationBuilder translationBuilder) {
 			translationBuilder.add(CanadaItems.PELT, "Pelt");
 			translationBuilder.add(CanadaItems.FLOUR, "Flour");
-			
+
 			translationBuilder.add(CanadaBlocks.MAPLE_PLANKS, "Maple Planks");
 			translationBuilder.add(CanadaBlocks.MAPLE_BUTTON, "Maple Button");
 			translationBuilder.add(CanadaBlocks.MAPLE_DOOR, "Maple Door");
@@ -94,7 +94,7 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 			translationBuilder.add(CanadaItems.TREE_TAP, "Tree Tap");
 			translationBuilder.add(CanadaItems.MAPLE_SYRUP_BOTTLE, "Maple Syrup");
 			translationBuilder.add(CanadaItems.MAPLE_SAPLING, "Maple Sapling");
-			
+
 			translationBuilder.add(CanadaItems.GRAVY, "Gravy");
 			translationBuilder.add(CanadaItems.SAP, "Sap");
 			translationBuilder.add(CanadaItems.MAPLE_SAP, "Maple Sap");
@@ -122,7 +122,7 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 			translationBuilder.add(CanadaItems.COOKED_VENISON, "Cooked venison");
 			translationBuilder.add(CanadaItems.WATERFOWL, "Waterfowl");
 			translationBuilder.add(CanadaItems.COOKED_WATERFOWL, "Cooked waterfowl");
-			
+
 			translationBuilder.add(CanadaMod.MOOSE_ENTITY, "Moose");
 			translationBuilder.add(CanadaMod.BEAVER_ENTITY, "Beaver");
 			translationBuilder.add(CanadaMod.DUCK_ENTITY, "Duck");
@@ -142,7 +142,7 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 
 			translationBuilder.add(CanadaTags.StructureTags.MAPLE_CABIN, "Maple Forest Cabin");
 			translationBuilder.addFilledMap(CanadaTags.StructureTags.MAPLE_CABIN, "Maple Forest Cabin");
-			
+
 			translationBuilder.add(CanadaTags.ItemTags.MAPLE_LOGS, "Maple Logs");
 			translationBuilder.add(CanadaTags.ItemTags.RAW_MEAT, "Red Meat");
 			translationBuilder.add(CanadaTags.ItemTags.SAP, "Sap");
@@ -154,7 +154,7 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 			translationBuilder.add("subtitles.canadamod.beaver_ambient", "Beaver grunts");
 			translationBuilder.add("subtitles.canadamod.beaver_death", "Beaver dies");
 			translationBuilder.add("subtitles.canadamod.beaver_hurt", "Beaver hurts");
-			
+
 			translationBuilder.add("subtitles.canadamod.moose_ambient", "Moose calls");
 			translationBuilder.add("subtitles.canadamod.moose_angry", "Moose grunts angrily");
 			translationBuilder.add("subtitles.canadamod.moose_death", "Moose dies");
@@ -181,12 +181,12 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 			translationBuilder.add("subtitles.canadamod.goose_warning", "Goose hisses");
 		}
 	}
-	
+
 	public static class EnglishUpsideDown extends English {
 		private static final String NORMAL_CHARS = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_,;.?!/\\'\"";
 		private static final String UPSIDE_DOWN_CHARS = " ɐqɔpǝɟᵷɥᴉɾʞꞁɯuodbɹsʇnʌʍxʎzⱯᗺƆᗡƎℲ⅁HIՐꞰꞀWNOԀὉᴚS⟘∩ΛMXʎZ0⥝ᘔƐ߈ϛ9ㄥ86‾'⸵˙¿¡\\/,„";
 
-		public EnglishUpsideDown(FabricDataOutput output, CompletableFuture<WrapperLookup> registryLookup) {
+		public EnglishUpsideDown(FabricDataOutput output, CompletableFuture<Provider> registryLookup) {
 			super(output, "en_ud", registryLookup);
 		}
 
@@ -220,6 +220,6 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 
 			return builder.toString();
 		}
-		
+
 	}
 }

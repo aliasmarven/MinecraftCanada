@@ -1,8 +1,8 @@
 package xen42.canadamod.item;
 
-import net.minecraft.item.tooltip.TooltipData;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
-public record ThermosTooltipData(ThermosContentsComponent contents) implements TooltipData {
+public record ThermosTooltipData(ThermosContentsComponent contents) implements TooltipComponent {
     public ThermosTooltipData(ThermosContentsComponent contents) {
         this.contents = contents;
     }

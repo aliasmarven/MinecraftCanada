@@ -8,43 +8,40 @@ import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityT
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.fabricmc.fabric.api.registry.FuelRegistryEvents;
 import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockSetType;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ButtonBlock;
-import net.minecraft.block.DoorBlock;
-import net.minecraft.block.FenceBlock;
-import net.minecraft.block.FenceGateBlock;
-import net.minecraft.block.FlowerPotBlock;
-import net.minecraft.block.MapColor;
-import net.minecraft.block.PillarBlock;
-import net.minecraft.block.PressurePlateBlock;
-import net.minecraft.block.SaplingBlock;
-import net.minecraft.block.SaplingGenerator;
-import net.minecraft.block.SkullBlock;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.SlimeBlock;
-import net.minecraft.block.StairsBlock;
-import net.minecraft.block.TrapdoorBlock;
-import net.minecraft.block.UntintedParticleLeavesBlock;
-import net.minecraft.block.WallSkullBlock;
-import net.minecraft.block.WoodType;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.block.entity.HangingSignBlockEntity;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.data.family.BlockFamilies;
-import net.minecraft.data.family.BlockFamily;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.particle.SimpleParticleType;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.sound.BlockSoundGroup;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.BlockFamilies;
+import net.minecraft.data.BlockFamily;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.FlowerPotBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.UntintedParticleLeavesBlock;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.HangingSignBlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.grower.TreeGrower;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
+import net.minecraft.world.level.block.state.properties.WoodType;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import xen42.canadamod.block.CookingPotBlock;
 import xen42.canadamod.block.MooseSkullBlock;
 import xen42.canadamod.block.MooseWallSkullBlock;
@@ -81,47 +78,47 @@ public class CanadaBlocks {
     public static Block MAPLE_HANGING_SIGN;
     public static Block MAPLE_WALL_HANGING_SIGN;
 
-	public static final SaplingGenerator MAPLE_SAPLING_GENERATED = new SaplingGenerator("maple", Optional.empty(), 
+	public static final TreeGrower MAPLE_SAPLING_GENERATED = new TreeGrower("maple", Optional.empty(),
 		Optional.of(CanadaConfiguredFeatures.MAPLE_CONFIGURED_FEATURE), Optional.of(CanadaConfiguredFeatures.MAPLE_CONFIGURED_FEATURE));
 
-	public static final Block MAPLE_SAPLING = register("maple_sapling", 
-        settings -> new SaplingBlock(MAPLE_SAPLING_GENERATED, settings), 
-        AbstractBlock.Settings.copy(Blocks.OAK_SAPLING).mapColor(MapColor.RED),
+	public static final Block MAPLE_SAPLING = register("maple_sapling",
+        settings -> new SaplingBlock(MAPLE_SAPLING_GENERATED, settings),
+        BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING).mapColor(MapColor.COLOR_RED),
 		false);
 
-	public static final Block POTTED_MAPLE_SAPLING = register("potted_maple_sapling", 
-		settings -> new FlowerPotBlock(MAPLE_SAPLING, settings), Blocks.createFlowerPotSettings(), 
+	public static final Block POTTED_MAPLE_SAPLING = register("potted_maple_sapling",
+		settings -> new FlowerPotBlock(MAPLE_SAPLING, settings), Blocks.flowerPotProperties(),
 		false);
 
 	public static Block TREE_TAP = register(
 			"tree_tap",
 			TreeTapBlock::new,
-			AbstractBlock.Settings.create().solid().sounds(BlockSoundGroup.CHAIN).nonOpaque().pistonBehavior(PistonBehavior.DESTROY).breakInstantly(),
+			BlockBehaviour.Properties.of().forceSolidOn().sound(SoundType.CHAIN).noOcclusion().pushReaction(PushReaction.DESTROY).instabreak(),
 			false
 		);
-	
+
 	public static Block COOKING_POT = register(
 		"cooking_pot",
 		CookingPotBlock::new,
-		AbstractBlock.Settings.create().luminance(Blocks.createLightLevelFromLitBlockState(13)).nonOpaque()
-			.mapColor(MapColor.STONE_GRAY).pistonBehavior(PistonBehavior.DESTROY).hardness(0.3f),
+		BlockBehaviour.Properties.of().lightLevel(Blocks.litBlockEmission(13)).noOcclusion()
+			.mapColor(MapColor.STONE).pushReaction(PushReaction.DESTROY).destroyTime(0.3f),
 		true
 	);
 
-	public static Block RUBBER_BLOCK = register("rubber_block", RubberBlock::new, AbstractBlock.Settings.create()
-		.sounds(BlockSoundGroup.FUNGUS).mapColor(MapColor.BLACK).hardness(0.1f), true);
+	public static Block RUBBER_BLOCK = register("rubber_block", RubberBlock::new, BlockBehaviour.Properties.of()
+		.sound(SoundType.FUNGUS).mapColor(MapColor.COLOR_BLACK).destroyTime(0.1f), true);
 
 	public static Block MOOSE_HEAD = register(
 		"moose_head",
 		MooseSkullBlock::new,
-		AbstractBlock.Settings.create().strength(1.0F).pistonBehavior(PistonBehavior.DESTROY),
+		BlockBehaviour.Properties.of().strength(1.0F).pushReaction(PushReaction.DESTROY),
 		false
 	);
 
 	public static Block MOOSE_WALL_HEAD = register(
 		"moose_head_wall",
 		MooseWallSkullBlock::new,
-		AbstractBlock.Settings.create().strength(1.0F).pistonBehavior(PistonBehavior.DESTROY),
+		BlockBehaviour.Properties.of().strength(1.0F).pushReaction(PushReaction.DESTROY),
 		false
 	);
 
@@ -138,116 +135,116 @@ public class CanadaBlocks {
 		MAPLE_PLANKS = register(
 			"maple_planks",
 			Block::new,
-			AbstractBlock.Settings.copy(Blocks.OAK_PLANKS),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS),
 			true
 		);
 		MAPLE_LOG = register(
 			"maple_log",
-			PillarBlock::new,
-			AbstractBlock.Settings.copy(Blocks.OAK_LOG),
+			RotatedPillarBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LOG),
 			true
 		);
-		Registry.register(Registries.PARTICLE_TYPE,
-					Identifier.of(CanadaMod.MOD_ID, "maple"),
+		Registry.register(BuiltInRegistries.PARTICLE_TYPE,
+					ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple"),
 					MAPLE_LEAF_PARTICLE);
 		MAPLE_LEAVES = register(
 			"maple_leaves",
 			(settings) -> new UntintedParticleLeavesBlock(0.01F, MAPLE_LEAF_PARTICLE, settings),
-			AbstractBlock.Settings.copy(Blocks.OAK_LEAVES),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES),
 			true
 		);
 		STRIPPED_MAPLE_LOG = register(
 			"stripped_maple_log",
-			PillarBlock::new,
-			AbstractBlock.Settings.copy(Blocks.STRIPPED_OAK_LOG),
+			RotatedPillarBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_LOG),
 			true
 		);
 		MAPLE_WOOD = register(
 			"maple_wood",
-			PillarBlock::new,
-			AbstractBlock.Settings.copy(Blocks.OAK_WOOD),
+			RotatedPillarBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WOOD),
 			true
 		);
 		STRIPPED_MAPLE_WOOD = register(
 			"stripped_maple_wood",
-			PillarBlock::new,
-			AbstractBlock.Settings.copy(Blocks.STRIPPED_OAK_WOOD),
+			RotatedPillarBlock::new,
+			BlockBehaviour.Properties.ofFullCopy(Blocks.STRIPPED_OAK_WOOD),
 			true
 		);
 		MAPLE_STAIRS = register(
 			"maple_stairs",
-			(settings) -> new StairsBlock(MAPLE_PLANKS.getDefaultState(), settings),
-			AbstractBlock.Settings.copy(Blocks.OAK_STAIRS),
+			(settings) -> new StairBlock(MAPLE_PLANKS.defaultBlockState(), settings),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_STAIRS),
 			true
 		);
 		MAPLE_BUTTON = register(
 			"maple_button",
 			(settings) -> new ButtonBlock(MAPLE_WOOD_SET, 30, settings),
-			AbstractBlock.Settings.copy(Blocks.OAK_BUTTON),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_BUTTON),
 			true
 		);
 		MAPLE_SLAB = register(
 			"maple_slab",
 			SlabBlock::new,
-			AbstractBlock.Settings.copy(Blocks.OAK_SLAB),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SLAB),
 			true
 		);
 		MAPLE_DOOR = register(
 			"maple_door",
 			(settings) -> new DoorBlock(MAPLE_WOOD_SET, settings),
-			AbstractBlock.Settings.copy(Blocks.OAK_DOOR),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_DOOR),
 			true
 		);
 		MAPLE_TRAPDOOR = register(
 			"maple_trapdoor",
-			(settings) -> new TrapdoorBlock(MAPLE_WOOD_SET, settings),
-			AbstractBlock.Settings.copy(Blocks.OAK_TRAPDOOR),
+			(settings) -> new TrapDoorBlock(MAPLE_WOOD_SET, settings),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_TRAPDOOR),
 			true
 		);
 		MAPLE_FENCE = register(
 			"maple_fence",
 			FenceBlock::new,
-			AbstractBlock.Settings.copy(Blocks.OAK_FENCE),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE),
 			true
 		);
 		MAPLE_FENCE_GATE = register(
 			"maple_fence_gate",
 			(settings) -> new FenceGateBlock(MAPLE_WOOD_TYPE, settings),
-			AbstractBlock.Settings.copy(Blocks.OAK_FENCE_GATE),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_FENCE_GATE),
 			true
 		);
 		MAPLE_PRESSURE_PLATE = register(
 			"maple_pressure_plate",
 			(settings) -> new PressurePlateBlock(MAPLE_WOOD_SET, settings),
-			AbstractBlock.Settings.copy(Blocks.OAK_PRESSURE_PLATE),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PRESSURE_PLATE),
 			true
 		);
 		MAPLE_SIGN = register(
 			"maple_sign",
 			MapleSignBlock::new,
-			AbstractBlock.Settings.copy(Blocks.OAK_SIGN),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SIGN),
 			false
 		);
 		MAPLE_WALL_SIGN = register(
 			"maple_wall_sign",
 			MapleWallSignBlock::new,
-			AbstractBlock.Settings.copy(Blocks.OAK_WALL_SIGN),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_SIGN),
 			false
 		);
 		MAPLE_HANGING_SIGN = register(
 			"maple_hanging_sign",
 			MapleHangingSignBlock::new,
-			AbstractBlock.Settings.copy(Blocks.OAK_HANGING_SIGN),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_HANGING_SIGN),
 			false
 		);
 		MAPLE_WALL_HANGING_SIGN = register(
 			"maple_hanging_wall_sign",
 			MapleWallHangingSignBlock::new,
-			AbstractBlock.Settings.copy(Blocks.OAK_WALL_HANGING_SIGN),
+			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_WALL_HANGING_SIGN),
 			false
 		);
 
-		MAPLE = BlockFamilies.register(MAPLE_PLANKS)
+		MAPLE = BlockFamilies.familyBuilder(MAPLE_PLANKS)
 			.button(MAPLE_BUTTON)
 			.door(MAPLE_DOOR)
 			.fence(MAPLE_FENCE)
@@ -257,9 +254,9 @@ public class CanadaBlocks {
 			.slab(MAPLE_SLAB)
 			.stairs(MAPLE_STAIRS)
 			.sign(MAPLE_SIGN, MAPLE_WALL_SIGN)
-			.group("wooden")
-			.unlockCriterionName("has_planks")
-			.build();
+			.recipeGroupPrefix("wooden")
+			.recipeUnlockedBy("has_planks")
+			.getFamily();
 
 		MAPLE_BLOCKS = new Block[] {
 			MAPLE_LOG, MAPLE_WOOD, STRIPPED_MAPLE_LOG, STRIPPED_MAPLE_WOOD, MAPLE_PLANKS, MAPLE_STAIRS,
@@ -270,7 +267,7 @@ public class CanadaBlocks {
 		StrippableBlockRegistry.register(CanadaBlocks.MAPLE_WOOD, CanadaBlocks.STRIPPED_MAPLE_WOOD);
 
 		FuelRegistryEvents.BUILD.register((builder, context) -> {
-            int time = context.baseSmeltTime(); 
+            int time = context.baseSmeltTime();
 			for (var woodItem : new Block[] { MAPLE_LOG, MAPLE_WOOD, STRIPPED_MAPLE_LOG, STRIPPED_MAPLE_WOOD, MAPLE_PLANKS,
 												MAPLE_TRAPDOOR, MAPLE_FENCE_GATE, MAPLE_FENCE }) {
 				builder.add(woodItem, time);
@@ -285,41 +282,41 @@ public class CanadaBlocks {
         });
 
         MAPLE_SIGN_BLOCK_ENTITY = Registry.register(
-            Registries.BLOCK_ENTITY_TYPE,
-            Identifier.of(CanadaMod.MOD_ID, "maple_sign"),
+            BuiltInRegistries.BLOCK_ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_sign"),
 			FabricBlockEntityTypeBuilder.<SignBlockEntity>create(MapleSignEntity::new, MAPLE_SIGN, MAPLE_WALL_SIGN).build());
-		
+
 		MAPLE_HANGING_SIGN_BLOCK_ENTITY = Registry.register(
-            Registries.BLOCK_ENTITY_TYPE,
-            Identifier.of(CanadaMod.MOD_ID, "maple_hanging_sign"),
+            BuiltInRegistries.BLOCK_ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_hanging_sign"),
 			FabricBlockEntityTypeBuilder.<HangingSignBlockEntity>create(MapleHangingSignBlockEntity::new, MAPLE_HANGING_SIGN, MAPLE_WALL_HANGING_SIGN).build());
 	}
 
-    private static Block register(String name, Function<AbstractBlock.Settings, Block> blockFactory, AbstractBlock.Settings settings, boolean shouldRegisterItem) {
+    private static Block register(String name, Function<BlockBehaviour.Properties, Block> blockFactory, BlockBehaviour.Properties settings, boolean shouldRegisterItem) {
 		// Create a registry key for the block
-		RegistryKey<Block> blockKey = keyOfBlock(name);
+		ResourceKey<Block> blockKey = keyOfBlock(name);
 		// Create the block instance
-		Block block = blockFactory.apply(settings.registryKey(blockKey));
+		Block block = blockFactory.apply(settings.setId(blockKey));
 
 		// Sometimes, you may not want to register an item for the block.
 		// Eg: if it's a technical block like `minecraft:moving_piston` or `minecraft:end_gateway`
 		if (shouldRegisterItem) {
 			// Items need to be registered with a different type of registry key, but the ID
 			// can be the same.
-			RegistryKey<Item> itemKey = keyOfItem(name);
+			ResourceKey<Item> itemKey = keyOfItem(name);
 
-			BlockItem blockItem = new BlockItem(block, new Item.Settings().registryKey(itemKey));
-			Registry.register(Registries.ITEM, itemKey, blockItem);
+			BlockItem blockItem = new BlockItem(block, new Item.Properties().setId(itemKey));
+			Registry.register(BuiltInRegistries.ITEM, itemKey, blockItem);
 		}
 
-		return Registry.register(Registries.BLOCK, blockKey, block);
+		return Registry.register(BuiltInRegistries.BLOCK, blockKey, block);
 	}
 
-	private static RegistryKey<Block> keyOfBlock(String name) {
-		return RegistryKey.of(RegistryKeys.BLOCK, Identifier.of(CanadaMod.MOD_ID, name));
+	private static ResourceKey<Block> keyOfBlock(String name) {
+		return ResourceKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
 	}
 
-	private static RegistryKey<Item> keyOfItem(String name) {
-		return RegistryKey.of(RegistryKeys.ITEM, Identifier.of(CanadaMod.MOD_ID, name));
+	private static ResourceKey<Item> keyOfItem(String name) {
+		return ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
 	}
 }

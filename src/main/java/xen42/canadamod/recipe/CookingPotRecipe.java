@@ -4,28 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.PlacementInfo;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeBookCategory;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay.ItemStackSlotDisplay;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.IngredientPlacement;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.recipe.display.SlotDisplay.StackSlotDisplay;
-import net.minecraft.registry.RegistryWrapper.WrapperLookup;
-import net.minecraft.world.World;
 import xen42.canadamod.CanadaBlocks;
 import xen42.canadamod.CanadaMod;
 
@@ -45,7 +43,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
     }
 
     @Override
-    public ItemStack craft(CookingPotRecipeInput input, WrapperLookup registries) {
+    public ItemStack assemble(CookingPotRecipeInput input, Provider registries) {
         return this.result.copy();
     }
 
@@ -55,12 +53,12 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 	}
 
 	@Override
-	public IngredientPlacement getIngredientPlacement() {
-		return IngredientPlacement.forShapeless(this.ingredients);
+	public PlacementInfo placementInfo() {
+		return PlacementInfo.create(this.ingredients);
 	}
 
 	@Override
-	public RecipeBookCategory getRecipeBookCategory() {
+	public RecipeBookCategory recipeBookCategory() {
 		return CanadaMod.COOKING_POT_RECIPE_BOOK_CATEGORY;
 	}
 
@@ -75,7 +73,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 	}
 
     @Override
-	public boolean isIgnoredInRecipeBook() {
+	public boolean isSpecial() {
 		return false;
 	}
 
@@ -85,38 +83,38 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 	}
 
     @Override
-	public String getGroup() {
+	public String group() {
 		return this.group;
 	}
 
 	@Override
-	public List<RecipeDisplay> getDisplays() {
+	public List<RecipeDisplay> display() {
         var containerItem = this.requiresBottle ? Items.GLASS_BOTTLE : (this.requiresBowl ? Items.BOWL : null);
-        var containerDisplay = containerItem == null ? SlotDisplay.EmptySlotDisplay.INSTANCE : new SlotDisplay.ItemSlotDisplay(containerItem);
-        var ingredientDisplays = this.ingredients.stream().map(Ingredient::toDisplay).toList();
+        var containerDisplay = containerItem == null ? SlotDisplay.Empty.INSTANCE : new SlotDisplay.ItemSlotDisplay(containerItem);
+        var ingredientDisplays = this.ingredients.stream().map(Ingredient::display).toList();
         var cookingPotItem = CanadaBlocks.COOKING_POT.asItem();
 		return List.of(
             new CookingPotRecipeDisplay(ingredientDisplays, containerDisplay,
-                new StackSlotDisplay(this.result), new SlotDisplay.ItemSlotDisplay(cookingPotItem))
+                new ItemStackSlotDisplay(this.result), new SlotDisplay.ItemSlotDisplay(cookingPotItem))
         );
 	}
 
     @Override
-    public boolean matches(CookingPotRecipeInput input, World world) {
+    public boolean matches(CookingPotRecipeInput input, Level world) {
         var flagHasBottle = false;
         var flagHasBowl = false;
         // Skip output and fuel slots
         for (int i = 2; i < input.stacks.size(); i++) {
             var stack = input.stacks.get(i);
-            if (stack.isOf(Items.BOWL)) {
+            if (stack.is(Items.BOWL)) {
                 flagHasBowl = true;
             }
-            else if (stack.isOf(Items.GLASS_BOTTLE)) {
+            else if (stack.is(Items.GLASS_BOTTLE)) {
                 flagHasBottle = true;
             }
             else {
                 // Check that all ingredients match an input
-                if (!ingredients.stream().anyMatch(ingredient -> stack.isEmpty() || Ingredient.matches(Optional.of(ingredient), stack))) {
+                if (!ingredients.stream().anyMatch(ingredient -> stack.isEmpty() || Ingredient.testOptionalIngredient(Optional.of(ingredient), stack))) {
                     return false;
                 }
             }
@@ -125,7 +123,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 
         // Check that all inputs match an ingredient
         for (var ingredient : ingredients) {
-            if (!input.stacks.stream().anyMatch(stack -> Ingredient.matches(Optional.of(ingredient), stack))) {
+            if (!input.stacks.stream().anyMatch(stack -> Ingredient.testOptionalIngredient(Optional.of(ingredient), stack))) {
                 return false;
             }
         }
@@ -155,7 +153,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 				)
 				.apply(instance, CookingPotRecipe::new)
 		);
-		public static final PacketCodec<RegistryByteBuf, CookingPotRecipe> PACKET_CODEC = PacketCodec.ofStatic(
+		public static final StreamCodec<RegistryFriendlyByteBuf, CookingPotRecipe> PACKET_CODEC = StreamCodec.of(
 				CookingPotRecipe.Serializer::write, CookingPotRecipe.Serializer::read
 		);
 
@@ -166,17 +164,17 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 
 		@Deprecated
 		@Override
-		public PacketCodec<RegistryByteBuf, CookingPotRecipe> packetCodec() {
+		public StreamCodec<RegistryFriendlyByteBuf, CookingPotRecipe> streamCodec() {
 			return PACKET_CODEC;
 		}
 
-		private static CookingPotRecipe read(RegistryByteBuf buf) {
-			var string = buf.readString();
-			var result = ItemStack.PACKET_CODEC.decode(buf);
+		private static CookingPotRecipe read(RegistryFriendlyByteBuf buf) {
+			var string = buf.readUtf();
+			var result = ItemStack.STREAM_CODEC.decode(buf);
             var ingredientsCount = buf.readInt();
             var ingredients = new ArrayList<Ingredient>();
             for (int i = 0; i < ingredientsCount; i++) {
-			    ingredients.add(Ingredient.PACKET_CODEC.decode(buf));
+			    ingredients.add(Ingredient.CONTENTS_STREAM_CODEC.decode(buf));
             }
             var requiresBottle = buf.readBoolean();
             var requiresBowl = buf.readBoolean();
@@ -184,12 +182,12 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 			return new CookingPotRecipe(string, result, ingredients, requiresBottle, requiresBowl);
 		}
 
-		private static void write(RegistryByteBuf buf, CookingPotRecipe recipe) {
-			buf.writeString(recipe.group);
-			ItemStack.PACKET_CODEC.encode(buf, recipe.result);
+		private static void write(RegistryFriendlyByteBuf buf, CookingPotRecipe recipe) {
+			buf.writeUtf(recipe.group);
+			ItemStack.STREAM_CODEC.encode(buf, recipe.result);
             buf.writeInt(recipe.ingredients.size());
             for (var ingredient : recipe.ingredients) {
-			    Ingredient.PACKET_CODEC.encode(buf, ingredient);
+			    Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient);
             }
             buf.writeBoolean(recipe.requiresBottle);
             buf.writeBoolean(recipe.requiresBowl);

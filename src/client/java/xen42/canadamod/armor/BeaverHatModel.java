@@ -1,19 +1,19 @@
 package xen42.canadamod.armor;
 
-import net.minecraft.client.model.Dilation;
-import net.minecraft.client.model.ModelData;
-import net.minecraft.client.model.ModelPartBuilder;
-import net.minecraft.client.model.ModelPartData;
-import net.minecraft.client.model.ModelTransform;
-import net.minecraft.client.model.TexturedModelData;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 
 public class BeaverHatModel {
-    
-    public static TexturedModelData getModel() {
-		ModelData modelData = new ModelData();
-		ModelPartData modelPartData = modelData.getRoot();
-		ModelPartData hat = modelPartData.addChild("hat", ModelPartBuilder.create().uv(0, 15).cuboid(-6.0F, -6.0F, -6.0F, 12.0F, 1.0F, 12.0F, new Dilation(0.1F))
-		.uv(0, 0).cuboid(-4.0F, -12.0F, -4.0F, 8.0F, 6.0F, 8.0F, new Dilation(0.1F)), ModelTransform.origin(0.0F, 24.0F, 0.0F));
-		return TexturedModelData.of(modelData, 64, 64);
+
+    public static LayerDefinition getModel() {
+		MeshDefinition modelData = new MeshDefinition();
+		PartDefinition modelPartData = modelData.getRoot();
+		PartDefinition hat = modelPartData.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(0, 15).addBox(-6.0F, -6.0F, -6.0F, 12.0F, 1.0F, 12.0F, new CubeDeformation(0.1F))
+		.texOffs(0, 0).addBox(-4.0F, -12.0F, -4.0F, 8.0F, 6.0F, 8.0F, new CubeDeformation(0.1F)), PartPose.offset(0.0F, 24.0F, 0.0F));
+		return LayerDefinition.create(modelData, 64, 64);
     }
 }

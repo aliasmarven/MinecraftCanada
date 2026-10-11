@@ -1,15 +1,14 @@
 package xen42.canadamod.recipe;
 
 import java.util.List;
-
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.RecipeFinder;
-import net.minecraft.recipe.input.RecipeInput;
+import net.minecraft.world.entity.player.StackedItemContents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeInput;
 
 public class CookingPotRecipeInput implements RecipeInput {
 
     public final List<ItemStack> stacks;
-    private final RecipeFinder matcher = new RecipeFinder();
+    private final StackedItemContents matcher = new StackedItemContents();
     private final int stackCount;
 
 	public CookingPotRecipeInput(List<ItemStack> stacks) {
@@ -19,7 +18,7 @@ public class CookingPotRecipeInput implements RecipeInput {
 		for (ItemStack itemStack : stacks) {
 			if (!itemStack.isEmpty()) {
 				i++;
-				this.matcher.addInput(itemStack, 1);
+				this.matcher.accountStack(itemStack, 1);
 			}
 		}
 
@@ -40,7 +39,7 @@ public class CookingPotRecipeInput implements RecipeInput {
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int slot) {
+	public ItemStack getItem(int slot) {
 		return (ItemStack)this.stacks.get(slot);
 	}
 

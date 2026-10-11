@@ -1,26 +1,26 @@
 package xen42.canadamod.item.eggs;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Position;
-import net.minecraft.world.World;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import xen42.canadamod.entities.eggs.DuckEggEntity;
 
 public class DuckEggItem extends CustomEggItem {
-    public DuckEggItem(Item.Settings settings) {
+    public DuckEggItem(Item.Properties settings) {
         super(settings);
     }
 
     @Override
-    public ProjectileEntity createEntity(World world, LivingEntity owner, ItemStack stack) {
+    public Projectile createEntity(Level world, LivingEntity owner, ItemStack stack) {
 		return new DuckEggEntity(world, owner, stack);
 	}
 
 	@Override
-	public ProjectileEntity createEntity(World world, Position pos, ItemStack stack, Direction direction) {
-		return new DuckEggEntity(world, pos.getX(), pos.getY(), pos.getZ(), stack);
+	public Projectile asProjectile(Level world, Position pos, ItemStack stack, Direction direction) {
+		return new DuckEggEntity(world, pos.x(), pos.y(), pos.z(), stack);
 	}
 }

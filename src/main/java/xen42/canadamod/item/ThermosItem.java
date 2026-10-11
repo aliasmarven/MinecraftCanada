@@ -1,67 +1,67 @@
 package xen42.canadamod.item;
 
 import java.util.Optional;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.TooltipDisplayComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.StackReference;
-import net.minecraft.item.consume.UseAction;
-import net.minecraft.item.tooltip.TooltipData;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ClickType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.component.Consumable;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.math.Fraction;
 
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.component.type.ConsumableComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUsage;
 import xen42.canadamod.CanadaItems;
 import xen42.canadamod.CanadaMod;
+import xen42.canadamod.item.ThermosContentsComponent.Builder;
 
 public class ThermosItem extends Item {
     @Nullable
     private ItemStack currentFoodStack;
 
     @Nullable
-    private ConsumableComponent currentConsumableComponent;
+    private Consumable currentConsumableComponent;
 
     private int selectedIndex = -1;
 
-    public ThermosItem(Settings settings) {
+    public ThermosItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public ActionResult use(World world, PlayerEntity user, Hand hand) {
-        ItemStack itemStack = user.getStackInHand(hand);
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
+        ItemStack itemStack = user.getItemInHand(hand);
 
         selectFirstFood(itemStack, user);
 
         if (currentConsumableComponent != null) {
-            return currentConsumableComponent.consume(user, itemStack, hand);
-        } 
+            return currentConsumableComponent.startConsuming(user, itemStack, hand);
+        }
 
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
-    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
+    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
         if (currentConsumableComponent != null) {
-            var finishedConsumption = currentConsumableComponent.finishConsumption(world, user, currentFoodStack.copy());
-            
+            var finishedConsumption = currentConsumableComponent.onConsume(world, user, currentFoodStack.copy());
+
             // If it has a remainder give that instead
-            var remainder = currentFoodStack.copy().finishUsing(world, user);
+            var remainder = currentFoodStack.copy().finishUsingItem(world, user);
             if (remainder != currentFoodStack) {
                 finishedConsumption = remainder;
             }
@@ -71,7 +71,7 @@ public class ThermosItem extends Item {
 
             builder.setSelectedStackIndex(selectedIndex);
             builder.removeSelected();
-            
+
             builder.add(finishedConsumption);
             stack.set(CanadaItems.THERMOS_CONTENTS, builder.build());
 
@@ -83,33 +83,33 @@ public class ThermosItem extends Item {
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
         if (currentConsumableComponent != null) {
-            return currentConsumableComponent.useAction();
-        } 
+            return currentConsumableComponent.animation();
+        }
         else {
-            return UseAction.NONE;
+            return ItemUseAnimation.NONE;
         }
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+    public int getUseDuration(ItemStack stack, LivingEntity user) {
         if (currentConsumableComponent != null) {
-            return currentConsumableComponent.getConsumeTicks();
+            return currentConsumableComponent.consumeTicks();
         } else {
             return 0;
         }
     }
 
     @Override
-    public boolean onStoppedUsing(ItemStack stack, World world, LivingEntity user, int remainingUseTicks) {
+    public boolean releaseUsing(ItemStack stack, Level world, LivingEntity user, int remainingUseTicks) {
         this.currentConsumableComponent = null;
         currentFoodStack = null;
         selectedIndex = -1;
         return false;
     }
 
-    private void selectFirstFood(ItemStack stack, PlayerEntity player) {
+    private void selectFirstFood(ItemStack stack, Player player) {
         var thermosContentsComponent = stack.get(CanadaItems.THERMOS_CONTENTS);
         var builder = thermosContentsComponent.new Builder(thermosContentsComponent);
 
@@ -117,12 +117,12 @@ public class ThermosItem extends Item {
             builder.setSelectedStackIndex(index);
             var itemStack = builder.removeSelected();
 
-            if (itemStack != null && itemStack.get(DataComponentTypes.CONSUMABLE) != null) {
+            if (itemStack != null && itemStack.get(DataComponents.CONSUMABLE) != null) {
                 currentFoodStack = itemStack;
-                currentConsumableComponent = itemStack.get(DataComponentTypes.CONSUMABLE);
+                currentConsumableComponent = itemStack.get(DataComponents.CONSUMABLE);
                 selectedIndex = index;
                 return;
-            } 
+            }
         }
 
         currentFoodStack = null;
@@ -131,9 +131,9 @@ public class ThermosItem extends Item {
     }
 
     @Override
-    public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
-        if (currentConsumableComponent != null && currentConsumableComponent.shouldSpawnParticlesAndPlaySounds(remainingUseTicks)) {
-            currentConsumableComponent.spawnParticlesAndPlaySound(user.getRandom(), user, currentFoodStack, 5);
+    public void onUseTick(Level world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if (currentConsumableComponent != null && currentConsumableComponent.shouldEmitParticlesAndSounds(remainingUseTicks)) {
+            currentConsumableComponent.emitParticlesAndSounds(user.getRandom(), user, currentFoodStack, 5);
         }
     }
 
@@ -143,22 +143,22 @@ public class ThermosItem extends Item {
     public static final int TOOLTIP_STACKS_ROWS = 3;
     public static final int MAX_TOOLTIP_STACKS_SHOWN = 12;
     public static final int MAX_TOOLTIP_STACKS_SHOWN_WHEN_TOO_MANY_TYPES = 11;
-    private static final int FULL_ITEM_BAR_COLOR = ColorHelper.fromFloats(1.0F, 1.0F, 0.33F, 0.33F);
-    private static final int ITEM_BAR_COLOR = ColorHelper.fromFloats(1.0F, 0.44F, 0.53F, 1.0F);
+    private static final int FULL_ITEM_BAR_COLOR = ARGB.colorFromFloat(1.0F, 1.0F, 0.33F, 0.33F);
+    private static final int ITEM_BAR_COLOR = ARGB.colorFromFloat(1.0F, 0.44F, 0.53F, 1.0F);
 
     public static float getAmountFilled(ItemStack stack) {
         ThermosContentsComponent thermosContentsComponent = (ThermosContentsComponent)stack.getOrDefault(CanadaItems.THERMOS_CONTENTS, ThermosContentsComponent.DEFAULT);
         return thermosContentsComponent.getOccupancy().floatValue();
     }
 
-    public boolean onStackClicked(ItemStack stack, Slot slot, ClickType clickType, PlayerEntity player) {
+    public boolean overrideStackedOnOther(ItemStack stack, Slot slot, ClickAction clickType, Player player) {
         ThermosContentsComponent thermosContentsComponent = (ThermosContentsComponent)stack.get(CanadaItems.THERMOS_CONTENTS);
         if (thermosContentsComponent == null) {
             return false;
         } else {
-            ItemStack itemStack = slot.getStack();
+            ItemStack itemStack = slot.getItem();
             ThermosContentsComponent.Builder builder = thermosContentsComponent.new Builder(thermosContentsComponent);
-            if (clickType == ClickType.LEFT && !itemStack.isEmpty()) {
+            if (clickType == ClickAction.PRIMARY && !itemStack.isEmpty()) {
                 if (builder.add(slot, player) > 0) {
                     playInsertSound(player);
                 } else {
@@ -168,10 +168,10 @@ public class ThermosItem extends Item {
                 stack.set(CanadaItems.THERMOS_CONTENTS, builder.build());
                 this.onContentChanged(player);
                 return true;
-            } else if (clickType == ClickType.RIGHT && itemStack.isEmpty()) {
+            } else if (clickType == ClickAction.SECONDARY && itemStack.isEmpty()) {
                 ItemStack itemStack2 = builder.removeSelected();
                 if (itemStack2 != null) {
-                    ItemStack itemStack3 = slot.insertStack(itemStack2);
+                    ItemStack itemStack3 = slot.safeInsert(itemStack2);
                     if (itemStack3.getCount() > 0) {
                         builder.add(itemStack3);
                     } else {
@@ -188,8 +188,8 @@ public class ThermosItem extends Item {
         }
     }
 
-    public boolean onClicked(ItemStack stack, ItemStack otherStack, Slot slot, ClickType clickType, PlayerEntity player, StackReference cursorStackReference) {
-        if (clickType == ClickType.LEFT && otherStack.isEmpty()) {
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction clickType, Player player, SlotAccess cursorStackReference) {
+        if (clickType == ClickAction.PRIMARY && otherStack.isEmpty()) {
             setSelectedStackIndex(stack, -1);
             return false;
         } else {
@@ -198,8 +198,8 @@ public class ThermosItem extends Item {
                 return false;
             } else {
                 ThermosContentsComponent.Builder builder = thermosContentsComponent.new Builder(thermosContentsComponent);
-                if (clickType == ClickType.LEFT && !otherStack.isEmpty()) {
-                    if (slot.canTakePartial(player) && builder.add(otherStack) > 0) {
+                if (clickType == ClickAction.PRIMARY && !otherStack.isEmpty()) {
+                    if (slot.allowModification(player) && builder.add(otherStack) > 0) {
                         playInsertSound(player);
                     } else {
                         playInsertFailSound(player);
@@ -208,8 +208,8 @@ public class ThermosItem extends Item {
                     stack.set(CanadaItems.THERMOS_CONTENTS, builder.build());
                     this.onContentChanged(player);
                     return true;
-                } else if (clickType == ClickType.RIGHT && otherStack.isEmpty()) {
-                    if (slot.canTakePartial(player)) {
+                } else if (clickType == ClickAction.SECONDARY && otherStack.isEmpty()) {
+                    if (slot.allowModification(player)) {
                         ItemStack itemStack = builder.removeSelected();
                         if (itemStack != null) {
                             playRemoveOneSound(player);
@@ -228,17 +228,17 @@ public class ThermosItem extends Item {
         }
     }
 
-    public boolean isItemBarVisible(ItemStack stack) {
+    public boolean isBarVisible(ItemStack stack) {
         ThermosContentsComponent thermosContentsComponent = (ThermosContentsComponent)stack.getOrDefault(CanadaItems.THERMOS_CONTENTS, ThermosContentsComponent.DEFAULT);
         return thermosContentsComponent.getOccupancy().compareTo(Fraction.ZERO) > 0;
     }
 
-    public int getItemBarStep(ItemStack stack) {
+    public int getBarWidth(ItemStack stack) {
         ThermosContentsComponent thermosContentsComponent = (ThermosContentsComponent)stack.getOrDefault(CanadaItems.THERMOS_CONTENTS, ThermosContentsComponent.DEFAULT);
-        return Math.min(1 + MathHelper.multiplyFraction(thermosContentsComponent.getOccupancy(), 12), 13);
+        return Math.min(1 + Mth.mulAndTruncate(thermosContentsComponent.getOccupancy(), 12), 13);
     }
 
-    public int getItemBarColor(ItemStack stack) {
+    public int getBarColor(ItemStack stack) {
         ThermosContentsComponent thermosContentsComponent = (ThermosContentsComponent)stack.getOrDefault(CanadaItems.THERMOS_CONTENTS, ThermosContentsComponent.DEFAULT);
         return thermosContentsComponent.getOccupancy().compareTo(Fraction.ONE) >= 0 ? FULL_ITEM_BAR_COLOR : ITEM_BAR_COLOR;
     }
@@ -272,35 +272,35 @@ public class ThermosItem extends Item {
         return thermosContentsComponent.getNumberOfStacksShown();
     }
 
-    public Optional<TooltipData> getTooltipData(ItemStack stack) {
-        TooltipDisplayComponent tooltipDisplayComponent = (TooltipDisplayComponent)stack.getOrDefault(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplayComponent.DEFAULT);
-        return !tooltipDisplayComponent.shouldDisplay(CanadaItems.THERMOS_CONTENTS) ? Optional.empty() : Optional.ofNullable((ThermosContentsComponent)stack.get(CanadaItems.THERMOS_CONTENTS)).map(ThermosTooltipData::new);
+    public Optional<TooltipComponent> getTooltipImage(ItemStack stack) {
+        TooltipDisplay tooltipDisplayComponent = (TooltipDisplay)stack.getOrDefault(DataComponents.TOOLTIP_DISPLAY, TooltipDisplay.DEFAULT);
+        return !tooltipDisplayComponent.shows(CanadaItems.THERMOS_CONTENTS) ? Optional.empty() : Optional.ofNullable((ThermosContentsComponent)stack.get(CanadaItems.THERMOS_CONTENTS)).map(ThermosTooltipData::new);
     }
 
-    public void onItemEntityDestroyed(ItemEntity entity) {
-        ThermosContentsComponent thermosContentsComponent = (ThermosContentsComponent)entity.getStack().get(CanadaItems.THERMOS_CONTENTS);
+    public void onDestroyed(ItemEntity entity) {
+        ThermosContentsComponent thermosContentsComponent = (ThermosContentsComponent)entity.getItem().get(CanadaItems.THERMOS_CONTENTS);
         if (thermosContentsComponent != null) {
-            entity.getStack().set(CanadaItems.THERMOS_CONTENTS, ThermosContentsComponent.DEFAULT);
-            ItemUsage.spawnItemContents(entity, thermosContentsComponent.iterateCopy());
+            entity.getItem().set(CanadaItems.THERMOS_CONTENTS, ThermosContentsComponent.DEFAULT);
+            ItemUtils.onContainerDestroyed(entity, thermosContentsComponent.iterateCopy());
         }
     }
 
     private static void playRemoveOneSound(Entity entity) {
-        entity.playSound(SoundEvents.ITEM_BUNDLE_REMOVE_ONE, 0.8F, 0.8F + entity.getWorld().getRandom().nextFloat() * 0.4F);
+        entity.playSound(SoundEvents.BUNDLE_REMOVE_ONE, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
     }
 
     private static void playInsertSound(Entity entity) {
-        entity.playSound(SoundEvents.ITEM_BUNDLE_INSERT, 0.8F, 0.8F + entity.getWorld().getRandom().nextFloat() * 0.4F);
+        entity.playSound(SoundEvents.BUNDLE_INSERT, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
     }
 
     private static void playInsertFailSound(Entity entity) {
-        entity.playSound(SoundEvents.ITEM_BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
+        entity.playSound(SoundEvents.BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
     }
 
-    private void onContentChanged(PlayerEntity user) {
-        ScreenHandler screenHandler = user.currentScreenHandler;
+    private void onContentChanged(Player user) {
+        AbstractContainerMenu screenHandler = user.containerMenu;
         if (screenHandler != null) {
-            screenHandler.onContentChanged(user.getInventory());
+            screenHandler.slotsChanged(user.getInventory());
         }
 
     }

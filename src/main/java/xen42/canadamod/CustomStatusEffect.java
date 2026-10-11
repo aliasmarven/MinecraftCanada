@@ -1,12 +1,12 @@
 package xen42.canadamod;
 
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 
-public class CustomStatusEffect extends StatusEffect {
+public class CustomStatusEffect extends MobEffect {
 
-    public CustomStatusEffect(StatusEffectCategory category, int color) {
+    public CustomStatusEffect(MobEffectCategory category, int color) {
         super(category, color);
     }
-    
+
 }

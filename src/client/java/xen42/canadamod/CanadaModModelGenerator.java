@@ -2,10 +2,10 @@ package xen42.canadamod;
 
 import net.fabricmc.fabric.api.client.datagen.v1.provider.FabricModelProvider;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.minecraft.client.data.BlockStateModelGenerator;
-import net.minecraft.client.data.ItemModelGenerator;
-import net.minecraft.client.data.Models;
-import net.minecraft.client.data.BlockStateModelGenerator.CrossType;
+import net.minecraft.client.data.models.BlockModelGenerators;
+import net.minecraft.client.data.models.BlockModelGenerators.PlantType;
+import net.minecraft.client.data.models.ItemModelGenerators;
+import net.minecraft.client.data.models.model.ModelTemplates;
 
 public class CanadaModModelGenerator extends FabricModelProvider {
     public CanadaModModelGenerator(FabricDataOutput output) {
@@ -13,48 +13,48 @@ public class CanadaModModelGenerator extends FabricModelProvider {
     }
 
     @Override
-    public void generateItemModels(ItemModelGenerator itemModelGenerator) {
-        itemModelGenerator.register(CanadaItems.PELT, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.FLOUR, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.MAPLE_BOAT, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.MAPLE_CHEST_BOAT, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.MAPLE_SAPLING, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.TREE_TAP, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.MAPLE_SYRUP_BOTTLE, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.SAP, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.MAPLE_SAP, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.RUBBER, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.GRAVY, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.CHEESE_CURD, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.POUTINE, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.BEAVER_SPAWN_EGG, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.MOOSE_SPAWN_EGG, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.DUCK_SPAWN_EGG, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.GRIZZLY_SPAWN_EGG, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.GOOSE_SPAWN_EGG, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.VENISON, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.COOKED_VENISON, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.WATERFOWL, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.COOKED_WATERFOWL, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.ANTLERS, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.THERMOS, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.PIEROGI, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.BUTTER_TART, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.DONAIR, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.DUCK_EGG, Models.GENERATED);
-        itemModelGenerator.register(CanadaItems.GOOSE_EGG, Models.GENERATED);
+    public void generateItemModels(ItemModelGenerators itemModelGenerator) {
+        itemModelGenerator.generateFlatItem(CanadaItems.PELT, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.FLOUR, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.MAPLE_BOAT, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.MAPLE_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.MAPLE_SAPLING, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.TREE_TAP, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.MAPLE_SYRUP_BOTTLE, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.SAP, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.MAPLE_SAP, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.RUBBER, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.GRAVY, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.CHEESE_CURD, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.POUTINE, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.BEAVER_SPAWN_EGG, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.MOOSE_SPAWN_EGG, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.DUCK_SPAWN_EGG, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.GRIZZLY_SPAWN_EGG, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.GOOSE_SPAWN_EGG, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.VENISON, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.COOKED_VENISON, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.WATERFOWL, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.COOKED_WATERFOWL, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.ANTLERS, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.THERMOS, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.PIEROGI, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.BUTTER_TART, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.DONAIR, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.DUCK_EGG, ModelTemplates.FLAT_ITEM);
+        itemModelGenerator.generateFlatItem(CanadaItems.GOOSE_EGG, ModelTemplates.FLAT_ITEM);
     }
 
     @Override
-    public void generateBlockStateModels(BlockStateModelGenerator blockStateModelGenerator) {
-        blockStateModelGenerator.registerCubeAllModelTexturePool(CanadaBlocks.MAPLE_PLANKS).family(CanadaBlocks.MAPLE);
-        blockStateModelGenerator.createLogTexturePool(CanadaBlocks.MAPLE_LOG).log(CanadaBlocks.MAPLE_LOG).wood(CanadaBlocks.MAPLE_WOOD);
-        blockStateModelGenerator.createLogTexturePool(CanadaBlocks.STRIPPED_MAPLE_LOG).log(CanadaBlocks.STRIPPED_MAPLE_LOG).wood(CanadaBlocks.STRIPPED_MAPLE_WOOD);
-        blockStateModelGenerator.registerSimpleCubeAll(CanadaBlocks.MAPLE_LEAVES);
-        blockStateModelGenerator.registerHangingSign(CanadaBlocks.STRIPPED_MAPLE_LOG, CanadaBlocks.MAPLE_HANGING_SIGN, CanadaBlocks.MAPLE_WALL_HANGING_SIGN);
-        blockStateModelGenerator.registerFlowerPotPlant(CanadaBlocks.MAPLE_SAPLING, CanadaBlocks.POTTED_MAPLE_SAPLING, CrossType.NOT_TINTED);
+    public void generateBlockStateModels(BlockModelGenerators blockStateModelGenerator) {
+        blockStateModelGenerator.family(CanadaBlocks.MAPLE_PLANKS).generateFor(CanadaBlocks.MAPLE);
+        blockStateModelGenerator.woodProvider(CanadaBlocks.MAPLE_LOG).log(CanadaBlocks.MAPLE_LOG).wood(CanadaBlocks.MAPLE_WOOD);
+        blockStateModelGenerator.woodProvider(CanadaBlocks.STRIPPED_MAPLE_LOG).log(CanadaBlocks.STRIPPED_MAPLE_LOG).wood(CanadaBlocks.STRIPPED_MAPLE_WOOD);
+        blockStateModelGenerator.createTrivialCube(CanadaBlocks.MAPLE_LEAVES);
+        blockStateModelGenerator.createHangingSign(CanadaBlocks.STRIPPED_MAPLE_LOG, CanadaBlocks.MAPLE_HANGING_SIGN, CanadaBlocks.MAPLE_WALL_HANGING_SIGN);
+        blockStateModelGenerator.createPlant(CanadaBlocks.MAPLE_SAPLING, CanadaBlocks.POTTED_MAPLE_SAPLING, PlantType.NOT_TINTED);
 
-        blockStateModelGenerator.registerSimpleCubeAll(CanadaBlocks.RUBBER_BLOCK);
+        blockStateModelGenerator.createTrivialCube(CanadaBlocks.RUBBER_BLOCK);
     }
 
     @Override

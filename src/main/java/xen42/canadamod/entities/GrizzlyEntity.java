@@ -1,45 +1,42 @@
 package xen42.canadamod.entities;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.passive.PolarBearEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.PolarBear;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import xen42.canadamod.CanadaItems;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.CanadaSounds;
 
-public class GrizzlyEntity extends PolarBearEntity {
+public class GrizzlyEntity extends PolarBear {
 
-    public GrizzlyEntity(EntityType<? extends PolarBearEntity> entityType, World world) {
+    public GrizzlyEntity(EntityType<? extends PolarBear> entityType, Level world) {
         super(entityType, world);
     }
 
-    public static DefaultAttributeContainer.Builder createGrizzlyAttributes() {
-		return AnimalEntity.createAnimalAttributes()
-			.add(EntityAttributes.MAX_HEALTH, 30.0)
-			.add(EntityAttributes.FOLLOW_RANGE, 20.0)
-			.add(EntityAttributes.MOVEMENT_SPEED, 0.25)
-			.add(EntityAttributes.ATTACK_DAMAGE, 6.0);
+    public static AttributeSupplier.Builder createGrizzlyAttributes() {
+		return Animal.createAnimalAttributes()
+			.add(Attributes.MAX_HEALTH, 30.0)
+			.add(Attributes.FOLLOW_RANGE, 20.0)
+			.add(Attributes.MOVEMENT_SPEED, 0.25)
+			.add(Attributes.ATTACK_DAMAGE, 6.0);
     }
 
     @Override
-	public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
-		return CanadaMod.GRIZZLY_ENTITY.create(world, SpawnReason.BREEDING);
+	public AgeableMob getBreedOffspring(ServerLevel world, AgeableMob entity) {
+		return CanadaMod.GRIZZLY_ENTITY.create(world, EntitySpawnReason.BREEDING);
 	}
-    
+
 	@Override
-    public ItemStack getPickBlockStack() {
+    public ItemStack getPickResult() {
         return new ItemStack(CanadaItems.GRIZZLY_SPAWN_EGG);
     }
 
@@ -60,9 +57,9 @@ public class GrizzlyEntity extends PolarBearEntity {
 
     @Override
 	protected void playWarningSound() {
-		if (this.warningSoundCooldown <= 0) {
-			this.playSound(CanadaSounds.ENTITY_GRIZZLY_BEAR_WARNING);
-			this.warningSoundCooldown = 40;
+		if (this.warningSoundTicks <= 0) {
+			this.makeSound(CanadaSounds.ENTITY_GRIZZLY_BEAR_WARNING);
+			this.warningSoundTicks = 40;
 		}
 	}
 }

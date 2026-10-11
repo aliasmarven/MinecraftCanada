@@ -1,8 +1,8 @@
 package xen42.canadamod.entity;
 
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.item.ItemStack;
 
 public class MooseEntityRenderState extends LivingEntityRenderState {
     public ItemStack saddleStack;

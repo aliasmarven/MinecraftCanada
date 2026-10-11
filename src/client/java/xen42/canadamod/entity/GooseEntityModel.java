@@ -1,52 +1,52 @@
 package xen42.canadamod.entity;
 
-import net.minecraft.client.model.Dilation;
-import net.minecraft.client.model.ModelData;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.model.ModelPartBuilder;
-import net.minecraft.client.model.ModelPartData;
-import net.minecraft.client.model.ModelTransform;
-import net.minecraft.client.model.TexturedModelData;
-import net.minecraft.client.render.entity.model.ChickenEntityModel;
-import net.minecraft.client.render.entity.model.EntityModelPartNames;
-import net.minecraft.client.render.entity.state.ChickenEntityRenderState;
+import net.minecraft.client.model.ChickenModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartNames;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.entity.state.ChickenRenderState;
 import xen42.canadamod.entities.GooseEntity;
 
-public class GooseEntityModel<T extends GooseEntity> extends ChickenEntityModel {
+public class GooseEntityModel<T extends GooseEntity> extends ChickenModel {
 
     private ModelPart head;
 
     public GooseEntityModel(ModelPart modelPart) {
         super(modelPart);
-        this.head = modelPart.getChild(EntityModelPartNames.HEAD);
+        this.head = modelPart.getChild(PartNames.HEAD);
     }
-    
+
     @Override
-	public void setAngles(ChickenEntityRenderState livingEntityRenderState) {
-        super.setAngles(livingEntityRenderState);
-		head.xScale = livingEntityRenderState.baby ? 1.5f : 1f;
-		head.yScale = livingEntityRenderState.baby ? 1.5f : 1f;
-		head.zScale = livingEntityRenderState.baby ? 1.5f : 1f;
+	public void setupAnim(ChickenRenderState livingEntityRenderState) {
+        super.setupAnim(livingEntityRenderState);
+		head.xScale = livingEntityRenderState.isBaby ? 1.5f : 1f;
+		head.yScale = livingEntityRenderState.isBaby ? 1.5f : 1f;
+		head.zScale = livingEntityRenderState.isBaby ? 1.5f : 1f;
 	}
 
-    public static TexturedModelData getTexturedModelData() {
-        ModelData meshdefinition = new ModelData();
-		ModelPartData partdefinition = meshdefinition.getRoot();
+    public static LayerDefinition createBodyLayer() {
+        MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
 
-		ModelPartData right_leg = partdefinition.addChild("right_leg", ModelPartBuilder.create().uv(14, 28).cuboid(-3.0F, 0.0F, -3.0F, 3.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 20.0F, 1.0F));
+		PartDefinition right_leg = partdefinition.addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(14, 28).addBox(-3.0F, 0.0F, -3.0F, 3.0F, 4.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 20.0F, 1.0F));
 
-		ModelPartData left_leg = partdefinition.addChild("left_leg", ModelPartBuilder.create().uv(26, 28).cuboid(0.0F, 0.0F, -3.0F, 3.0F, 4.0F, 3.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 20.0F, 1.0F));
+		PartDefinition left_leg = partdefinition.addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(26, 28).addBox(0.0F, 0.0F, -3.0F, 3.0F, 4.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 20.0F, 1.0F));
 
-		ModelPartData right_wing = partdefinition.addChild("right_wing", ModelPartBuilder.create().uv(16, 16).cuboid(-1.0F, 0.0F, -3.0F, 1.0F, 5.0F, 7.0F, new Dilation(0.0F)), ModelTransform.origin(-3.0F, 14.0F, 0.0F));
+		PartDefinition right_wing = partdefinition.addOrReplaceChild("right_wing", CubeListBuilder.create().texOffs(16, 16).addBox(-1.0F, 0.0F, -3.0F, 1.0F, 5.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(-3.0F, 14.0F, 0.0F));
 
-		ModelPartData left_wing = partdefinition.addChild("left_wing", ModelPartBuilder.create().uv(0, 16).cuboid(0.0F, 0.0F, -3.0F, 1.0F, 5.0F, 7.0F, new Dilation(0.0F)), ModelTransform.origin(3.0F, 14.0F, 0.0F));
+		PartDefinition left_wing = partdefinition.addOrReplaceChild("left_wing", CubeListBuilder.create().texOffs(0, 16).addBox(0.0F, 0.0F, -3.0F, 1.0F, 5.0F, 7.0F, new CubeDeformation(0.0F)), PartPose.offset(3.0F, 14.0F, 0.0F));
 
-		ModelPartData body = partdefinition.addChild("body", ModelPartBuilder.create().uv(0, 0).cuboid(-3.0F, -4.0F, -5.0F, 6.0F, 6.0F, 10.0F, new Dilation(0.0F))
-		.uv(32, 0).cuboid(-1.0F, -10.0F, -5.0F, 2.0F, 6.0F, 2.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 18.0F, 0.0F));
+		PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0F, -4.0F, -5.0F, 6.0F, 6.0F, 10.0F, new CubeDeformation(0.0F))
+		.texOffs(32, 0).addBox(-1.0F, -10.0F, -5.0F, 2.0F, 6.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 18.0F, 0.0F));
 
-		ModelPartData head = partdefinition.addChild("head", ModelPartBuilder.create().uv(0, 28).cuboid(-2.0F, -3.0F, -3.0F, 4.0F, 4.0F, 3.0F, new Dilation(0.0F))
-		.uv(32, 8).cuboid(-1.0F, -1.0F, -6.0F, 2.0F, 2.0F, 3.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 8.0F, -4.0F));
+		PartDefinition head = partdefinition.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 28).addBox(-2.0F, -3.0F, -3.0F, 4.0F, 4.0F, 3.0F, new CubeDeformation(0.0F))
+		.texOffs(32, 8).addBox(-1.0F, -1.0F, -6.0F, 2.0F, 2.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 8.0F, -4.0F));
 
-		return TexturedModelData.of(meshdefinition, 64, 64);
+		return LayerDefinition.create(meshdefinition, 64, 64);
 	}
 }

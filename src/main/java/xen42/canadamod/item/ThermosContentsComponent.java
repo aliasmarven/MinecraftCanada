@@ -1,8 +1,6 @@
 package xen42.canadamod.item;
 
 import com.mojang.serialization.Codec;
-
-import net.minecraft.item.tooltip.TooltipData;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.DataResult;
 
@@ -10,26 +8,25 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
-
-import net.minecraft.component.ComponentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import xen42.canadamod.CanadaItems;
 
 import org.apache.commons.lang3.math.Fraction;
 import org.jetbrains.annotations.Nullable;
 
 /// Modified from BundleContentsComponent because its marked final and can't be extended
-public class ThermosContentsComponent implements TooltipData {
+public class ThermosContentsComponent implements TooltipComponent {
     public static final ThermosContentsComponent DEFAULT = new ThermosContentsComponent(List.of());
     public static final Codec<ThermosContentsComponent> CODEC;
-    public static final PacketCodec<RegistryByteBuf, ThermosContentsComponent> PACKET_CODEC;
+    public static final StreamCodec<RegistryFriendlyByteBuf, ThermosContentsComponent> PACKET_CODEC;
     private static final int ADD_TO_NEW_SLOT = -1;
     public static final int field_52591 = -1;
     final List<ItemStack> stacks;
@@ -80,8 +77,8 @@ public class ThermosContentsComponent implements TooltipData {
             return false;
         }
 
-        var isSoup = stack.get(DataComponentTypes.CONSUMABLE) != null && stack.getMaxCount() < 64;
-        var isContainer = stack.isOf(Items.BUCKET) || stack.isOf(Items.GLASS_BOTTLE) || stack.isOf(Items.BOWL);
+        var isSoup = stack.get(DataComponents.CONSUMABLE) != null && stack.getMaxStackSize() < 64;
+        var isContainer = stack.is(Items.BUCKET) || stack.is(Items.GLASS_BOTTLE) || stack.is(Items.BOWL);
 
         return isSoup || isContainer;
     }
@@ -137,12 +134,12 @@ public class ThermosContentsComponent implements TooltipData {
             return false;
         } else {
             ThermosContentsComponent ThermosContentsComponent = (ThermosContentsComponent)o;
-            return this.occupancy.equals(ThermosContentsComponent.occupancy) && ItemStack.stacksEqual(this.stacks, ThermosContentsComponent.stacks);
+            return this.occupancy.equals(ThermosContentsComponent.occupancy) && ItemStack.listMatches(this.stacks, ThermosContentsComponent.stacks);
         }
     }
 
     public int hashCode() {
-        return ItemStack.listHashCode(this.stacks);
+        return ItemStack.hashStackList(this.stacks);
     }
 
     public String toString() {
@@ -153,7 +150,7 @@ public class ThermosContentsComponent implements TooltipData {
         CODEC = ItemStack.CODEC.listOf().flatXmap(ThermosContentsComponent::validateOccupancy, (component) -> {
             return DataResult.success(component.stacks);
         });
-        PACKET_CODEC = ItemStack.PACKET_CODEC.collect(PacketCodecs.toList()).xmap(ThermosContentsComponent::new, (component) -> {
+        PACKET_CODEC = ItemStack.STREAM_CODEC.apply(ByteBufCodecs.list()).map(ThermosContentsComponent::new, (component) -> {
             return component.stacks;
         });
     }
@@ -181,7 +178,7 @@ public class ThermosContentsComponent implements TooltipData {
                 return -1;
             } else {
                 for(int i = 0; i < this.stacks.size(); ++i) {
-                    if (ItemStack.areItemsAndComponentsEqual((ItemStack)this.stacks.get(i), stack)) {
+                    if (ItemStack.isSameItemSameComponents((ItemStack)this.stacks.get(i), stack)) {
                     return i;
                     }
                 }
@@ -208,7 +205,7 @@ public class ThermosContentsComponent implements TooltipData {
                     if (j != -1) {
                     ItemStack itemStack = (ItemStack)this.stacks.remove(j);
                     ItemStack itemStack2 = itemStack.copyWithCount(itemStack.getCount() + i);
-                    stack.decrement(i);
+                    stack.shrink(i);
                     this.stacks.add(0, itemStack2);
                     } else {
                     this.stacks.add(0, stack.split(i));
@@ -219,10 +216,10 @@ public class ThermosContentsComponent implements TooltipData {
             }
         }
 
-        public int add(Slot slot, PlayerEntity player) {
-            ItemStack itemStack = slot.getStack();
+        public int add(Slot slot, Player player) {
+            ItemStack itemStack = slot.getItem();
             int i = this.getMaxAllowed(itemStack);
-            return ThermosContentsComponent.canBeBundled(itemStack) ? this.add(slot.takeStackRange(itemStack.getCount(), i, player)) : 0;
+            return ThermosContentsComponent.canBeBundled(itemStack) ? this.add(slot.safeTake(itemStack.getCount(), i, player)) : 0;
         }
 
         public void setSelectedStackIndex(int selectedStackIndex) {

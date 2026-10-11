@@ -1,22 +1,22 @@
 package xen42.canadamod.entity;
 
-import net.minecraft.client.render.entity.EntityRendererFactory.Context;
-import net.minecraft.client.render.entity.MobEntityRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.resources.ResourceLocation;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.CanadaModClient;
 import xen42.canadamod.entities.BeaverEntity;
 
-public class BeaverEntityRenderer extends MobEntityRenderer<BeaverEntity, BeaverEntityRenderState, BeaverEntityModel> {
+public class BeaverEntityRenderer extends MobRenderer<BeaverEntity, BeaverEntityRenderState, BeaverEntityModel> {
 
     public BeaverEntityRenderer(Context context) {
-        super(context, new BeaverEntityModel(context.getPart(CanadaModClient.MODEL_BEAVER_LAYER)), 0.4f);
+        super(context, new BeaverEntityModel(context.bakeLayer(CanadaModClient.MODEL_BEAVER_LAYER)), 0.4f);
     }
 
     @Override
-    public Identifier getTexture(BeaverEntityRenderState state) {
-        return Identifier.of(CanadaMod.MOD_ID, "textures/entity/beaver/beaver.png");
+    public ResourceLocation getTextureLocation(BeaverEntityRenderState state) {
+        return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/beaver/beaver.png");
     }
 
     @Override
@@ -25,16 +25,16 @@ public class BeaverEntityRenderer extends MobEntityRenderer<BeaverEntity, Beaver
     }
 
     @Override
-    protected void scale(BeaverEntityRenderState state, MatrixStack matrices) {
-        if (state.baby) {
-            matrices.scale(0.5F, 0.5F, 0.5F); 
+    protected void scale(BeaverEntityRenderState state, PoseStack matrices) {
+        if (state.isBaby) {
+            matrices.scale(0.5F, 0.5F, 0.5F);
         }
         super.scale(state, matrices);
     }
 
     @Override
-    public void updateRenderState(BeaverEntity beaverEntity, BeaverEntityRenderState beaverEntityRenderState, float f) {
-        super.updateRenderState(beaverEntity, beaverEntityRenderState, f);
+    public void extractRenderState(BeaverEntity beaverEntity, BeaverEntityRenderState beaverEntityRenderState, float f) {
+        super.extractRenderState(beaverEntity, beaverEntityRenderState, f);
 
         beaverEntityRenderState.chopAnimationState.copyFrom(beaverEntity.chopAnimationState);
         beaverEntityRenderState.isFrenzied = beaverEntity.isFrenzied();

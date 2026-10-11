@@ -2,22 +2,20 @@ package xen42.canadamod.entities;
 
 import java.util.HashMap;
 import java.util.Map;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.pathfinder.Path;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.SaplingBlock;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.pathing.Path;
-import net.minecraft.item.BlockItem;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameRules;
 import xen42.canadamod.CanadaBlocks;
 import xen42.canadamod.CanadaMod;
 
@@ -41,16 +39,16 @@ public class BeaverChopTreeGoal extends Goal {
         this.beaver = beaver;
     }
 
-    public boolean canStart() {
+    public boolean canUse() {
         if (!beaver.canChopTree()) {
             return false;
         }
 
-        if (!(beaver.getWorld() instanceof ServerWorld serverWorld) || !serverWorld.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
+        if (!(beaver.level() instanceof ServerLevel serverWorld) || !serverWorld.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
             return false;
         }
 
-        if (!this.beaver.isFrenzied() && this.beaver.getRandom().nextInt(toGoalTicks(20)) != 0) {
+        if (!this.beaver.isFrenzied() && this.beaver.getRandom().nextInt(reducedTickDelay(20)) != 0) {
             return false;
         }
 
@@ -59,7 +57,7 @@ public class BeaverChopTreeGoal extends Goal {
             return false;
         }
 
-        pathToTrunk = beaver.getNavigation().findPathTo(this.beaver.getChoppingTreePos().getX(), this.beaver.getChoppingTreePos().getY(),
+        pathToTrunk = beaver.getNavigation().createPath(this.beaver.getChoppingTreePos().getX(), this.beaver.getChoppingTreePos().getY(),
             this.beaver.getChoppingTreePos().getZ(), 0);
         if (pathToTrunk == null) {
             return false;
@@ -69,17 +67,17 @@ public class BeaverChopTreeGoal extends Goal {
     }
 
     @Override
-    public boolean shouldContinue() {
+    public boolean canContinueToUse() {
         if (isChoppingTree) return true;
 
         if (this.beaver.getChoppingTreePos() == null) return false;
 
-        return !this.beaver.getNavigation().isIdle() || this.beaver.getWorld().getBlockState(this.beaver.getChoppingTreePos()).isAir();
+        return !this.beaver.getNavigation().isDone() || this.beaver.level().getBlockState(this.beaver.getChoppingTreePos()).isAir();
     }
 
     @Override
     public void start() {
-        this.beaver.getNavigation().startMovingAlong(this.pathToTrunk, 1f);
+        this.beaver.getNavigation().moveTo(this.pathToTrunk, 1f);
     }
 
     @Override
@@ -93,7 +91,7 @@ public class BeaverChopTreeGoal extends Goal {
         for (var dx = -radius; dx <= radius; dx++) {
             for (var dz = -radius; dz <= radius; dz++) {
                 for (var dy = -1; dy <= 1; dy++) {
-                    var trunkPos = beaver.getBlockPos().add(dx, dy, dz);
+                    var trunkPos = beaver.blockPosition().offset(dx, dy, dz);
 
                     if (isTreeTrunk(trunkPos)) {
                         return trunkPos;
@@ -105,17 +103,17 @@ public class BeaverChopTreeGoal extends Goal {
     }
 
     private boolean isTreeTrunk(BlockPos pos) {
-        var world = beaver.getWorld();
+        var world = beaver.level();
         var trunk = world.getBlockState(pos);
         this.sapling = null;
 
         // If its a log with dirt under it, it may be the start of a tree!
         // From this we move up to make sure it has leaves on the top, else we might be breaking somebody's house
-        var dirt = world.getBlockState(pos.down());
-        if (trunk.isIn(BlockTags.LOGS) && (dirt.isIn(BlockTags.DIRT) || dirt.isOf(Blocks.GRASS_BLOCK) || dirt.isOf(Blocks.PODZOL))) {
+        var dirt = world.getBlockState(pos.below());
+        if (trunk.is(BlockTags.LOGS) && (dirt.is(BlockTags.DIRT) || dirt.is(Blocks.GRASS_BLOCK) || dirt.is(Blocks.PODZOL))) {
             // Move up to find leaves
             for (int i = 0; i < 20; i++) {
-                var topBlockPos = pos.add(0, i, 0);
+                var topBlockPos = pos.offset(0, i, 0);
                 var topBlock = world.getBlockState(topBlockPos);
                 // Also checks for tree taps
                 if (!noLogsNextToBlock(topBlockPos)) {
@@ -126,7 +124,7 @@ public class BeaverChopTreeGoal extends Goal {
                     return true;
                 }
                 // Make sure it is a continuous tree
-                else if (!topBlock.isIn(BlockTags.LOGS)) {
+                else if (!topBlock.is(BlockTags.LOGS)) {
                     return false;
                 }
             }
@@ -135,12 +133,12 @@ public class BeaverChopTreeGoal extends Goal {
     }
 
     private boolean isNaturalLeaf(BlockState state) {
-        return state.isIn(BlockTags.LEAVES) && state.contains(Properties.PERSISTENT) && !state.get(Properties.PERSISTENT);
+        return state.is(BlockTags.LEAVES) && state.hasProperty(BlockStateProperties.PERSISTENT) && !state.getValue(BlockStateProperties.PERSISTENT);
     }
 
     @Nullable
     private SaplingBlock getSaplingFromLeaf(BlockPos pos) {
-        var blockState = beaver.getWorld().getBlockState(pos);
+        var blockState = beaver.level().getBlockState(pos);
         var leafBlock = (LeavesBlock)blockState.getBlock();
 
         if (leafBlock == null) {
@@ -153,7 +151,7 @@ public class BeaverChopTreeGoal extends Goal {
         else {
             // This is straight goofy ok we need to simulate like 40 leaf drops to PROBABLY get a sapling but even then
             for (int i = 0; i < 60; i++) {
-                for (var item : Block.getDroppedStacks(blockState, (ServerWorld)beaver.getWorld(), pos, null)) {
+                for (var item : Block.getDrops(blockState, (ServerLevel)beaver.level(), pos, null)) {
                     if (item.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof SaplingBlock sapling) {
                         saplingMap.put(leafBlock, sapling);
                         return sapling;
@@ -166,14 +164,14 @@ public class BeaverChopTreeGoal extends Goal {
     }
 
     private boolean noLogsNextToBlock(BlockPos pos) {
-        var world = this.beaver.getWorld();
+        var world = this.beaver.level();
         for (int ddx = -1; ddx <= 1; ddx++) {
             for (int ddz = -1; ddz <= 1; ddz++) {
                 if (ddx == 0 && ddz == 0) {
                     continue;
                 }
-                var block = world.getBlockState(pos.add(ddx, 0, ddz));
-                if (block.isIn(BlockTags.LOGS) || block.isOf(CanadaBlocks.TREE_TAP)) {
+                var block = world.getBlockState(pos.offset(ddx, 0, ddz));
+                if (block.is(BlockTags.LOGS) || block.is(CanadaBlocks.TREE_TAP)) {
                     return false;
                 }
             }
@@ -186,11 +184,11 @@ public class BeaverChopTreeGoal extends Goal {
         if (isChoppingTree) {
             // Don't let them move away
             this.beaver.getNavigation().stop();
-            this.beaver.getLookControl().lookAt(this.beaver.getChoppingTreePos().toCenterPos());
+            this.beaver.getLookControl().setLookAt(this.beaver.getChoppingTreePos().getCenter());
 
-            if (!this.beaver.getWorld().getBlockState(this.beaver.getChoppingTreePos()).isIn(BlockTags.LOGS) || 
-                this.beaver.getChoppingTreePos().toCenterPos().distanceTo(this.beaver.getPos()) > 2f ||
-                this.beaver.getRecentDamageSource() != null) {
+            if (!this.beaver.level().getBlockState(this.beaver.getChoppingTreePos()).is(BlockTags.LOGS) ||
+                this.beaver.getChoppingTreePos().getCenter().distanceTo(this.beaver.position()) > 2f ||
+                this.beaver.getLastDamageSource() != null) {
                 // If something else broke it give up, or if we moved away or got hurts
                 this.beaver.stopChopping();
                 isChoppingTree = false;
@@ -212,32 +210,32 @@ public class BeaverChopTreeGoal extends Goal {
                 if (this.beaver.getChoppingTreePos() != null) {
 
                     this.beaver.getNavigation().stop();
-                    this.beaver.getLookControl().lookAt(this.beaver.getChoppingTreePos().toCenterPos());
+                    this.beaver.getLookControl().setLookAt(this.beaver.getChoppingTreePos().getCenter());
                 }
             }
         }
-        else if (this.beaver.getChoppingTreePos().toCenterPos().distanceTo(this.beaver.getPos()) < 1.6f) {
+        else if (this.beaver.getChoppingTreePos().getCenter().distanceTo(this.beaver.position()) < 1.6f) {
             // Reached the tree, chop it
             this.isChoppingTree = true;
             choppingTicks = MAX_BREAKING_TICKS;
         }
-        if (beaver.isDead()) {
+        if (beaver.isDeadOrDying()) {
             stop();
         }
     }
 
     private void breakTree() {
         var blockPos = this.beaver.getChoppingTreePos();
-        while (this.beaver.getWorld().getBlockState(blockPos).isIn(BlockTags.LOGS)) {
-            this.beaver.getWorld().breakBlock(blockPos, true);
-            blockPos = blockPos.up();
+        while (this.beaver.level().getBlockState(blockPos).is(BlockTags.LOGS)) {
+            this.beaver.level().destroyBlock(blockPos, true);
+            blockPos = blockPos.above();
         }
         if (sapling != null) {
-            this.beaver.getWorld().setBlockState(this.beaver.getChoppingTreePos(), sapling.getDefaultState());
+            this.beaver.level().setBlockAndUpdate(this.beaver.getChoppingTreePos(), sapling.defaultBlockState());
         }
         this.beaver.stopChopping();
         this.beaver.onChopTree();
         this.isChoppingTree = false;
     }
 }
- 
+

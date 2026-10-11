@@ -1,66 +1,65 @@
 package xen42.canadamod.block;
 
 import com.mojang.serialization.MapCodec;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import xen42.canadamod.CanadaBlocks;
 import xen42.canadamod.CanadaItems;
 
-public class TreeTapBlock extends HorizontalFacingBlock {
+public class TreeTapBlock extends HorizontalDirectionalBlock {
     public static int MAX_SAP = 4;
-    public static IntProperty SAP_LEVEL = IntProperty.of("sap_level", 0, MAX_SAP);
-    public static final MapCodec<TreeTapBlock> CODEC = createCodec(TreeTapBlock::new);
+    public static IntegerProperty SAP_LEVEL = IntegerProperty.create("sap_level", 0, MAX_SAP);
+    public static final MapCodec<TreeTapBlock> CODEC = simpleCodec(TreeTapBlock::new);
 
     public final VoxelShape northShape;
     public final VoxelShape southShape;
     public final VoxelShape eastShape;
     public final VoxelShape westShape;
 
-    public TreeTapBlock(Settings settings) {
+    public TreeTapBlock(Properties settings) {
         super(settings);
-        setDefaultState((this.stateManager.getDefaultState()).with(SAP_LEVEL, 0));
+        registerDefaultState((this.stateDefinition.any()).setValue(SAP_LEVEL, 0));
 
         var width = 12;
-        this.southShape = Block.createCuboidShape(0, 0, 0, 16f, 16f, width);
-        this.northShape = Block.createCuboidShape(0, 0, 16 - width, 16f, 16f, 16f);
-        this.eastShape = Block.createCuboidShape(0, 0, 0, width, 16f, 16f);
-        this.westShape = Block.createCuboidShape(16 - width, 0, 0, 16f, 16f, 16f);
+        this.southShape = Block.box(0, 0, 0, 16f, 16f, width);
+        this.northShape = Block.box(0, 0, 16 - width, 16f, 16f, 16f);
+        this.eastShape = Block.box(0, 0, 0, width, 16f, 16f);
+        this.westShape = Block.box(16 - width, 0, 0, 16f, 16f, 16f);
     }
 
-    public MapCodec<? extends TreeTapBlock> getCodec() {
+    public MapCodec<? extends TreeTapBlock> codec() {
         return CODEC;
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        switch (state.get(FACING)) {
+    protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        switch (state.getValue(FACING)) {
             case NORTH:
                 return northShape;
             case SOUTH:
@@ -70,32 +69,32 @@ public class TreeTapBlock extends HorizontalFacingBlock {
             case WEST:
                 return westShape;
             default:
-                break; 
+                break;
         }
         return westShape;
     }
 
-    public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-        var direction = state.get(FACING);
+    public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+        var direction = state.getValue(FACING);
         if (direction == Direction.UP || direction == Direction.DOWN) {
             return false;
         }
         else {
-            var blockPos = pos.offset(direction.getOpposite());
-            return world.getBlockState(blockPos).isSideSolidFullSquare((BlockView)world, blockPos, direction);
+            var blockPos = pos.relative(direction.getOpposite());
+            return world.getBlockState(blockPos).isFaceSturdy((BlockGetter)world, blockPos, direction);
         }
     }
 
-    public Item getReturnItem(BlockState state, World world, BlockPos pos) {
-        var tappedBlock = world.getBlockState(pos.add(state.get(FACING).getOpposite().getVector()));
+    public Item getReturnItem(BlockState state, Level world, BlockPos pos) {
+        var tappedBlock = world.getBlockState(pos.offset(state.getValue(FACING).getOpposite().getUnitVec3i()));
 
-        if (tappedBlock.isOf(Blocks.PALE_OAK_LOG)) {
+        if (tappedBlock.is(Blocks.PALE_OAK_LOG)) {
             return Items.RESIN_CLUMP;
         }
-        else if (tappedBlock.isOf(CanadaBlocks.MAPLE_LOG)) {
+        else if (tappedBlock.is(CanadaBlocks.MAPLE_LOG)) {
             return CanadaItems.MAPLE_SAP;
         }
-        else if (tappedBlock.isIn(BlockTags.LOGS)) {
+        else if (tappedBlock.is(BlockTags.LOGS)) {
             return CanadaItems.SAP;
         }
         else {
@@ -104,73 +103,73 @@ public class TreeTapBlock extends HorizontalFacingBlock {
     }
 
     @Override
-    protected void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    protected void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         var pair = getReturnItem(state, world, pos);
 
         if (pair != null && !isFull(state)) {
-            world.setBlockState(pos, state.with(SAP_LEVEL, state.get(SAP_LEVEL) + 1));
-            world.playSoundClient(SoundEvents.BLOCK_POINTED_DRIPSTONE_DRIP_WATER_INTO_CAULDRON, SoundCategory.BLOCKS, 1f, 1f);
-            world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(state));
+            world.setBlockAndUpdate(pos, state.setValue(SAP_LEVEL, state.getValue(SAP_LEVEL) + 1));
+            world.playPlayerSound(SoundEvents.POINTED_DRIPSTONE_DRIP_WATER_INTO_CAULDRON, SoundSource.BLOCKS, 1f, 1f);
+            world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(state));
         }
     }
 
     public boolean isFull(BlockState state) {
-        return state.get(SAP_LEVEL) == MAX_SAP;
+        return state.getValue(SAP_LEVEL) == MAX_SAP;
     }
 
     @Override
-    protected boolean hasRandomTicks(BlockState state) {
+    protected boolean isRandomlyTicking(BlockState state) {
         return !isFull(state);
     }
 
     @Override
-    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         var returnItem = getReturnItem(state, world, pos);
 
         if (returnItem == null) {
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        if(state.get(SAP_LEVEL) > 0) {
-            world.setBlockState(pos, state.with(SAP_LEVEL, state.get(SAP_LEVEL) - 1));
-            world.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_BOTTLE_FILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
+        if(state.getValue(SAP_LEVEL) > 0) {
+            world.setBlockAndUpdate(pos, state.setValue(SAP_LEVEL, state.getValue(SAP_LEVEL) - 1));
+            world.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
 
-            player.giveOrDropStack(new ItemStack(returnItem));
+            player.handleExtraItemsCreatedOnUse(new ItemStack(returnItem));
 
-            return ActionResult.CONSUME;
+            return InteractionResult.CONSUME;
         }
         else {
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         }
     }
 
     @Override
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(new Property[] { SAP_LEVEL, FACING });
     }
 
     @Override
-    protected int getComparatorOutput(BlockState state, World world, BlockPos pos) {
-        return state.get(SAP_LEVEL);
+    protected int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos) {
+        return state.getValue(SAP_LEVEL);
     }
 
     @Override
-    protected BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
-        if (direction == (state.get(FACING)).getOpposite() && !state.canPlaceAt(world, pos)) {
-            return Blocks.AIR.getDefaultState(); 
+    protected BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+        if (direction == (state.getValue(FACING)).getOpposite() && !state.canSurvive(world, pos)) {
+            return Blocks.AIR.defaultBlockState();
         }
         else {
-            return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+            return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
         }
     }
 
     @Override
-    public BlockState getPlacementState(ItemPlacementContext ctx) {
-        var dir = ctx.getSide();
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        var dir = ctx.getClickedFace();
         // Should never happen but want to avoid a crash
         if (dir == Direction.UP || dir == Direction.DOWN) {
             dir = Direction.NORTH;
         }
-        return getDefaultState().with(SAP_LEVEL, 0).with(FACING, dir);
+        return defaultBlockState().setValue(SAP_LEVEL, 0).setValue(FACING, dir);
     }
 }

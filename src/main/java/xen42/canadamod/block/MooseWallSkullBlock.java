@@ -1,29 +1,28 @@
 package xen42.canadamod.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.SkullBlock.SkullType;
-import net.minecraft.block.WallSkullBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.WallSkullBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class MooseWallSkullBlock extends WallSkullBlock {
 
-    public MooseWallSkullBlock(Settings settings) {
+    public MooseWallSkullBlock(Properties settings) {
         super(null, settings);
     }
-    
+
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new MooseSkullBlockEntity(pos, state);
     }
 
     @Override
-    protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return (VoxelShape)VoxelShapes.createHorizontalFacingShapeMap(Block.createCuboidZShape(8.0, 0.0, 16.0)).get(state.get(FACING));
+    protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        return (VoxelShape)Shapes.rotateHorizontal(Block.boxZ(8.0, 0.0, 16.0)).get(state.getValue(FACING));
     }
 }

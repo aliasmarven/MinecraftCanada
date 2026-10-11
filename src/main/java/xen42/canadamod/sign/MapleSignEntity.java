@@ -1,8 +1,8 @@
 package xen42.canadamod.sign;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import xen42.canadamod.CanadaBlocks;
 
 public class MapleSignEntity extends SignBlockEntity {
@@ -11,7 +11,7 @@ public class MapleSignEntity extends SignBlockEntity {
     }
 
     @Override
-    public boolean supports(BlockState state) {
-        return CanadaBlocks.MAPLE_SIGN_BLOCK_ENTITY.supports(state);
+    public boolean isValidBlockState(BlockState state) {
+        return CanadaBlocks.MAPLE_SIGN_BLOCK_ENTITY.isValid(state);
     }
 }

@@ -1,19 +1,19 @@
 package xen42.canadamod.world;
 
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import xen42.canadamod.CanadaMod;
 
 public class CanadaConfiguredFeatures {
-    public static final RegistryKey<ConfiguredFeature<?, ?>> MAPLE_CONFIGURED_FEATURE = registerKey("maple");
-    public static final RegistryKey<ConfiguredFeature<?, ?>> MAPLE_FOREST_VEGETATION = registerKey("maple_forest_vegetation");
-    public static final RegistryKey<ConfiguredFeature<?, ?>> FALLEN_MAPLE_TREE = registerKey("fallen_maple_tree");
-    public static final RegistryKey<ConfiguredFeature<?, ?>> MAPLE_LEAF_LITTER = registerKey("maple_leaf_litter");
-    
-    private static RegistryKey<ConfiguredFeature<?, ?>> registerKey(String name) {
-        return RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, Identifier.of(CanadaMod.MOD_ID, name));
+    public static final ResourceKey<ConfiguredFeature<?, ?>> MAPLE_CONFIGURED_FEATURE = registerKey("maple");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> MAPLE_FOREST_VEGETATION = registerKey("maple_forest_vegetation");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> FALLEN_MAPLE_TREE = registerKey("fallen_maple_tree");
+    public static final ResourceKey<ConfiguredFeature<?, ?>> MAPLE_LEAF_LITTER = registerKey("maple_leaf_litter");
+
+    private static ResourceKey<ConfiguredFeature<?, ?>> registerKey(String name) {
+        return ResourceKey.create(Registries.CONFIGURED_FEATURE, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
     }
 
     public static void onInitialize() {

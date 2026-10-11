@@ -1,15 +1,15 @@
 package xen42.canadamod.entities;
 
-import net.minecraft.entity.ai.goal.FleeEntityGoal;
-import net.minecraft.entity.mob.DrownedEntity;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.monster.Drowned;
 
 // This class exists solely to allow patching the tick method to update the nagiation field which is final (can modify only in a mixin)
-public class DrownedFleeEntityGoal extends FleeEntityGoal {
+public class DrownedFleeEntityGoal extends AvoidEntityGoal {
 
-    public DrownedEntity drowned;
+    public Drowned drowned;
 
-    public DrownedFleeEntityGoal(DrownedEntity mob, Class fleeFromType, float distance, double slowSpeed, double fastSpeed) {
+    public DrownedFleeEntityGoal(Drowned mob, Class fleeFromType, float distance, double slowSpeed, double fastSpeed) {
         super(mob, fleeFromType, distance, slowSpeed, fastSpeed);
         drowned = mob;
-    }     
+    }
 }

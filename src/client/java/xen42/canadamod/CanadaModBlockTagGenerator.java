@@ -4,12 +4,19 @@ import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider.BlockTagProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
-import net.minecraft.registry.RegistryWrapper.WrapperLookup;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.block.Block;
 
 public class CanadaModBlockTagGenerator extends BlockTagProvider {
-    public CanadaModBlockTagGenerator(FabricDataOutput output, CompletableFuture<WrapperLookup> registriesFuture) {
+
+    private static ResourceKey<Block> key(Block block) {
+        return BuiltInRegistries.BLOCK.getResourceKey(block).orElseThrow();
+    }
+
+    public CanadaModBlockTagGenerator(FabricDataOutput output, CompletableFuture<Provider> registriesFuture) {
         super(output, registriesFuture);
     }
 
@@ -17,78 +24,78 @@ public class CanadaModBlockTagGenerator extends BlockTagProvider {
     public String getName() {
         return "CanadaModBlockTagGenerator";
     }
-    
+
     @Override
-    protected void configure(WrapperLookup wrapperLookup) {
-        this.getOrCreateTagBuilder(BlockTags.LOGS)
-            .add(CanadaBlocks.MAPLE_LOG, CanadaBlocks.STRIPPED_MAPLE_LOG, CanadaBlocks.MAPLE_WOOD, CanadaBlocks.STRIPPED_MAPLE_WOOD);
-        
-        this.getOrCreateTagBuilder(BlockTags.LOGS_THAT_BURN)
-            .add(CanadaBlocks.MAPLE_LOG, CanadaBlocks.STRIPPED_MAPLE_LOG, CanadaBlocks.MAPLE_WOOD, CanadaBlocks.STRIPPED_MAPLE_WOOD);
+    protected void addTags(Provider wrapperLookup) {
+        this.tag(BlockTags.LOGS)
+            .add(key(CanadaBlocks.MAPLE_LOG), key(CanadaBlocks.STRIPPED_MAPLE_LOG), key(CanadaBlocks.MAPLE_WOOD), key(CanadaBlocks.STRIPPED_MAPLE_WOOD));
 
-        this.getOrCreateTagBuilder(CanadaTags.BlockTags.MAPLE_LOGS)
-            .add(CanadaBlocks.MAPLE_LOG, CanadaBlocks.STRIPPED_MAPLE_LOG, CanadaBlocks.MAPLE_WOOD, CanadaBlocks.STRIPPED_MAPLE_WOOD);
-        
-        this.getOrCreateTagBuilder(BlockTags.WOODEN_BUTTONS)
-            .add(CanadaBlocks.MAPLE_BUTTON);
-        
-        this.getOrCreateTagBuilder(BlockTags.WOODEN_DOORS)
-            .add(CanadaBlocks.MAPLE_DOOR);
-        
-        this.getOrCreateTagBuilder(BlockTags.WOODEN_PRESSURE_PLATES)
-            .add(CanadaBlocks.MAPLE_PRESSURE_PLATE);
-        
-        this.getOrCreateTagBuilder(BlockTags.WOODEN_SLABS)
-            .add(CanadaBlocks.MAPLE_SLAB);
-        
-        this.getOrCreateTagBuilder(BlockTags.WOODEN_STAIRS)
-            .add(CanadaBlocks.MAPLE_STAIRS);
-        
-        this.getOrCreateTagBuilder(BlockTags.WOODEN_TRAPDOORS)
-            .add(CanadaBlocks.MAPLE_STAIRS);
+        this.tag(BlockTags.LOGS_THAT_BURN)
+            .add(key(CanadaBlocks.MAPLE_LOG), key(CanadaBlocks.STRIPPED_MAPLE_LOG), key(CanadaBlocks.MAPLE_WOOD), key(CanadaBlocks.STRIPPED_MAPLE_WOOD));
 
-        this.getOrCreateTagBuilder(BlockTags.FENCES)
-            .add(CanadaBlocks.MAPLE_FENCE);
+        this.tag(CanadaTags.BlockTags.MAPLE_LOGS)
+            .add(key(CanadaBlocks.MAPLE_LOG), key(CanadaBlocks.STRIPPED_MAPLE_LOG), key(CanadaBlocks.MAPLE_WOOD), key(CanadaBlocks.STRIPPED_MAPLE_WOOD));
 
-        this.getOrCreateTagBuilder(BlockTags.FENCE_GATES)
-            .add(CanadaBlocks.MAPLE_FENCE_GATE);
+        this.tag(BlockTags.WOODEN_BUTTONS)
+            .add(key(CanadaBlocks.MAPLE_BUTTON));
 
-        this.getOrCreateTagBuilder(BlockTags.ALL_SIGNS)
-            .add(CanadaBlocks.MAPLE_SIGN)
-            .add(CanadaBlocks.MAPLE_WALL_SIGN);
-        
-        this.getOrCreateTagBuilder(BlockTags.ALL_HANGING_SIGNS)
-            .add(CanadaBlocks.MAPLE_HANGING_SIGN)
-            .add(CanadaBlocks.MAPLE_WALL_HANGING_SIGN);
-        
-        this.getOrCreateTagBuilder(BlockTags.AXE_MINEABLE)
-            .add(CanadaBlocks.MAPLE_PLANKS)
-            .add(CanadaBlocks.MAPLE_HANGING_SIGN)
-            .add(CanadaBlocks.MAPLE_WALL_HANGING_SIGN)
-            .add(CanadaBlocks.MAPLE_SIGN)
-            .add(CanadaBlocks.MAPLE_WALL_SIGN)
-            .add(CanadaBlocks.MAPLE_TRAPDOOR)
-            .add(CanadaBlocks.MAPLE_FENCE);
-        
-        this.getOrCreateTagBuilder(BlockTags.LEAVES)
-            .add(CanadaBlocks.MAPLE_LEAVES);
+        this.tag(BlockTags.WOODEN_DOORS)
+            .add(key(CanadaBlocks.MAPLE_DOOR));
 
-        this.getOrCreateTagBuilder(ConventionalBlockTags.FENCES)
-            .add(CanadaBlocks.MAPLE_FENCE);
-        this.getOrCreateTagBuilder(ConventionalBlockTags.WOODEN_FENCES)
-            .add(CanadaBlocks.MAPLE_FENCE);
-        this.getOrCreateTagBuilder(ConventionalBlockTags.FENCE_GATES)
-            .add(CanadaBlocks.MAPLE_FENCE_GATE);
-        this.getOrCreateTagBuilder(ConventionalBlockTags.WOODEN_FENCE_GATES)
-            .add(CanadaBlocks.MAPLE_FENCE);
-        this.getOrCreateTagBuilder(ConventionalBlockTags.STRIPPED_LOGS)
-            .add(CanadaBlocks.STRIPPED_MAPLE_LOG);
-        this.getOrCreateTagBuilder(ConventionalBlockTags.STRIPPED_WOODS)
-            .add(CanadaBlocks.STRIPPED_MAPLE_WOOD);
+        this.tag(BlockTags.WOODEN_PRESSURE_PLATES)
+            .add(key(CanadaBlocks.MAPLE_PRESSURE_PLATE));
 
-        this.getOrCreateTagBuilder(BlockTags.SAPLINGS).add(CanadaBlocks.MAPLE_SAPLING);
-        this.getOrCreateTagBuilder(BlockTags.FLOWER_POTS).add(CanadaBlocks.POTTED_MAPLE_SAPLING);
+        this.tag(BlockTags.WOODEN_SLABS)
+            .add(key(CanadaBlocks.MAPLE_SLAB));
 
-        this.getOrCreateTagBuilder(ConventionalBlockTags.VILLAGER_JOB_SITES).add(CanadaBlocks.TREE_TAP);
+        this.tag(BlockTags.WOODEN_STAIRS)
+            .add(key(CanadaBlocks.MAPLE_STAIRS));
+
+        this.tag(BlockTags.WOODEN_TRAPDOORS)
+            .add(key(CanadaBlocks.MAPLE_TRAPDOOR));
+
+        this.tag(BlockTags.FENCES)
+            .add(key(CanadaBlocks.MAPLE_FENCE));
+
+        this.tag(BlockTags.FENCE_GATES)
+            .add(key(CanadaBlocks.MAPLE_FENCE_GATE));
+
+        this.tag(BlockTags.ALL_SIGNS)
+            .add(key(CanadaBlocks.MAPLE_SIGN))
+            .add(key(CanadaBlocks.MAPLE_WALL_SIGN));
+
+        this.tag(BlockTags.ALL_HANGING_SIGNS)
+            .add(key(CanadaBlocks.MAPLE_HANGING_SIGN))
+            .add(key(CanadaBlocks.MAPLE_WALL_HANGING_SIGN));
+
+        this.tag(BlockTags.MINEABLE_WITH_AXE)
+            .add(key(CanadaBlocks.MAPLE_PLANKS))
+            .add(key(CanadaBlocks.MAPLE_HANGING_SIGN))
+            .add(key(CanadaBlocks.MAPLE_WALL_HANGING_SIGN))
+            .add(key(CanadaBlocks.MAPLE_SIGN))
+            .add(key(CanadaBlocks.MAPLE_WALL_SIGN))
+            .add(key(CanadaBlocks.MAPLE_TRAPDOOR))
+            .add(key(CanadaBlocks.MAPLE_FENCE));
+
+        this.tag(BlockTags.LEAVES)
+            .add(key(CanadaBlocks.MAPLE_LEAVES));
+
+        this.tag(ConventionalBlockTags.FENCES)
+            .add(key(CanadaBlocks.MAPLE_FENCE));
+        this.tag(ConventionalBlockTags.WOODEN_FENCES)
+            .add(key(CanadaBlocks.MAPLE_FENCE));
+        this.tag(ConventionalBlockTags.FENCE_GATES)
+            .add(key(CanadaBlocks.MAPLE_FENCE_GATE));
+        this.tag(ConventionalBlockTags.WOODEN_FENCE_GATES)
+            .add(key(CanadaBlocks.MAPLE_FENCE_GATE));
+        this.tag(ConventionalBlockTags.STRIPPED_LOGS)
+            .add(key(CanadaBlocks.STRIPPED_MAPLE_LOG));
+        this.tag(ConventionalBlockTags.STRIPPED_WOODS)
+            .add(key(CanadaBlocks.STRIPPED_MAPLE_WOOD));
+
+        this.tag(BlockTags.SAPLINGS).add(key(CanadaBlocks.MAPLE_SAPLING));
+        this.tag(BlockTags.FLOWER_POTS).add(key(CanadaBlocks.POTTED_MAPLE_SAPLING));
+
+        this.tag(ConventionalBlockTags.VILLAGER_JOB_SITES).add(key(CanadaBlocks.TREE_TAP));
     }
 }

@@ -1,164 +1,160 @@
 package xen42.canadamod.entities;
 
 import java.util.UUID;
-
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Mth;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.FollowParentGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.pathfinder.PathType;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.ai.goal.ActiveTargetGoal;
-import net.minecraft.entity.ai.goal.AnimalMateGoal;
-import net.minecraft.entity.ai.goal.EscapeDangerGoal;
-import net.minecraft.entity.ai.goal.FleeEntityGoal;
-import net.minecraft.entity.ai.goal.FollowParentGoal;
-import net.minecraft.entity.ai.goal.LookAroundGoal;
-import net.minecraft.entity.ai.goal.LookAtEntityGoal;
-import net.minecraft.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.entity.ai.goal.RevengeGoal;
-import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.ai.goal.TemptGoal;
-import net.minecraft.entity.ai.goal.UniversalAngerGoal;
-import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
-import net.minecraft.entity.ai.pathing.PathNodeType;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.Angerable;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.ChickenEntity;
-import net.minecraft.entity.passive.FoxEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.passive.PolarBearEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TimeHelper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.intprovider.UniformIntProvider;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
 import xen42.canadamod.CanadaItems;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.CanadaSounds;
 
-public class GooseEntity extends ChickenEntity implements Angerable {
+public class GooseEntity extends Chicken implements NeutralMob {
 
-	private static final UniformIntProvider ANGER_TIME_RANGE = TimeHelper.betweenSeconds(20, 39);
+	private static final UniformInt ANGER_TIME_RANGE = TimeUtil.rangeOfSeconds(20, 39);
 	private int angerTime;
 	@Nullable
 	private UUID angryAt;
 
-	private static final TrackedData<Boolean> ANGRY = DataTracker.registerData(GooseEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+	private static final EntityDataAccessor<Boolean> ANGRY = SynchedEntityData.defineId(GooseEntity.class, EntityDataSerializers.BOOLEAN);
 
 	@Override
-	protected void initDataTracker(DataTracker.Builder builder) {
-		super.initDataTracker(builder);
-		builder.add(ANGRY, false);
+	protected void defineSynchedData(SynchedEntityData.Builder builder) {
+		super.defineSynchedData(builder);
+		builder.define(ANGRY, false);
 	}
 
-	public GooseEntity(EntityType<? extends ChickenEntity> entityType, World world) {
+	public GooseEntity(EntityType<? extends Chicken> entityType, Level world) {
         super(entityType, world);
         // Override that chickens don't like water
-        this.setPathfindingPenalty(PathNodeType.WATER, 0f);
+        this.setPathfindingMalus(PathType.WATER, 0f);
     }
-    
-    public static DefaultAttributeContainer.Builder createGooseAttributes() {
-        return AnimalEntity.createAnimalAttributes()
-            .add(EntityAttributes.MAX_HEALTH, 8.0f)
-            .add(EntityAttributes.MOVEMENT_SPEED, 0.25f)
-            .add(EntityAttributes.WATER_MOVEMENT_EFFICIENCY, 2f)
-            .add(EntityAttributes.OXYGEN_BONUS)
-			.add(EntityAttributes.ATTACK_DAMAGE, 0.5);
+
+    public static AttributeSupplier.Builder createGooseAttributes() {
+        return Animal.createAnimalAttributes()
+            .add(Attributes.MAX_HEALTH, 8.0f)
+            .add(Attributes.MOVEMENT_SPEED, 0.25f)
+            .add(Attributes.WATER_MOVEMENT_EFFICIENCY, 2f)
+            .add(Attributes.OXYGEN_BONUS)
+			.add(Attributes.ATTACK_DAMAGE, 0.5);
     }
 
 	@Override
-	protected void eat(PlayerEntity player, Hand hand, ItemStack stack) {
-		super.eat(player, hand, stack);
+	protected void usePlayerItem(Player player, InteractionHand hand, ItemStack stack) {
+		super.usePlayerItem(player, hand, stack);
 		this.setHealth(this.getMaxHealth());
 	}
 
 	@Override
-	protected void initGoals() {
-		this.goalSelector.add(0, new SwimGoal(this));
-		this.goalSelector.add(1, new GooseEntity.AttackGoal());
-		this.goalSelector.add(1, new EscapeDangerGoal(this, 1.4));
-		this.goalSelector.add(1, new FleeEntityGoal(this, PlayerEntity.class, 8.0F, 1.6, 1.4, 
-			entity -> this.getHealth() <= 4 && !((PlayerEntity)entity).isHolding(Items.BREAD)));
-		this.goalSelector.add(1, new FleeEntityGoal(this, FoxEntity.class, 8.0F, 1.6, 1.4, entity -> !this.isAngry()));
-		this.goalSelector.add(2, new AnimalMateGoal(this, 1.0));
-		this.goalSelector.add(3, new TemptGoal(this, 1.0, stack -> stack.isOf(Items.BREAD), false));
-		this.goalSelector.add(4, new FollowParentGoal(this, 1.1));
-		this.goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
-		this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 6.0F));
-		this.goalSelector.add(7, new LookAroundGoal(this));
+	protected void registerGoals() {
+		this.goalSelector.addGoal(0, new FloatGoal(this));
+		this.goalSelector.addGoal(1, new GooseEntity.AttackGoal());
+		this.goalSelector.addGoal(1, new PanicGoal(this, 1.4));
+		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Player.class, 8.0F, 1.6, 1.4,
+			entity -> this.getHealth() <= 4 && !((Player)entity).isHolding(Items.BREAD)));
+		this.goalSelector.addGoal(1, new AvoidEntityGoal(this, Fox.class, 8.0F, 1.6, 1.4, entity -> !this.isAngry()));
+		this.goalSelector.addGoal(2, new BreedGoal(this, 1.0));
+		this.goalSelector.addGoal(3, new TemptGoal(this, 1.0, stack -> stack.is(Items.BREAD), false));
+		this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1));
+		this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0));
+		this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
+		this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 
-		this.targetSelector.add(1, new GooseEntity.GooseRevengeGoal());
-		this.targetSelector.add(3, new ActiveTargetGoal(this, PlayerEntity.class, 10, true, false, this::shouldAngerAt));
-		this.targetSelector.add(5, new UniversalAngerGoal<>(this, false));
+		this.targetSelector.addGoal(1, new GooseEntity.GooseRevengeGoal());
+		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::isAngryAt));
+		this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, false));
 	}
 
     @Override
-	public ChickenEntity createChild(ServerWorld serverWorld, PassiveEntity passiveEntity) {
-		ChickenEntity chickenEntity = CanadaMod.GOOSE_ENTITY.create(serverWorld, SpawnReason.BREEDING);
+	public Chicken getBreedOffspring(ServerLevel serverWorld, AgeableMob passiveEntity) {
+		Chicken chickenEntity = CanadaMod.GOOSE_ENTITY.create(serverWorld, EntitySpawnReason.BREEDING);
 
 		return chickenEntity;
 	}
 
     @Override
-	public boolean isBreedingItem(ItemStack stack) {
-		return stack.isOf(Items.BREAD);
+	public boolean isFood(ItemStack stack) {
+		return stack.is(Items.BREAD);
 	}
 
     @Override
-	public void tickMovement() {
-		super.tickMovement();
-		this.lastFlapProgress = this.flapProgress;
-		this.lastMaxWingDeviation = this.maxWingDeviation;
+	public void aiStep() {
+		super.aiStep();
+		this.oFlap = this.flap;
+		this.oFlapSpeed = this.flapSpeed;
 
-		var shouldFlap = (!this.isOnGround() && !this.isTouchingWater()) || this.isAngry();
-		
-		this.maxWingDeviation = this.maxWingDeviation + (!shouldFlap ? -1.0F : 4.0F) * 0.3F;
-		this.maxWingDeviation = MathHelper.clamp(this.maxWingDeviation, 0.0F, 1.0F);
-		if (shouldFlap && this.flapSpeed < 1.0F) {
-			this.flapSpeed = 1.0F;
+		var shouldFlap = (!this.onGround() && !this.isInWater()) || this.isAngry();
+
+		this.flapSpeed = this.flapSpeed + (!shouldFlap ? -1.0F : 4.0F) * 0.3F;
+		this.flapSpeed = Mth.clamp(this.flapSpeed, 0.0F, 1.0F);
+		if (shouldFlap && this.flapping < 1.0F) {
+			this.flapping = 1.0F;
 		}
 
-		this.flapSpeed *= 0.9F;
-		Vec3d vec3d = this.getVelocity();
-		if (!this.isOnGround() && vec3d.y < 0.0) {
-			this.setVelocity(vec3d.multiply(1.0, 0.6, 1.0));
+		this.flapping *= 0.9F;
+		Vec3 vec3d = this.getDeltaMovement();
+		if (!this.onGround() && vec3d.y < 0.0) {
+			this.setDeltaMovement(vec3d.multiply(1.0, 0.6, 1.0));
 		}
 
-		this.flapProgress = this.flapProgress + this.flapSpeed * 2.0F;
-		if (this.getWorld() instanceof ServerWorld serverWorld && this.isAlive() && !this.isBaby() && !this.hasJockey() && --this.eggLayTime <= 0) {
-            var item = this.dropItem(serverWorld, CanadaItems.GOOSE_EGG);
-            item.setPosition(this.getPos());
+		this.flap = this.flap + this.flapping * 2.0F;
+		if (this.level() instanceof ServerLevel serverWorld && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
+            var item = this.spawnAtLocation(serverWorld, CanadaItems.GOOSE_EGG);
+            item.setPos(this.position());
 
             this.playSound(CanadaSounds.SOUND_GOOSE_PLOP, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
-            this.emitGameEvent(GameEvent.ENTITY_PLACE);
+            this.gameEvent(GameEvent.ENTITY_PLACE);
 
-			this.eggLayTime = this.random.nextInt(6000) + 6000;
+			this.eggTime = this.random.nextInt(6000) + 6000;
 		}
 	}
 
 	@Override
-	public void travel(Vec3d movementInput) {
+	public void travel(Vec3 movementInput) {
 		super.travel(movementInput);
-		if (this.isTouchingWater()) {
-			this.setVelocity(this.getVelocity().x, this.getVelocity().y - 0.03f, this.getVelocity().z);
+		if (this.isInWater()) {
+			this.setDeltaMovement(this.getDeltaMovement().x, this.getDeltaMovement().y - 0.03f, this.getDeltaMovement().z);
 		}
 	}
 
@@ -188,50 +184,50 @@ public class GooseEntity extends ChickenEntity implements Angerable {
 	}
 
 	@Override
-    public ItemStack getPickBlockStack() {
+    public ItemStack getPickResult() {
         return new ItemStack(CanadaItems.GOOSE_SPAWN_EGG);
     }
 
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.getWorld().isClient) {
-			this.tickAngerLogic((ServerWorld)this.getWorld(), false);
+		if (!this.level().isClientSide) {
+			this.updatePersistentAnger((ServerLevel)this.level(), false);
 			// Make them give up if hurt too much
 			if (this.getHealth() < 2 && this.isAngry()) {
-				this.stopAnger();
+				this.stopBeingAngry();
 			}
 		}
 	}
 
 	@Override
-	public void stopAnger() {
-		this.dataTracker.set(ANGRY, false);
-		Angerable.super.stopAnger();
+	public void stopBeingAngry() {
+		this.entityData.set(ANGRY, false);
+		NeutralMob.super.stopBeingAngry();
 	}
 
 	@Override
-	public void tickAngerLogic(ServerWorld world, boolean angerPersistent) {
+	public void updatePersistentAnger(ServerLevel world, boolean angerPersistent) {
 		if (this.getHealth() <= 4) {
-			this.stopAnger();
+			this.stopBeingAngry();
 		}
 		else {
-			Angerable.super.tickAngerLogic(world, angerPersistent);
+			NeutralMob.super.updatePersistentAnger(world, angerPersistent);
 		}
 	}
 
 	@Override
-	public boolean shouldAngerAt(LivingEntity entity, ServerWorld world) {
+	public boolean isAngryAt(LivingEntity entity, ServerLevel world) {
 		if (this.getHealth() <= 4) {
 			return false;
 		}
 		else {
-			return Angerable.super.shouldAngerAt(entity, world);
+			return NeutralMob.super.isAngryAt(entity, world);
 		}
 	}
 
 	public boolean isAngry() {
-		return this.dataTracker.get(ANGRY);
+		return this.entityData.get(ANGRY);
 	}
 
 	class AttackGoal extends MeleeAttackGoal {
@@ -248,25 +244,25 @@ public class GooseEntity extends ChickenEntity implements Angerable {
 		}
 
 		@Override
-		protected void attack(LivingEntity target) {
-			if (this.canAttack(target)) {
-				this.resetCooldown();
-				this.mob.tryAttack(getServerWorld(this.mob), target);
-			} else if (this.mob.squaredDistanceTo(target) < (target.getWidth() + 4.0F) * (target.getWidth() + 4.0F)) {
-				if (this.isCooledDown()) {
-					this.resetCooldown();
+		protected void checkAndPerformAttack(LivingEntity target) {
+			if (this.canPerformAttack(target)) {
+				this.resetAttackCooldown();
+				this.mob.doHurtTarget(getServerLevel(this.mob), target);
+			} else if (this.mob.distanceToSqr(target) < (target.getBbWidth() + 4.0F) * (target.getBbWidth() + 4.0F)) {
+				if (this.isTimeToAttack()) {
+					this.resetAttackCooldown();
 				}
 
-				if (this.getCooldown() <= 5 && this.mob.getRandom().nextInt(2) == 0) {
-					GooseEntity.this.playSound(GooseEntity.this.getWarningSound());
+				if (this.getTicksUntilNextAttack() <= 5 && this.mob.getRandom().nextInt(2) == 0) {
+					GooseEntity.this.makeSound(GooseEntity.this.getWarningSound());
 				}
 			} else {
-				this.resetCooldown();
+				this.resetAttackCooldown();
 			}
 		}
 	}
 
-	class GooseRevengeGoal extends RevengeGoal {
+	class GooseRevengeGoal extends HurtByTargetGoal {
 		public GooseRevengeGoal() {
 			super(GooseEntity.this);
 		}
@@ -275,15 +271,15 @@ public class GooseEntity extends ChickenEntity implements Angerable {
 		public void start() {
 			super.start();
 			if (GooseEntity.this.isBaby()) {
-				this.callSameTypeForRevenge();
+				this.alertOthers();
 				this.stop();
 			}
 		}
 
 		@Override
-		protected void setMobEntityTarget(MobEntity mob, LivingEntity target) {
+		protected void alertOther(Mob mob, LivingEntity target) {
 			if (mob instanceof GooseEntity && !mob.isBaby()) {
-				super.setMobEntityTarget(mob, target);
+				super.alertOther(mob, target);
 			}
 		}
 
@@ -295,48 +291,48 @@ public class GooseEntity extends ChickenEntity implements Angerable {
 			}
 		}
 	}
-	
+
 	@Override
-	public void readCustomDataFromNbt(NbtCompound nbt) {
-		super.readCustomDataFromNbt(nbt);
-		this.readAngerFromNbt(this.getWorld(), nbt);
+	public void readAdditionalSaveData(CompoundTag nbt) {
+		super.readAdditionalSaveData(nbt);
+		this.readPersistentAngerSaveData(this.level(), nbt);
 	}
 
 	@Override
-	public void writeCustomDataToNbt(NbtCompound nbt) {
-		super.writeCustomDataToNbt(nbt);
-		this.writeAngerToNbt(nbt);
+	public void addAdditionalSaveData(CompoundTag nbt) {
+		super.addAdditionalSaveData(nbt);
+		this.addPersistentAngerSaveData(nbt);
 	}
 
 	@Override
-	public void chooseRandomAngerTime() {
-		this.setAngerTime(ANGER_TIME_RANGE.get(this.random));
+	public void startPersistentAngerTimer() {
+		this.setRemainingPersistentAngerTime(ANGER_TIME_RANGE.sample(this.random));
 	}
 
 	@Override
-	public void setAngerTime(int angerTime) {
+	public void setRemainingPersistentAngerTime(int angerTime) {
 		this.angerTime = angerTime;
 		if (angerTime > 0) {
-			this.dataTracker.set(ANGRY, true);
+			this.entityData.set(ANGRY, true);
 		}
 	}
 
 	@Override
-	public int getAngerTime() {
+	public int getRemainingPersistentAngerTime() {
 		return this.angerTime;
 	}
 
 	@Override
-	public void setAngryAt(@Nullable UUID angryAt) {
+	public void setPersistentAngerTarget(@Nullable UUID angryAt) {
 		this.angryAt = angryAt;
 		if (angryAt != null) {
-			this.dataTracker.set(ANGRY, true);
+			this.entityData.set(ANGRY, true);
 		}
 	}
 
 	@Nullable
 	@Override
-	public UUID getAngryAt() {
+	public UUID getPersistentAngerTarget() {
 		return this.angryAt;
 	}
 }

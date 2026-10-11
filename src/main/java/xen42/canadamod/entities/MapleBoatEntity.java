@@ -1,25 +1,24 @@
 package xen42.canadamod.entities;
 
-import net.minecraft.block.DispenserBlock;
-import net.minecraft.block.dispenser.BoatDispenserBehavior;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.vehicle.BoatEntity;
-import net.minecraft.entity.vehicle.ChestBoatEntity;
-import net.minecraft.item.Items;
+import net.minecraft.core.dispenser.BoatDispenseItemBehavior;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.ChestBoat;
+import net.minecraft.world.level.block.DispenserBlock;
 import xen42.canadamod.CanadaItems;
 
 public class MapleBoatEntity {
-    public static final EntityType<BoatEntity> MAPLE_BOAT = 
-        EntityType.register("maple_boat", EntityType.Builder.<BoatEntity>create(EntityType.getBoatFactory(() -> CanadaItems.MAPLE_BOAT), SpawnGroup.MISC)
-            .dropsNothing().dimensions(1.375F, 0.5625F).eyeHeight(0.5625F).maxTrackingRange(10));
+    public static final EntityType<Boat> MAPLE_BOAT =
+        EntityType.register("maple_boat", EntityType.Builder.<Boat>of(EntityType.boatFactory(() -> CanadaItems.MAPLE_BOAT), MobCategory.MISC)
+            .noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10));
 
-    public static final EntityType<ChestBoatEntity> MAPLE_CHEST_BOAT = 
-        EntityType.register("maple_chest_boat", EntityType.Builder.<ChestBoatEntity>create(EntityType.getChestBoatFactory(() -> CanadaItems.MAPLE_CHEST_BOAT), SpawnGroup.MISC)
-            .dropsNothing().dimensions(1.375F, 0.5625F).eyeHeight(0.5625F).maxTrackingRange(10));
-    
+    public static final EntityType<ChestBoat> MAPLE_CHEST_BOAT =
+        EntityType.register("maple_chest_boat", EntityType.Builder.<ChestBoat>of(EntityType.chestBoatFactory(() -> CanadaItems.MAPLE_CHEST_BOAT), MobCategory.MISC)
+            .noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10));
+
     public static void initialize() {
-        DispenserBlock.registerBehavior(CanadaItems.MAPLE_CHEST_BOAT, new BoatDispenserBehavior(MAPLE_CHEST_BOAT));
-        DispenserBlock.registerBehavior(CanadaItems.MAPLE_BOAT, new BoatDispenserBehavior(MAPLE_BOAT));
+        DispenserBlock.registerBehavior(CanadaItems.MAPLE_CHEST_BOAT, new BoatDispenseItemBehavior(MAPLE_CHEST_BOAT));
+        DispenserBlock.registerBehavior(CanadaItems.MAPLE_BOAT, new BoatDispenseItemBehavior(MAPLE_BOAT));
     }
 }

@@ -1,36 +1,36 @@
 package xen42.canadamod.block;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.LockableContainerBlockEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.RecipeFinder;
-import net.minecraft.recipe.RecipeInputProvider;
-import net.minecraft.recipe.ServerRecipeManager;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.screen.ArrayPropertyDelegate;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.StackedItemContents;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.inventory.StackedContentsCompatible;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.recipe.CookingPotRecipe;
 import xen42.canadamod.recipe.CookingPotRecipeInput;
 import xen42.canadamod.screen.CookingPotScreenHandler;
 
-public class CookingPotBlockEntity extends LockableContainerBlockEntity implements RecipeInputProvider, SidedInventory {
-    protected DefaultedList<ItemStack> inventory;
+public class CookingPotBlockEntity extends BaseContainerBlockEntity implements StackedContentsCompatible, WorldlyContainer {
+    protected NonNullList<ItemStack> inventory;
     private BlockState _blockState;
 
     public int cookTimeRemaining;
@@ -39,19 +39,19 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
     public int burnTimeRemaining;
     public int burnTimeTotal;
 
-    public  RegistryKey<Recipe<?>> currentRecipeID;
+    public  ResourceKey<Recipe<?>> currentRecipeID;
 
-    private final ServerRecipeManager.MatchGetter<CookingPotRecipeInput, ? extends CookingPotRecipe> matchGetter;
+    private final RecipeManager.CachedCheck<CookingPotRecipeInput, ? extends CookingPotRecipe> matchGetter;
 
-    protected final PropertyDelegate propertyDelegate;
+    protected final ContainerData propertyDelegate;
 
     public CookingPotBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(CanadaMod.COOKING_POT_ENTITY, blockPos, blockState);
-        this.propertyDelegate = new ArrayPropertyDelegate(4);
+        this.propertyDelegate = new SimpleContainerData(4);
 
-        this.inventory = DefaultedList.ofSize(8, ItemStack.EMPTY);
+        this.inventory = NonNullList.withSize(8, ItemStack.EMPTY);
         _blockState = blockState;
-        this.matchGetter = ServerRecipeManager.createCachedMatchGetter(CanadaMod.COOKING_POT_RECIPE_TYPE);
+        this.matchGetter = RecipeManager.createCheck(CanadaMod.COOKING_POT_RECIPE_TYPE);
     }
 
     private CookingPotScreenHandler _handler;
@@ -65,41 +65,41 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
     }
 
     @Override
-    public int size() {
+    public int getContainerSize() {
         return 8;
     }
 
     @Override
-    protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory) {
-        _handler = new CookingPotScreenHandler(syncId, playerInventory, ScreenHandlerContext.EMPTY, this, this.propertyDelegate);
+    protected AbstractContainerMenu createMenu(int syncId, Inventory playerInventory) {
+        _handler = new CookingPotScreenHandler(syncId, playerInventory, ContainerLevelAccess.NULL, this, this.propertyDelegate);
         return _handler;
     }
 
     @Override
-    protected Text getContainerName() {
+    protected Component getDefaultName() {
         return ((CookingPotBlock)(this._blockState.getBlock())).getTitle();
     }
 
     @Override
-    protected DefaultedList<ItemStack> getHeldStacks() {
+    protected NonNullList<ItemStack> getItems() {
         return this.inventory;
     }
 
     @Override
-    protected void setHeldStacks(DefaultedList<ItemStack> inventory) {
+    protected void setItems(NonNullList<ItemStack> inventory) {
         this.inventory = inventory;
     }
 
     @Override
-    public boolean supports(BlockState state) {
-        return CanadaMod.COOKING_POT_ENTITY.supports(state);
+    public boolean isValidBlockState(BlockState state) {
+        return CanadaMod.COOKING_POT_ENTITY.isValid(state);
     }
 
     @Override
-    protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
-        super.readNbt(nbt, registries);
-        this.inventory = DefaultedList.ofSize(size(), ItemStack.EMPTY);
-        Inventories.readNbt(nbt, this.inventory, registries);
+    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.loadAdditional(nbt, registries);
+        this.inventory = NonNullList.withSize(getContainerSize(), ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(nbt, this.inventory, registries);
         this.cookTimeRemaining = nbt.getShort("cookTimeRemaining").orElse((short)0);
         this.cookTimeTotal = nbt.getShort("cookTimeTotal").orElse((short)0);
         this.burnTimeRemaining = nbt.getShort("burnTimeRemaining").orElse((short)0);
@@ -107,28 +107,28 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
     }
 
     @Override
-    public void setStack(int slot, ItemStack stack) {
+    public void setItem(int slot, ItemStack stack) {
         this.inventory.set(slot, stack);
-        markDirty();
+        setChanged();
     }
 
     @Override
-    protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) { 
-        super.writeNbt(nbt, registries);
-        Inventories.writeNbt(nbt, this.inventory, registries);
+    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+        super.saveAdditional(nbt, registries);
+        ContainerHelper.saveAllItems(nbt, this.inventory, registries);
         nbt.putShort("cookTimeRemaining", (short)this.cookTimeRemaining);
         nbt.putShort("cookTimeTotal", (short)this.cookTimeTotal);
         nbt.putShort("burnTimeRemaining", (short)this.burnTimeRemaining);
         nbt.putShort("burnTimeTotal", (short)this.burnTimeTotal);
     }
 
-    public static void tick(ServerWorld world, BlockPos pos, BlockState state, CookingPotBlockEntity blockEntity) {
+    public static void tick(ServerLevel world, BlockPos pos, BlockState state, CookingPotBlockEntity blockEntity) {
         var wasBurning = blockEntity.isCooking();
 
         // Todo: only check this when the inventory actually changed
         var inputRecipe = getRecipeFromInputs(blockEntity, world);
         var activeRecipe = getCurrentRecipe(blockEntity, world);
-        var currentOutput = blockEntity.getStack(CookingPotScreenHandler.OUTPUT_SLOT);
+        var currentOutput = blockEntity.getItem(CookingPotScreenHandler.OUTPUT_SLOT);
         var currentRecipeResult = inputRecipe == null ? ItemStack.EMPTY : inputRecipe.value().result;
 
         var canAcceptOutput = blockEntity.canAcceptOutput(currentOutput, currentRecipeResult);
@@ -140,12 +140,12 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
 
         // Only progress or use fuel if we actually can create an output
         if (canAcceptOutput && currentRecipeResult != ItemStack.EMPTY) {
-            var fuelStack = blockEntity.getStack(CookingPotScreenHandler.FUEL_SLOT);
+            var fuelStack = blockEntity.getItem(CookingPotScreenHandler.FUEL_SLOT);
             if (!blockEntity.hasFuel() && !fuelStack.isEmpty()) {
-                blockEntity.burnTimeRemaining = world.getFuelRegistry().getFuelTicks(fuelStack);
+                blockEntity.burnTimeRemaining = world.fuelValues().burnDuration(fuelStack);
                 blockEntity.burnTimeTotal = blockEntity.burnTimeRemaining;
                 if (fuelStack.getRecipeRemainder().isEmpty()) {
-                    fuelStack.decrement(1);
+                    fuelStack.shrink(1);
                 }
                 else {
                     blockEntity.inventory.set(CookingPotScreenHandler.FUEL_SLOT, fuelStack.getRecipeRemainder());
@@ -179,15 +179,15 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
             setCurrentRecipe(null, blockEntity, world);
         }
 
-        var isLit = state.get(CookingPotBlock.LIT);
+        var isLit = state.getValue(CookingPotBlock.LIT);
         var shouldBeLit = blockEntity.isCooking() && blockEntity.hasFuel() && canAcceptOutput;
         if (isLit != shouldBeLit) {
-            world.setBlockState(pos, state.with(CookingPotBlock.LIT, shouldBeLit));
+            world.setBlockAndUpdate(pos, state.setValue(CookingPotBlock.LIT, shouldBeLit));
             didUpdate = true;
         }
 
         if (didUpdate) {
-            markDirty(world, pos, state);
+            setChanged(world, pos, state);
         }
 
         blockEntity.propertyDelegate.set(0, blockEntity.burnTimeRemaining);
@@ -197,34 +197,34 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
     }
 
     @SuppressWarnings("unchecked")
-    private static RecipeEntry<CookingPotRecipe> getRecipeFromInputs(CookingPotBlockEntity blockEntity, ServerWorld world) {
+    private static RecipeHolder<CookingPotRecipe> getRecipeFromInputs(CookingPotBlockEntity blockEntity, ServerLevel world) {
         var input = new CookingPotRecipeInput(blockEntity.inventory);
-        var recipeEntry = blockEntity.matchGetter.getFirstMatch(input, world).orElse(null);
-        return (RecipeEntry<CookingPotRecipe>)recipeEntry;
+        var recipeEntry = blockEntity.matchGetter.getRecipeFor(input, world).orElse(null);
+        return (RecipeHolder<CookingPotRecipe>)recipeEntry;
     }
 
-    private static void setCurrentRecipe(RecipeEntry<CookingPotRecipe> recipe, CookingPotBlockEntity blockEntity, ServerWorld world) {
+    private static void setCurrentRecipe(RecipeHolder<CookingPotRecipe> recipe, CookingPotBlockEntity blockEntity, ServerLevel world) {
         blockEntity.currentRecipeID = recipe == null ? null : recipe.id();
     }
 
     @SuppressWarnings("unchecked")
-    private static RecipeEntry<CookingPotRecipe> getCurrentRecipe(CookingPotBlockEntity blockEntity, ServerWorld world) {
-        var recipe = world.getRecipeManager().get(blockEntity.currentRecipeID).orElse(null);
+    private static RecipeHolder<CookingPotRecipe> getCurrentRecipe(CookingPotBlockEntity blockEntity, ServerLevel world) {
+        var recipe = world.recipeAccess().byKey(blockEntity.currentRecipeID).orElse(null);
         if (recipe == null) {
             return null;
         }
         else {
-            return (RecipeEntry<CookingPotRecipe>)recipe;
+            return (RecipeHolder<CookingPotRecipe>)recipe;
         }
     }
 
     private boolean canAcceptOutput(ItemStack currentOutput, ItemStack resultItem) {
-        return currentOutput.isEmpty() || 
-                (currentOutput.isOf(resultItem.getItem()) && currentOutput.getMaxCount() > currentOutput.getCount() + resultItem.getCount());
+        return currentOutput.isEmpty() ||
+                (currentOutput.is(resultItem.getItem()) && currentOutput.getMaxStackSize() > currentOutput.getCount() + resultItem.getCount());
     }
 
     /// Called when crafting bar time is up
-    private static boolean craftRecipe(CookingPotBlockEntity blockEntity, ServerWorld world) {
+    private static boolean craftRecipe(CookingPotBlockEntity blockEntity, ServerLevel world) {
         var recipeEntry = getRecipeFromInputs(blockEntity, world);
         if (recipeEntry == null) {
             return false;
@@ -234,7 +234,7 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
         if (recipe != null) {
             var resultItem = recipe.result;
 
-            var currentOutput = blockEntity.getStack(CookingPotScreenHandler.OUTPUT_SLOT);
+            var currentOutput = blockEntity.getItem(CookingPotScreenHandler.OUTPUT_SLOT);
 
             if (blockEntity.canAcceptOutput(currentOutput, resultItem)) {
                 var finalResult = resultItem.copy();
@@ -242,13 +242,13 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
                     finalResult = new ItemStack(finalResult.getItem(), finalResult.getCount() + currentOutput.getCount());
                 }
 
-                blockEntity.setStack(CookingPotScreenHandler.OUTPUT_SLOT, finalResult);
+                blockEntity.setItem(CookingPotScreenHandler.OUTPUT_SLOT, finalResult);
                 for (var slotIndex : new int[] { 2, 3, 4, 5, 6 }) {
                     var slot = blockEntity.inventory.get(slotIndex);
 
                     if (!slot.isEmpty()) {
                         if (slot.getRecipeRemainder().isEmpty()) {
-                            slot.decrement(1);
+                            slot.shrink(1);
                         }
                         else {
                             blockEntity.inventory.set(slotIndex, slot.getRecipeRemainder());
@@ -265,23 +265,23 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
     }
 
     @Override
-    public void provideRecipeInputs(RecipeFinder finder) {
+    public void fillStackedContents(StackedItemContents finder) {
         for (ItemStack itemStack : this.inventory) {
-            finder.addInput(itemStack); 
+            finder.accountStack(itemStack);
         }
     }
 
     @Override
-    public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-        return (slot == CookingPotScreenHandler.OUTPUT_SLOT) || stack.isOf(Items.BUCKET);
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction dir) {
+        return (slot == CookingPotScreenHandler.OUTPUT_SLOT) || stack.is(Items.BUCKET);
     }
 
     @Override
-    public boolean canInsert(int slot, ItemStack stack, Direction dir) {
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction dir) {
         if (CookingPotScreenHandler.isContainer(stack)) {
             return slot == CookingPotScreenHandler.CONTAINER_SLOT;
         }
-        else if (world.getFuelRegistry().isFuel(stack)) {
+        else if (level.fuelValues().isFuel(stack)) {
             return slot == CookingPotScreenHandler.FUEL_SLOT;
         }
 
@@ -289,7 +289,7 @@ public class CookingPotBlockEntity extends LockableContainerBlockEntity implemen
     }
 
     @Override
-    public int[] getAvailableSlots(Direction side) {
+    public int[] getSlotsForFace(Direction side) {
         if (side == Direction.DOWN) {
             return new int[] { CookingPotScreenHandler.OUTPUT_SLOT, 3, 4, 5, 6 };
         }

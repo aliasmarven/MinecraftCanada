@@ -1,37 +1,33 @@
 package xen42.canadamod.screen;
 
 import java.util.List;
-
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ButtonTextures;
-import net.minecraft.client.gui.screen.recipebook.GhostRecipe;
-import net.minecraft.client.gui.screen.recipebook.RecipeBookWidget;
-import net.minecraft.client.gui.screen.recipebook.RecipeResultCollection;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.NetworkRecipeId;
-import net.minecraft.recipe.RecipeFinder;
-import net.minecraft.recipe.display.RecipeDisplay;
-import net.minecraft.recipe.display.SlotDisplay;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.context.ContextParameterMap;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.screens.recipebook.GhostSlots;
+import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
+import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.context.ContextMap;
+import net.minecraft.world.entity.player.StackedItemContents;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import xen42.canadamod.CanadaBlocks;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.recipe.CookingPotRecipeDisplay;
 
-public class CookingPotRecipeBookWidget extends RecipeBookWidget<CookingPotScreenHandler> {
-	private static final Text TOGGLE_CRAFTABLE_TEXT = Text.translatable("gui.recipebook.toggleRecipes.craftable");
+public class CookingPotRecipeBookWidget extends RecipeBookComponent<CookingPotScreenHandler> {
+	private static final Component TOGGLE_CRAFTABLE_TEXT = Component.translatable("gui.recipebook.toggleRecipes.craftable");
 
-	private static final List<RecipeBookWidget.Tab> TABS = List.of(
-		new RecipeBookWidget.Tab(CanadaBlocks.COOKING_POT.asItem(), CanadaMod.COOKING_POT_RECIPE_BOOK_CATEGORY)
+	private static final List<RecipeBookComponent.TabInfo> TABS = List.of(
+		new RecipeBookComponent.TabInfo(CanadaBlocks.COOKING_POT.asItem(), CanadaMod.COOKING_POT_RECIPE_BOOK_CATEGORY)
 	);
 
-	private static final ButtonTextures TEXTURES = new ButtonTextures(
-		Identifier.ofVanilla("recipe_book/filter_enabled"),
-		Identifier.ofVanilla("recipe_book/filter_disabled"),
-		Identifier.ofVanilla("recipe_book/filter_enabled_highlighted"),
-		Identifier.ofVanilla("recipe_book/filter_disabled_highlighted")
+	private static final WidgetSprites TEXTURES = new WidgetSprites(
+		ResourceLocation.withDefaultNamespace("recipe_book/filter_enabled"),
+		ResourceLocation.withDefaultNamespace("recipe_book/filter_disabled"),
+		ResourceLocation.withDefaultNamespace("recipe_book/filter_enabled_highlighted"),
+		ResourceLocation.withDefaultNamespace("recipe_book/filter_disabled_highlighted")
 	);
 
     public CookingPotRecipeBookWidget(CookingPotScreenHandler craftingScreenHandler) {
@@ -39,19 +35,19 @@ public class CookingPotRecipeBookWidget extends RecipeBookWidget<CookingPotScree
     }
 
     @Override
-    protected Text getToggleCraftableButtonText() {
+    protected Component getRecipeFilterName() {
 		return TOGGLE_CRAFTABLE_TEXT;
     }
 
     @Override
-    protected boolean isValid(Slot slot) {
-		return this.craftingScreenHandler.getOutputSlot() == slot || this.craftingScreenHandler.getInputSlots().contains(slot) || 
-        this.craftingScreenHandler.getContainerSlot() == slot || this.craftingScreenHandler.getFuelSlot() == slot;
+    protected boolean isCraftingSlot(Slot slot) {
+		return this.menu.getOutputSlot() == slot || this.menu.getInputSlots().contains(slot) ||
+        this.menu.getContainerSlot() == slot || this.menu.getFuelSlot() == slot;
     }
 
     @Override
-    protected void populateRecipes(RecipeResultCollection recipeResultCollection, RecipeFinder recipeFinder) {
-		recipeResultCollection.populateRecipes(recipeFinder, this::canDisplay);
+    protected void selectMatchingRecipes(RecipeCollection recipeResultCollection, StackedItemContents recipeFinder) {
+		recipeResultCollection.selectRecipes(recipeFinder, this::canDisplay);
     }
 
     private boolean canDisplay(RecipeDisplay display) {
@@ -59,24 +55,24 @@ public class CookingPotRecipeBookWidget extends RecipeBookWidget<CookingPotScree
 	}
 
     @Override
-    protected void setBookButtonTexture() {
-		this.toggleCraftableButton.setTextures(TEXTURES);
+    protected void initFilterButtonTextures() {
+		this.filterButton.initTextureValues(TEXTURES);
     }
 
     @Override
-    protected void showGhostRecipe(GhostRecipe ghostRecipe, RecipeDisplay display, ContextParameterMap context) {
+    protected void fillGhostRecipe(GhostSlots ghostRecipe, RecipeDisplay display, ContextMap context) {
 		var cookingPotDisplay = (CookingPotRecipeDisplay)display;
-		ghostRecipe.addResults(this.craftingScreenHandler.getOutputSlot(), context, cookingPotDisplay.result());
+		ghostRecipe.setResult(this.menu.getOutputSlot(), context, cookingPotDisplay.result());
 
-		List<Slot> inputSlots = this.craftingScreenHandler.getInputSlots();
-		List<SlotDisplay> ingredients = cookingPotDisplay.ingredients(); 
+		List<Slot> inputSlots = this.menu.getInputSlots();
+		List<SlotDisplay> ingredients = cookingPotDisplay.ingredients();
 		for (int i = 0; i < inputSlots.size(); i++) {
 			if (i >= ingredients.size()) {
 				continue;
 			}
-			ghostRecipe.addInputs(inputSlots.get(i), context, ingredients.get(i));
+			ghostRecipe.setInput(inputSlots.get(i), context, ingredients.get(i));
 		}
-		
-		ghostRecipe.addInputs(this.craftingScreenHandler.getContainerSlot(), context, cookingPotDisplay.containers());
+
+		ghostRecipe.setInput(this.menu.getContainerSlot(), context, cookingPotDisplay.containers());
     }
 }

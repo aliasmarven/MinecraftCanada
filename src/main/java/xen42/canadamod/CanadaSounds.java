@@ -1,9 +1,9 @@
 package xen42.canadamod;
 
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 
 public class CanadaSounds {
     public static final SoundEvent SOUND_BEAVER_AMBIENT = registerSound("beaver_ambient");
@@ -37,9 +37,9 @@ public class CanadaSounds {
 	public static final SoundEvent SOUND_GOOSE_PLOP = registerSound("goose_plop");
 
     public static SoundEvent registerSound(String name) {
-        var id = Identifier.of(CanadaMod.MOD_ID, name);
-        var event = SoundEvent.of(id);
-        Registry.register(Registries.SOUND_EVENT, id, event);
+        var id = ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name);
+        var event = SoundEvent.createVariableRangeEvent(id);
+        Registry.register(BuiltInRegistries.SOUND_EVENT, id, event);
         return event;
     }
 

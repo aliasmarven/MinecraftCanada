@@ -1,8 +1,8 @@
 package xen42.canadamod.block;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import xen42.canadamod.CanadaMod;
 
 public class MooseSkullBlockEntity extends BlockEntity {
@@ -12,7 +12,7 @@ public class MooseSkullBlockEntity extends BlockEntity {
     }
 
     @Override
-    public boolean supports(BlockState state) {
-        return CanadaMod.MOOSE_HEAD_ENTITY.supports(state);
-    }    
+    public boolean isValidBlockState(BlockState state) {
+        return CanadaMod.MOOSE_HEAD_ENTITY.isValid(state);
+    }
 }

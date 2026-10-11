@@ -6,23 +6,23 @@ import java.util.concurrent.CompletableFuture;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
-import net.minecraft.block.Blocks;
-import net.minecraft.data.recipe.RecipeExporter;
-import net.minecraft.data.recipe.RecipeGenerator;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.book.RecipeCategory;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper.WrapperLookup;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.recipes.RecipeCategory;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Blocks;
 import xen42.canadamod.recipe.CookingPotRecipeJsonBuilder;
 
 public class CanadaModRecipeGenerator extends FabricRecipeProvider {
-    public CanadaModRecipeGenerator(FabricDataOutput generator, CompletableFuture<WrapperLookup> registriesFuture) {
+    public CanadaModRecipeGenerator(FabricDataOutput generator, CompletableFuture<Provider> registriesFuture) {
         super(generator, registriesFuture);
     }
 
@@ -32,129 +32,129 @@ public class CanadaModRecipeGenerator extends FabricRecipeProvider {
     }
 
     @Override
-    public Identifier getRecipeIdentifier(Identifier identifier) {
-        return Identifier.of(CanadaMod.MOD_ID, identifier.getPath());
+    public ResourceLocation getRecipeIdentifier(ResourceLocation identifier) {
+        return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, identifier.getPath());
     }
 
     @Override
-    protected RecipeGenerator getRecipeGenerator(WrapperLookup registryLookup, RecipeExporter exporter) {
-        return new RecipeGenerator(registryLookup, exporter) {            
+    protected RecipeProvider createRecipeProvider(Provider registryLookup, RecipeOutput exporter) {
+        return new RecipeProvider(registryLookup, exporter) {
             @Override
-            public void generate() {
-                createShaped(RecipeCategory.MISC, Items.LEATHER)
+            public void buildRecipes() {
+                shaped(RecipeCategory.MISC, Items.LEATHER)
                     .pattern("XX")
                     .pattern("XX")
-                    .input('X', CanadaItems.PELT)
-                    .criterion(hasItem(CanadaItems.PELT), conditionsFromItem(CanadaItems.PELT))
-                    .offerTo(exporter);
-                
-                createShaped(RecipeCategory.TOOLS, CanadaItems.TREE_TAP)
+                    .define('X', CanadaItems.PELT)
+                    .unlockedBy(getHasName(CanadaItems.PELT), has(CanadaItems.PELT))
+                    .save(output);
+
+                shaped(RecipeCategory.TOOLS, CanadaItems.TREE_TAP)
                     .pattern("XX")
                     .pattern("Y ")
-                    .input('X', Items.COPPER_INGOT)
-                    .input('Y', Items.BUCKET)
-                    .criterion(hasItem(Items.COPPER_INGOT), conditionsFromItem(Items.COPPER_INGOT))
-                    .criterion(hasItem(Items.BUCKET), conditionsFromItem(Items.BUCKET))
-                    .offerTo(exporter);
-                
-                createShapeless(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.MAPLE_PLANKS, 4)
-                    .input(CanadaTags.ItemTags.MAPLE_LOGS)
-                    .criterion(hasTag(CanadaTags.ItemTags.MAPLE_LOGS), conditionsFromTag(CanadaTags.ItemTags.MAPLE_LOGS))
-                    .offerTo(exporter);
+                    .define('X', Items.COPPER_INGOT)
+                    .define('Y', Items.BUCKET)
+                    .unlockedBy(getHasName(Items.COPPER_INGOT), has(Items.COPPER_INGOT))
+                    .unlockedBy(getHasName(Items.BUCKET), has(Items.BUCKET))
+                    .save(output);
 
-                createShaped(RecipeCategory.TOOLS, CanadaBlocks.COOKING_POT)
+                shapeless(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.MAPLE_PLANKS, 4)
+                    .requires(CanadaTags.ItemTags.MAPLE_LOGS)
+                    .unlockedBy(hasTag(CanadaTags.ItemTags.MAPLE_LOGS), has(CanadaTags.ItemTags.MAPLE_LOGS))
+                    .save(output);
+
+                shaped(RecipeCategory.TOOLS, CanadaBlocks.COOKING_POT)
                     .pattern("X")
                     .pattern("Y")
-                    .input('X', Items.CAULDRON)
-                    .input('Y', Items.FURNACE)
-                    .criterion(hasItem(Items.CAULDRON), conditionsFromItem(Items.CAULDRON))
-                    .criterion(hasItem(Items.FURNACE), conditionsFromItem(Items.FURNACE))
-                    .offerTo(exporter);
-                
-                createStairsRecipe(CanadaBlocks.MAPLE_STAIRS.asItem(), Ingredient.ofItem(CanadaBlocks.MAPLE_PLANKS.asItem()))
-                    .criterion(hasItem(CanadaBlocks.MAPLE_PLANKS), conditionsFromItem(CanadaBlocks.MAPLE_PLANKS))
-                    .offerTo(exporter);
+                    .define('X', Items.CAULDRON)
+                    .define('Y', Items.FURNACE)
+                    .unlockedBy(getHasName(Items.CAULDRON), has(Items.CAULDRON))
+                    .unlockedBy(getHasName(Items.FURNACE), has(Items.FURNACE))
+                    .save(output);
 
-                createButtonRecipe(CanadaBlocks.MAPLE_BUTTON.asItem(), Ingredient.ofItem(CanadaBlocks.MAPLE_PLANKS.asItem()))
-                    .criterion(hasItem(CanadaBlocks.MAPLE_PLANKS), conditionsFromItem(CanadaBlocks.MAPLE_PLANKS))
-                    .offerTo(exporter);
+                stairBuilder(CanadaBlocks.MAPLE_STAIRS.asItem(), Ingredient.of(CanadaBlocks.MAPLE_PLANKS.asItem()))
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_PLANKS), has(CanadaBlocks.MAPLE_PLANKS))
+                    .save(output);
 
-                createSlabRecipe(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.MAPLE_SLAB.asItem(), Ingredient.ofItem(CanadaBlocks.MAPLE_PLANKS.asItem()))
-                    .criterion(hasItem(CanadaBlocks.MAPLE_PLANKS), conditionsFromItem(CanadaBlocks.MAPLE_PLANKS))
-                    .offerTo(exporter);
+                buttonBuilder(CanadaBlocks.MAPLE_BUTTON.asItem(), Ingredient.of(CanadaBlocks.MAPLE_PLANKS.asItem()))
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_PLANKS), has(CanadaBlocks.MAPLE_PLANKS))
+                    .save(output);
 
-                createDoorRecipe(CanadaBlocks.MAPLE_DOOR.asItem(), Ingredient.ofItem(CanadaBlocks.MAPLE_PLANKS.asItem()))
-                    .criterion(hasItem(CanadaBlocks.MAPLE_PLANKS), conditionsFromItem(CanadaBlocks.MAPLE_PLANKS))
-                    .offerTo(exporter);
+                slabBuilder(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.MAPLE_SLAB.asItem(), Ingredient.of(CanadaBlocks.MAPLE_PLANKS.asItem()))
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_PLANKS), has(CanadaBlocks.MAPLE_PLANKS))
+                    .save(output);
 
-                createFenceGateRecipe(CanadaBlocks.MAPLE_FENCE_GATE.asItem(), Ingredient.ofItem(CanadaBlocks.MAPLE_PLANKS.asItem()))
-                    .criterion(hasItem(CanadaBlocks.MAPLE_PLANKS), conditionsFromItem(CanadaBlocks.MAPLE_PLANKS))
-                    .offerTo(exporter);
+                doorBuilder(CanadaBlocks.MAPLE_DOOR.asItem(), Ingredient.of(CanadaBlocks.MAPLE_PLANKS.asItem()))
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_PLANKS), has(CanadaBlocks.MAPLE_PLANKS))
+                    .save(output);
 
-                createFenceRecipe(CanadaBlocks.MAPLE_FENCE.asItem(), Ingredient.ofItem(CanadaBlocks.MAPLE_PLANKS.asItem()))
-                    .criterion(hasItem(CanadaBlocks.MAPLE_PLANKS), conditionsFromItem(CanadaBlocks.MAPLE_PLANKS))
-                    .offerTo(exporter);
+                fenceGateBuilder(CanadaBlocks.MAPLE_FENCE_GATE.asItem(), Ingredient.of(CanadaBlocks.MAPLE_PLANKS.asItem()))
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_PLANKS), has(CanadaBlocks.MAPLE_PLANKS))
+                    .save(output);
 
-                createPressurePlateRecipe(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.MAPLE_PRESSURE_PLATE.asItem(), Ingredient.ofItem(CanadaBlocks.MAPLE_PLANKS.asItem()))
-                    .criterion(hasItem(CanadaBlocks.MAPLE_PLANKS), conditionsFromItem(CanadaBlocks.MAPLE_PLANKS))
-                    .offerTo(exporter);
+                fenceBuilder(CanadaBlocks.MAPLE_FENCE.asItem(), Ingredient.of(CanadaBlocks.MAPLE_PLANKS.asItem()))
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_PLANKS), has(CanadaBlocks.MAPLE_PLANKS))
+                    .save(output);
 
-                createSignRecipe(CanadaBlocks.MAPLE_SIGN.asItem(), Ingredient.ofItem(CanadaBlocks.MAPLE_PLANKS.asItem()))
-                    .criterion(hasItem(CanadaBlocks.MAPLE_PLANKS), conditionsFromItem(CanadaBlocks.MAPLE_PLANKS))
-                    .criterion(hasItem(Items.STICK), conditionsFromItem(Items.STICK))
-                    .offerTo(exporter);
-                
-                createTrapdoorRecipe(CanadaBlocks.MAPLE_TRAPDOOR.asItem(), Ingredient.ofItem(CanadaBlocks.MAPLE_PLANKS.asItem()))
-                    .criterion(hasItem(CanadaBlocks.MAPLE_PLANKS), conditionsFromItem(CanadaBlocks.MAPLE_PLANKS))
-                    .offerTo(exporter);
+                pressurePlateBuilder(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.MAPLE_PRESSURE_PLATE.asItem(), Ingredient.of(CanadaBlocks.MAPLE_PLANKS.asItem()))
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_PLANKS), has(CanadaBlocks.MAPLE_PLANKS))
+                    .save(output);
 
-                createShaped(RecipeCategory.MISC, CanadaBlocks.MAPLE_HANGING_SIGN)
+                signBuilder(CanadaBlocks.MAPLE_SIGN.asItem(), Ingredient.of(CanadaBlocks.MAPLE_PLANKS.asItem()))
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_PLANKS), has(CanadaBlocks.MAPLE_PLANKS))
+                    .unlockedBy(getHasName(Items.STICK), has(Items.STICK))
+                    .save(output);
+
+                trapdoorBuilder(CanadaBlocks.MAPLE_TRAPDOOR.asItem(), Ingredient.of(CanadaBlocks.MAPLE_PLANKS.asItem()))
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_PLANKS), has(CanadaBlocks.MAPLE_PLANKS))
+                    .save(output);
+
+                shaped(RecipeCategory.MISC, CanadaBlocks.MAPLE_HANGING_SIGN)
                     .pattern("X X")
                     .pattern("YYY")
                     .pattern("YYY")
-                    .input('X', Items.CHAIN)
-                    .input('Y', CanadaTags.ItemTags.MAPLE_LOGS)
-                    .criterion(hasTag(CanadaTags.ItemTags.MAPLE_LOGS), conditionsFromTag(CanadaTags.ItemTags.MAPLE_LOGS))
-                    .criterion(hasItem(Items.CHAIN), conditionsFromItem(Items.CHAIN))
-                    .offerTo(exporter);
+                    .define('X', Items.CHAIN)
+                    .define('Y', CanadaTags.ItemTags.MAPLE_LOGS)
+                    .unlockedBy(hasTag(CanadaTags.ItemTags.MAPLE_LOGS), has(CanadaTags.ItemTags.MAPLE_LOGS))
+                    .unlockedBy(getHasName(Items.CHAIN), has(Items.CHAIN))
+                    .save(output);
 
-                offerBoatRecipe(CanadaItems.MAPLE_BOAT, CanadaBlocks.MAPLE_PLANKS);
-                offerChestBoatRecipe(CanadaItems.MAPLE_CHEST_BOAT, CanadaBlocks.MAPLE_PLANKS);
+                woodenBoat(CanadaItems.MAPLE_BOAT, CanadaBlocks.MAPLE_PLANKS);
+                chestBoat(CanadaItems.MAPLE_CHEST_BOAT, CanadaBlocks.MAPLE_PLANKS);
 
-                createShaped(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.MAPLE_WOOD, 3)
+                shaped(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.MAPLE_WOOD, 3)
                     .pattern("XX")
                     .pattern("XX")
-                    .input('X', CanadaBlocks.MAPLE_LOG)
-                    .criterion(hasItem(CanadaBlocks.MAPLE_LOG), conditionsFromItem(CanadaBlocks.MAPLE_LOG))
-                    .offerTo(exporter);
-                
-                createShaped(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.STRIPPED_MAPLE_WOOD, 3)
+                    .define('X', CanadaBlocks.MAPLE_LOG)
+                    .unlockedBy(getHasName(CanadaBlocks.MAPLE_LOG), has(CanadaBlocks.MAPLE_LOG))
+                    .save(output);
+
+                shaped(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.STRIPPED_MAPLE_WOOD, 3)
                     .pattern("XX")
                     .pattern("XX")
-                    .input('X', CanadaBlocks.STRIPPED_MAPLE_LOG)
-                    .criterion(hasItem(CanadaBlocks.STRIPPED_MAPLE_LOG), conditionsFromItem(CanadaBlocks.STRIPPED_MAPLE_LOG))
-                    .offerTo(exporter);
+                    .define('X', CanadaBlocks.STRIPPED_MAPLE_LOG)
+                    .unlockedBy(getHasName(CanadaBlocks.STRIPPED_MAPLE_LOG), has(CanadaBlocks.STRIPPED_MAPLE_LOG))
+                    .save(output);
 
-                createShapeless(RecipeCategory.FOOD, CanadaItems.FLOUR)
-                    .input(Items.WHEAT)
-                    .criterion(hasItem(Items.WHEAT), conditionsFromItem(Items.WHEAT))
-                    .offerTo(exporter);
+                shapeless(RecipeCategory.FOOD, CanadaItems.FLOUR)
+                    .requires(Items.WHEAT)
+                    .unlockedBy(getHasName(Items.WHEAT), has(Items.WHEAT))
+                    .save(output);
 
-                createShapeless(RecipeCategory.MISC, Items.BONE_MEAL, 3)
-                    .input(CanadaItems.ANTLERS)
-                    .criterion(hasItem(CanadaItems.ANTLERS), conditionsFromItem(CanadaItems.ANTLERS))
-                    .offerTo(exporter);
-                
+                shapeless(RecipeCategory.MISC, Items.BONE_MEAL, 3)
+                    .requires(CanadaItems.ANTLERS)
+                    .unlockedBy(getHasName(CanadaItems.ANTLERS), has(CanadaItems.ANTLERS))
+                    .save(output);
+
                 createCookingPotRecipe(registryLookup, Items.RABBIT_STEW, 1)
                     .input(Items.RABBIT, this)
                     .input(ConventionalItemTags.VEGETABLE_FOODS, this)
                     .requiresBowl()
-                    .offerTo(exporter);
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, Items.MUSHROOM_STEW, 1)
                     .input(ConventionalItemTags.MUSHROOMS, this)
                     .requiresBowl()
-                    .offerTo(exporter);
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, Items.BEETROOT_SOUP, 1)
                     .input(Items.BEETROOT, this)
@@ -162,123 +162,123 @@ public class CanadaModRecipeGenerator extends FabricRecipeProvider {
                     .input(Items.BEETROOT, this)
                     .input(Items.BEETROOT, this)
                     .requiresBowl()
-                    .offerTo(exporter);
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, Items.CAKE, 1)
                     .input(Items.MILK_BUCKET, this)
                     .input(ItemTags.EGGS, this)
                     .input(Items.SUGAR, this)
                     .input(CanadaTags.ItemTags.FLOUR, this)
-                    .offerTo(exporter);
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, Items.PUMPKIN_PIE, 3)
                     .input(Blocks.PUMPKIN, this)
                     .input(ItemTags.EGGS, this)
                     .input(Items.SUGAR, this)
-                    .offerTo(exporter);
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, Items.BREAD, 3)
                     .input(CanadaTags.ItemTags.FLOUR, this)
                     .input(CanadaTags.ItemTags.FLOUR, this)
                     .input(CanadaTags.ItemTags.FLOUR, this)
                     .input(Items.WATER_BUCKET, this)
-                    .offerTo(exporter);   
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, Items.SLIME_BALL, 1)
                     .input(CanadaTags.ItemTags.FLOUR, this)
                     .input(CanadaTags.ItemTags.SAP, this)
-                    .offerTo(exporter);   
-                    
+                    .save(output);
+
                 createCookingPotRecipe(registryLookup, CanadaItems.GRAVY, 1)
                     .input(CanadaTags.ItemTags.FLOUR, this)
                     .input(CanadaTags.ItemTags.RAW_MEAT, this)
                     .requiresBottle()
-                    .offerTo(exporter);   
-                
+                    .save(output);
+
                 createCookingPotRecipe(registryLookup, CanadaItems.CHEESE_CURD, 3)
                     .input(Items.MILK_BUCKET, this)
                     .input(Items.FERMENTED_SPIDER_EYE, this)
-                    .offerTo(exporter);   
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, CanadaItems.RUBBER, 4)
                     .input(CanadaTags.ItemTags.SAP, this)
                     .input(CanadaTags.ItemTags.SAP, this)
                     .input(CanadaTags.ItemTags.SAP, this)
                     .input(Items.FERMENTED_SPIDER_EYE, this)
-                    .offerTo(exporter);   
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, CanadaItems.MAPLE_SYRUP_BOTTLE, 1)
                     .input(CanadaItems.MAPLE_SAP, this)
                     .requiresBottle()
-                    .offerTo(exporter);
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, CanadaItems.POUTINE, 1)
                     .input(CanadaItems.GRAVY, this)
                     .input(Items.POTATO, this)
                     .input(CanadaItems.CHEESE_CURD, this)
                     .requiresBowl()
-                    .offerTo(exporter);
-                
+                    .save(output);
+
                 createCookingPotRecipe(registryLookup, CanadaItems.DONAIR, 2)
                     .input(CanadaTags.ItemTags.FLOUR, this)
                     .input(Items.BEEF, this)
                     .input(Items.SUGAR, this)
-                    .offerTo(exporter);
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, CanadaItems.PIEROGI, 2)
                     .input(CanadaTags.ItemTags.FLOUR, this)
                     .input(CanadaTags.ItemTags.CHEESE, this)
                     .input(Items.POTATO, this)
-                    .offerTo(exporter);
+                    .save(output);
 
                 createCookingPotRecipe(registryLookup, CanadaItems.BUTTER_TART, 4)
                     .input(CanadaTags.ItemTags.FLOUR, this)
                     .input(Items.MILK_BUCKET, this)
                     .input(ItemTags.EGGS, this)
                     .input(CanadaItems.MAPLE_SYRUP_BOTTLE, this)
-                    .offerTo(exporter);
+                    .save(output);
 
-                createShaped(RecipeCategory.FOOD, CanadaItems.THERMOS)
+                shaped(RecipeCategory.FOOD, CanadaItems.THERMOS)
                     .pattern(" X ")
                     .pattern("Y Y")
                     .pattern("XXX")
-                    .input('X', Items.IRON_INGOT)
-                    .input('Y', CanadaTags.ItemTags.RUBBER)
-                    .criterion(hasItem(CanadaItems.RUBBER), conditionsFromItem(CanadaItems.RUBBER))
-                    .offerTo(exporter);
+                    .define('X', Items.IRON_INGOT)
+                    .define('Y', CanadaTags.ItemTags.RUBBER)
+                    .unlockedBy(getHasName(CanadaItems.RUBBER), has(CanadaItems.RUBBER))
+                    .save(output);
 
-                createShaped(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.RUBBER_BLOCK)
+                shaped(RecipeCategory.BUILDING_BLOCKS, CanadaBlocks.RUBBER_BLOCK)
                     .pattern("XX")
                     .pattern("XX")
-                    .input('X', CanadaTags.ItemTags.RUBBER)
-                    .criterion(hasItem(CanadaItems.RUBBER), conditionsFromItem(CanadaItems.RUBBER))
-                    .offerTo(exporter);
+                    .define('X', CanadaTags.ItemTags.RUBBER)
+                    .unlockedBy(getHasName(CanadaItems.RUBBER), has(CanadaItems.RUBBER))
+                    .save(output);
 
-                createShaped(RecipeCategory.COMBAT, CanadaItems.BEAVER_HELMET)
+                shaped(RecipeCategory.COMBAT, CanadaItems.BEAVER_HELMET)
                     .pattern(" Y ")
                     .pattern("XXX")
                     .pattern("X X")
-                    .input('X', CanadaItems.PELT)
-                    .input('Y', CanadaTags.ItemTags.SAP)
-                    .criterion(hasItem(CanadaItems.PELT), conditionsFromItem(CanadaItems.PELT))
-                    .offerTo(exporter);
+                    .define('X', CanadaItems.PELT)
+                    .define('Y', CanadaTags.ItemTags.SAP)
+                    .unlockedBy(getHasName(CanadaItems.PELT), has(CanadaItems.PELT))
+                    .save(output);
 
-                createShaped(RecipeCategory.COMBAT, CanadaItems.MOOSE_HELMET)
+                shaped(RecipeCategory.COMBAT, CanadaItems.MOOSE_HELMET)
                     .pattern("ZYZ")
                     .pattern("XXX")
                     .pattern("X X")
-                    .input('X', Items.LEATHER)
-                    .input('Y', CanadaTags.ItemTags.SAP)
-                    .input('Z', CanadaItems.ANTLERS)
-                    .criterion(hasItem(CanadaItems.ANTLERS), conditionsFromItem(CanadaItems.ANTLERS))
-                    .offerTo(exporter);
+                    .define('X', Items.LEATHER)
+                    .define('Y', CanadaTags.ItemTags.SAP)
+                    .define('Z', CanadaItems.ANTLERS)
+                    .unlockedBy(getHasName(CanadaItems.ANTLERS), has(CanadaItems.ANTLERS))
+                    .save(output);
 
-                offerSmelting(List.of(CanadaItems.VENISON), RecipeCategory.FOOD, CanadaItems.COOKED_VENISON, 0.35f, 200, CanadaItems.VENISON.getName().toString());
-                offerSmelting(List.of(CanadaItems.WATERFOWL), RecipeCategory.FOOD, CanadaItems.COOKED_WATERFOWL, 0.35f, 200, CanadaItems.WATERFOWL.getName().toString());
+                oreSmelting(List.of(CanadaItems.VENISON), RecipeCategory.FOOD, CanadaItems.COOKED_VENISON, 0.35f, 200, CanadaItems.VENISON.getName().toString());
+                oreSmelting(List.of(CanadaItems.WATERFOWL), RecipeCategory.FOOD, CanadaItems.COOKED_WATERFOWL, 0.35f, 200, CanadaItems.WATERFOWL.getName().toString());
             }
 
-            public static CookingPotRecipeJsonBuilder createCookingPotRecipe(WrapperLookup registryLookup, ItemConvertible output, int count) {
-                return new CookingPotRecipeJsonBuilder(registryLookup.getOrThrow(RegistryKeys.ITEM), output, count);
+            public static CookingPotRecipeJsonBuilder createCookingPotRecipe(Provider registryLookup, ItemLike output, int count) {
+                return new CookingPotRecipeJsonBuilder(registryLookup.lookupOrThrow(Registries.ITEM), output, count);
             }
         };
     }

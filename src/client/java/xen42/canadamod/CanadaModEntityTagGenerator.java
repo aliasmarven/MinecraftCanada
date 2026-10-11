@@ -4,12 +4,21 @@ import java.util.concurrent.CompletableFuture;
 
 import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricTagProvider.EntityTypeTagProvider;
-import net.minecraft.registry.RegistryWrapper.WrapperLookup;
-import net.minecraft.registry.tag.EntityTypeTags;
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntityType;
+
 
 public class CanadaModEntityTagGenerator extends EntityTypeTagProvider {
 
-    public CanadaModEntityTagGenerator(FabricDataOutput output, CompletableFuture<WrapperLookup> completableFuture) {
+    private static ResourceKey<EntityType<?>> key(EntityType<?> entityType) {
+        return BuiltInRegistries.ENTITY_TYPE.getResourceKey(entityType).orElseThrow();
+    }
+
+
+    public CanadaModEntityTagGenerator(FabricDataOutput output, CompletableFuture<Provider> completableFuture) {
         super(output, completableFuture);
 
     }
@@ -20,9 +29,9 @@ public class CanadaModEntityTagGenerator extends EntityTypeTagProvider {
 	}
 
     @Override
-    protected void configure(WrapperLookup wrapperLookup) {
-        this.getOrCreateTagBuilder(EntityTypeTags.CAN_EQUIP_SADDLE).add(CanadaMod.MOOSE_ENTITY);
-        this.getOrCreateTagBuilder(EntityTypeTags.AQUATIC).add(CanadaMod.MOOSE_ENTITY).add(CanadaMod.BEAVER_ENTITY);
+    protected void addTags(Provider wrapperLookup) {
+        this.tag(EntityTypeTags.CAN_EQUIP_SADDLE).add(key(CanadaMod.MOOSE_ENTITY));
+        this.tag(EntityTypeTags.AQUATIC).add(key(CanadaMod.MOOSE_ENTITY)).add(key(CanadaMod.BEAVER_ENTITY));
     }
-    
+
 }

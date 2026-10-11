@@ -1,37 +1,37 @@
 package xen42.canadamod.entity;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.block.entity.BlockEntityRenderer;
-import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.RotationPropertyHelper;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.world.level.block.state.properties.RotationSegment;
+import net.minecraft.world.phys.Vec3;
 import xen42.canadamod.CanadaBlocks;
 import xen42.canadamod.block.MooseSkullBlock;
 import xen42.canadamod.block.MooseSkullBlockEntity;
 
 public class MooseSkullBlockEntityRenderer implements BlockEntityRenderer<MooseSkullBlockEntity> {
-    public MooseSkullBlockEntityRenderer(BlockEntityRendererFactory.Context ctx) {
+    public MooseSkullBlockEntityRenderer(BlockEntityRendererProvider.Context ctx) {
     }
 
     @Override
-    public void render(MooseSkullBlockEntity entity, float tickProgress, MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers, int light, int overlay, Vec3d cameraPos) {
+    public void render(MooseSkullBlockEntity entity, float tickProgress, PoseStack matrices,
+            MultiBufferSource vertexConsumers, int light, int overlay, Vec3 cameraPos) {
 
-        if (entity.getCachedState().isOf(CanadaBlocks.MOOSE_WALL_HEAD)) {
+        if (entity.getBlockState().is(CanadaBlocks.MOOSE_WALL_HEAD)) {
             return;
         }
 
-        var rot = RotationPropertyHelper.toDegrees((16 - entity.getCachedState().get(MooseSkullBlock.ROTATION)) % 16);
+        var rot = RotationSegment.convertToDegrees((16 - entity.getBlockState().getValue(MooseSkullBlock.ROTATION)) % 16);
 
         matrices.translate(0.5f, 0.5f, 0.5f);
-        matrices.multiply(RotationAxis.POSITIVE_Y.rotation((float)Math.toRadians(rot)));
+        matrices.mulPose(Axis.YP.rotation((float)Math.toRadians(rot)));
         matrices.translate(-0.5f, -0.5f, -0.5f);
 
-        MinecraftClient.getInstance().getBlockRenderManager().renderBlockAsEntity(CanadaBlocks.MOOSE_HEAD.getDefaultState().with(MooseSkullBlock.WEIRD_HACK, false),
-            matrices, vertexConsumers, light, OverlayTexture.DEFAULT_UV);
+        Minecraft.getInstance().getBlockRenderer().renderSingleBlock(CanadaBlocks.MOOSE_HEAD.defaultBlockState().setValue(MooseSkullBlock.WEIRD_HACK, false),
+            matrices, vertexConsumers, light, OverlayTexture.NO_OVERLAY);
     }
 }

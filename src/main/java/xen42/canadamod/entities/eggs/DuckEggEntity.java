@@ -1,26 +1,26 @@
 package xen42.canadamod.entities.eggs;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.projectile.thrown.ThrownItemEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import xen42.canadamod.CanadaItems;
 import xen42.canadamod.CanadaMod;
 
 public class DuckEggEntity extends CustomEggEntity {
 
-    public DuckEggEntity(EntityType<? extends ThrownItemEntity> entity, World world) {
+    public DuckEggEntity(EntityType<? extends ThrowableItemProjectile> entity, Level world) {
         super(EntityType.EGG, world);
     }
 
-	public DuckEggEntity(World world, LivingEntity owner, ItemStack stack) {
+	public DuckEggEntity(Level world, LivingEntity owner, ItemStack stack) {
         super(world, owner, stack);
     }
 
-    public DuckEggEntity(World world, double x, double y, double z, ItemStack stack) {
+    public DuckEggEntity(Level world, double x, double y, double z, ItemStack stack) {
         super(world, x, y, z, stack);
     }
 
@@ -30,8 +30,8 @@ public class DuckEggEntity extends CustomEggEntity {
 	}
 
     @Override
-	public EntityType<? extends AnimalEntity> getHatchedEntity() {
+	public EntityType<? extends Animal> getHatchedEntity() {
 		return CanadaMod.DUCK_ENTITY;
 	}
-    
+
 }

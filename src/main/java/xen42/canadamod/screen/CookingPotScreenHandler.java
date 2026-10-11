@@ -6,37 +6,34 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
-import net.minecraft.block.entity.FurnaceBlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.RecipeFinder;
-import net.minecraft.recipe.RecipeInputProvider;
-import net.minecraft.recipe.book.RecipeBookType;
-import net.minecraft.screen.AbstractRecipeScreenHandler;
-import net.minecraft.screen.ArrayPropertyDelegate;
-import net.minecraft.screen.PropertyDelegate;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedItemContents;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.RecipeBookMenu;
+import net.minecraft.world.inventory.RecipeBookType;
+import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.StackedContentsCompatible;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import xen42.canadamod.CanadaBlocks;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.recipe.CookingPotRecipe;
 
-public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
+public class CookingPotScreenHandler extends RecipeBookMenu {
 
     public final static int OUTPUT_SLOT = 0;
     public final static int FUEL_SLOT = 1;
-    public final static int CONTAINER_SLOT = 2;    
+    public final static int CONTAINER_SLOT = 2;
     public final static int INPUT_SLOTS_START = 3;
     public final static int INPUT_SLOTS_END = 6;
 
@@ -47,13 +44,13 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
 
     public static final int MAX_WIDTH_AND_HEIGHT = 2;
 
-    private final PropertyDelegate propertyDelegate;
+    private final ContainerData propertyDelegate;
 
-    public Inventory inventory;
+    public Container inventory;
 
-    public ScreenHandlerContext context;
+    public ContainerLevelAccess context;
 
-    private final PlayerEntity player;
+    private final Player player;
 
     private Slot[] _slots;
     private Slot _fuelSlot;
@@ -76,17 +73,17 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
         return _outputSlot;
     }
 
-    public CookingPotScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, ScreenHandlerContext.EMPTY, null, new ArrayPropertyDelegate(4));
+    public CookingPotScreenHandler(int syncId, Inventory playerInventory) {
+        this(syncId, playerInventory, ContainerLevelAccess.NULL, null, new SimpleContainerData(4));
     }
 
-    public CookingPotScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, Inventory inventory, PropertyDelegate delegate) {
+    public CookingPotScreenHandler(int syncId, Inventory playerInventory, ContainerLevelAccess context, Container inventory, ContainerData delegate) {
         super(CanadaMod.COOKING_POT_SCREEN_HANDLER_TYPE, syncId);
         this.inventory = inventory == null ? new CookingPotSimpleInventory(this, 8) : inventory;
         this.context = context;
         this.player = playerInventory.player;
-        
-        checkSize(this.inventory, 8);
+
+        checkContainerSize(this.inventory, 8);
         this.propertyDelegate = delegate;
 
         _outputSlot = this.addSlot(new OutputSlot(this, this.inventory, OUTPUT_SLOT, 141, 35));
@@ -100,14 +97,14 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
             this.addSlot(new CustomSlot(this, this.inventory, INPUT_SLOTS_START+3, 89, 26))
         };
 
-        this.addPlayerSlots(playerInventory, 8, 84);
+        this.addStandardInventorySlots(playerInventory, 8, 84);
 
-        this.addProperties(this.propertyDelegate);
+        this.addDataSlots(this.propertyDelegate);
     }
 
     private int getSlotWithIngredient(Ingredient ingredient) {
         for (int i = 0; i < slots.size(); i++) {
-            if (Ingredient.matches(Optional.of(ingredient), this.slots.get(i).getStack())) {
+            if (Ingredient.testOptionalIngredient(Optional.of(ingredient), this.slots.get(i).getItem())) {
                 return i;
             }
         }
@@ -117,7 +114,7 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
     private int[] getSlotsWithIngredient(Ingredient ingredient) {
         var matches = new ArrayList<Integer>();
         for (int i = INVENTORY_SLOTS_START; i < slots.size(); i++) {
-            if (Ingredient.matches(Optional.of(ingredient), this.slots.get(i).getStack())) {
+            if (Ingredient.testOptionalIngredient(Optional.of(ingredient), this.slots.get(i).getItem())) {
                 matches.add(i);
             }
         }
@@ -125,47 +122,47 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
     }
 
     @Override
-    public PostFillAction fillInputSlots(boolean craftAll, boolean creative, RecipeEntry<?> recipeEntry, ServerWorld world, PlayerInventory inventory) {
+    public PostPlaceAction handlePlacement(boolean craftAll, boolean creative, RecipeHolder<?> recipeEntry, ServerLevel world, Inventory inventory) {
         var recipe = (CookingPotRecipe)recipeEntry.value();
 
         // Clear stuff
         // If we can't clear, don't show ghost recipe
-        this.quickMove(player, CONTAINER_SLOT);
+        this.quickMoveStack(player, CONTAINER_SLOT);
         for (int i = INPUT_SLOTS_START; i <= INPUT_SLOTS_END; i++) {
-            if (this.slots.get(i).getStack().isEmpty()) {
+            if (this.slots.get(i).getItem().isEmpty()) {
                 continue;
             }
-            if (this.quickMove(player, i).isEmpty()) {
-                return AbstractRecipeScreenHandler.PostFillAction.NOTHING;
+            if (this.quickMoveStack(player, i).isEmpty()) {
+                return RecipeBookMenu.PostPlaceAction.NOTHING;
             }
         }
 
         var outputSlot = getSlot(OUTPUT_SLOT);
-        if (!outputSlot.getStack().isEmpty() && !outputSlot.getStack().isOf(recipe.result.getItem())) {
-            this.quickMove(player, OUTPUT_SLOT);
+        if (!outputSlot.getItem().isEmpty() && !outputSlot.getItem().is(recipe.result.getItem())) {
+            this.quickMoveStack(player, OUTPUT_SLOT);
         }
 
-        var bottleSlot = getSlotWithIngredient(Ingredient.ofItem(Items.GLASS_BOTTLE));
-        var bowlSlot = getSlotWithIngredient(Ingredient.ofItem(Items.BOWL));
+        var bottleSlot = getSlotWithIngredient(Ingredient.of(Items.GLASS_BOTTLE));
+        var bowlSlot = getSlotWithIngredient(Ingredient.of(Items.BOWL));
         var ingredientSlots = new int[recipe.ingredients.size()];
-        
+
         for (int j = 0; j < recipe.ingredients.size(); j++) {
             ingredientSlots[j] = getSlotWithIngredient(recipe.ingredients.get(j));
         }
 
         if ((recipe.requiresBottle && bottleSlot == -1) || (recipe.requiresBowl && bowlSlot == -1) || Arrays.stream(ingredientSlots).anyMatch(x -> x == -1)) {
-            return AbstractRecipeScreenHandler.PostFillAction.PLACE_GHOST_RECIPE;
+            return RecipeBookMenu.PostPlaceAction.PLACE_GHOST_RECIPE;
         }
         else {
             // Surely theres a better way
             if (recipe.requiresBottle) {
-                for (int slot : getSlotsWithIngredient(Ingredient.ofItem(Items.GLASS_BOTTLE))) {
-                    this.insertItem(this.slots.get(slot).getStack(), CONTAINER_SLOT, CONTAINER_SLOT + 1, false);
+                for (int slot : getSlotsWithIngredient(Ingredient.of(Items.GLASS_BOTTLE))) {
+                    this.moveItemStackTo(this.slots.get(slot).getItem(), CONTAINER_SLOT, CONTAINER_SLOT + 1, false);
                 }
             }
             if (recipe.requiresBowl) {
-                for (int slot : getSlotsWithIngredient(Ingredient.ofItem(Items.BOWL))) {
-                    this.insertItem(this.slots.get(slot).getStack(), CONTAINER_SLOT, CONTAINER_SLOT + 1, false);
+                for (int slot : getSlotsWithIngredient(Ingredient.of(Items.BOWL))) {
+                    this.moveItemStackTo(this.slots.get(slot).getItem(), CONTAINER_SLOT, CONTAINER_SLOT + 1, false);
                 }
             }
 
@@ -178,7 +175,7 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
                 var slots = getSlotsWithIngredient(ingredient);
                 var end = start + (int)(long)count;
                 for (int slot : slots) {
-                    this.insertItem(this.slots.get(slot).getStack(), start, end, false);
+                    this.moveItemStackTo(this.slots.get(slot).getItem(), start, end, false);
                 }
                 if (count > 1) {
                     // Equalize them
@@ -188,20 +185,20 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
                 start = end;
             }
 
-            return AbstractRecipeScreenHandler.PostFillAction.NOTHING;
+            return RecipeBookMenu.PostPlaceAction.NOTHING;
         }
     }
 
     public static void equalizeStacks(List<Slot> slots) {
-        var totalItems = slots.stream().mapToInt(slot -> slot.getStack().getCount()).sum();
+        var totalItems = slots.stream().mapToInt(slot -> slot.getItem().getCount()).sum();
         var numStacks = slots.size();
         var itemsPerStack = totalItems / numStacks;
         var remainder = totalItems % numStacks;
-        var item = slots.get(0).getStack().getItem();
+        var item = slots.get(0).getItem().getItem();
 
         for (int i = 0; i < numStacks; i++) {
             int count = itemsPerStack + (i < remainder ? 1 : 0);
-            slots.get(i).setStack(new ItemStack(item, count));
+            slots.get(i).setByPlayer(new ItemStack(item, count));
         }
     }
 
@@ -210,79 +207,79 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
     }
 
     public float getFuelProgress() {
-        return (float)this.propertyDelegate.get(0) / (float)this.propertyDelegate.get(1); 
+        return (float)this.propertyDelegate.get(0) / (float)this.propertyDelegate.get(1);
     }
 
     public float getCookProgress() {
-        return 1f - ((float)this.propertyDelegate.get(2) / (float)this.propertyDelegate.get(3)); 
+        return 1f - ((float)this.propertyDelegate.get(2) / (float)this.propertyDelegate.get(3));
     }
 
     @Override
-    public RecipeBookType getCategory() {
+    public RecipeBookType getRecipeBookType() {
         return RecipeBookType.CRAFTING; // Return crafting because making a RecipeBookType is impossible.
     }
 
     @Override
-    public void populateRecipeFinder(RecipeFinder finder) {
-        if (this.inventory instanceof RecipeInputProvider recipeInputProvider) {
-            recipeInputProvider.provideRecipeInputs(finder);
+    public void fillCraftSlotsStackedContents(StackedItemContents finder) {
+        if (this.inventory instanceof StackedContentsCompatible recipeInputProvider) {
+            recipeInputProvider.fillStackedContents(finder);
         }
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return canUse(this.context, player, CanadaBlocks.COOKING_POT);
+    public boolean stillValid(Player player) {
+        return stillValid(this.context, player, CanadaBlocks.COOKING_POT);
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slot) {
+    public ItemStack quickMoveStack(Player player, int slot) {
         ItemStack itemStack = ItemStack.EMPTY;
         Slot slotAtIndex = this.slots.get(slot);
-        if (slotAtIndex != null && slotAtIndex.hasStack() && slotAtIndex.canTakeItems(player)) {
-            ItemStack itemStackAtIndex = slotAtIndex.getStack();
+        if (slotAtIndex != null && slotAtIndex.hasItem() && slotAtIndex.mayPickup(player)) {
+            ItemStack itemStackAtIndex = slotAtIndex.getItem();
             itemStack = itemStackAtIndex.copy();
             if (slot == OUTPUT_SLOT) {
-                itemStackAtIndex.getItem().onCraftByPlayer(itemStackAtIndex, player);
-                if (!this.insertItem(itemStackAtIndex, INVENTORY_SLOTS_START, HOTBAR_SLOTS_END, true)) {
+                itemStackAtIndex.getItem().onCraftedBy(itemStackAtIndex, player);
+                if (!this.moveItemStackTo(itemStackAtIndex, INVENTORY_SLOTS_START, HOTBAR_SLOTS_END, true)) {
                     return ItemStack.EMPTY;
                 }
 
-                slotAtIndex.onQuickTransfer(itemStackAtIndex, itemStack);
+                slotAtIndex.onQuickCraft(itemStackAtIndex, itemStack);
             } else if (slot >= INVENTORY_SLOTS_START && slot < HOTBAR_SLOTS_END) {
                 if (isContainer(itemStackAtIndex)) {
-                    this.insertItem(itemStackAtIndex, CONTAINER_SLOT, CONTAINER_SLOT + 1, false);
+                    this.moveItemStackTo(itemStackAtIndex, CONTAINER_SLOT, CONTAINER_SLOT + 1, false);
                 }
                 else if (isFuel(itemStackAtIndex)) {
-                    this.insertItem(itemStackAtIndex, FUEL_SLOT, FUEL_SLOT + 1, false);
+                    this.moveItemStackTo(itemStackAtIndex, FUEL_SLOT, FUEL_SLOT + 1, false);
                 }
                 else {
-                    if (!this.insertItem(itemStackAtIndex, INPUT_SLOTS_START, INVENTORY_SLOTS_START, false)) {
+                    if (!this.moveItemStackTo(itemStackAtIndex, INPUT_SLOTS_START, INVENTORY_SLOTS_START, false)) {
                         if (slot < HOTBAR_SLOTS_START) {
-                            if (!this.insertItem(itemStackAtIndex, HOTBAR_SLOTS_START, HOTBAR_SLOTS_END, false)) {
+                            if (!this.moveItemStackTo(itemStackAtIndex, HOTBAR_SLOTS_START, HOTBAR_SLOTS_END, false)) {
                                 return ItemStack.EMPTY;
                             }
-                        } else if (!this.insertItem(itemStackAtIndex, INVENTORY_SLOTS_START, HOTBAR_SLOTS_START, false)) {
+                        } else if (!this.moveItemStackTo(itemStackAtIndex, INVENTORY_SLOTS_START, HOTBAR_SLOTS_START, false)) {
                             return ItemStack.EMPTY;
                         }
                     }
                 }
-            } else if (!this.insertItem(itemStackAtIndex, INVENTORY_SLOTS_START, HOTBAR_SLOTS_END, false)) {
+            } else if (!this.moveItemStackTo(itemStackAtIndex, INVENTORY_SLOTS_START, HOTBAR_SLOTS_END, false)) {
                 return ItemStack.EMPTY;
             }
 
             if (itemStackAtIndex.isEmpty()) {
-                slotAtIndex.setStack(ItemStack.EMPTY);
+                slotAtIndex.setByPlayer(ItemStack.EMPTY);
             } else {
-                slotAtIndex.markDirty();
+                slotAtIndex.setChanged();
             }
 
             if (itemStackAtIndex.getCount() == itemStack.getCount()) {
                 return ItemStack.EMPTY;
             }
 
-            slotAtIndex.onTakeItem(player, itemStackAtIndex);
+            slotAtIndex.onTake(player, itemStackAtIndex);
             if (slot == OUTPUT_SLOT) {
-                player.dropItem(itemStackAtIndex, false);
+                player.drop(itemStackAtIndex, false);
             }
         }
 
@@ -290,24 +287,24 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
     }
 
     public boolean isFuel(ItemStack item) {
-        return this.player.getWorld().getFuelRegistry().isFuel(item);
+        return this.player.level().fuelValues().isFuel(item);
     }
 
     public static boolean isContainer(ItemStack item) {
-        return item.isOf(Items.BOWL) || item.isOf(Items.GLASS_BOTTLE);
+        return item.is(Items.BOWL) || item.is(Items.GLASS_BOTTLE);
     }
 
-    private class CookingPotSimpleInventory extends SimpleInventory implements RecipeInputInventory {
-        private ScreenHandler _screen;
+    private class CookingPotSimpleInventory extends SimpleContainer implements CraftingContainer {
+        private AbstractContainerMenu _screen;
 
         CookingPotSimpleInventory(CookingPotScreenHandler screen, int size) {
             super(size);
             _screen = screen;
         }
 
-        public void markDirty() {
-            _screen.onContentChanged(this);
-            super.markDirty();
+        public void setChanged() {
+            _screen.slotsChanged(this);
+            super.setChanged();
         }
 
         @Override
@@ -323,53 +320,53 @@ public class CookingPotScreenHandler extends AbstractRecipeScreenHandler {
 
     private class CustomSlot extends Slot {
         protected CookingPotScreenHandler _handler;
-        public CustomSlot(CookingPotScreenHandler handler, Inventory inventory, int index, int x, int y) {
+        public CustomSlot(CookingPotScreenHandler handler, Container inventory, int index, int x, int y) {
             super(inventory, index, x, y);
             _handler = handler;
         }
 
         @Override
-        public void markDirty() {
-            super.markDirty();
-            _handler.onContentChanged(_handler.inventory);
-            _handler.inventory.markDirty();
+        public void setChanged() {
+            super.setChanged();
+            _handler.slotsChanged(_handler.inventory);
+            _handler.inventory.setChanged();
         }
 
         @Override
-        public boolean canInsert(ItemStack stack) {
+        public boolean mayPlace(ItemStack stack) {
             return !_handler.isContainer(stack);
         }
     }
 
     private class ContainerSlot extends CustomSlot {
-        public ContainerSlot(CookingPotScreenHandler handler, Inventory inventory, int index, int x, int y) {
+        public ContainerSlot(CookingPotScreenHandler handler, Container inventory, int index, int x, int y) {
             super(handler, inventory, index, x, y);
         }
 
         @Override
-        public boolean canInsert(ItemStack stack) {
+        public boolean mayPlace(ItemStack stack) {
             return _handler.isContainer(stack);
         }
     }
 
     private class OutputSlot extends CustomSlot {
-        public OutputSlot(CookingPotScreenHandler handler, Inventory inventory, int index, int x, int y) {
+        public OutputSlot(CookingPotScreenHandler handler, Container inventory, int index, int x, int y) {
             super(handler, inventory, index, x, y);
         }
 
         @Override
-        public boolean canInsert(ItemStack stack) {
+        public boolean mayPlace(ItemStack stack) {
             return false;
         }
     }
 
     private class FuelSlot extends CustomSlot {
-        public FuelSlot(CookingPotScreenHandler handler, Inventory inventory, int index, int x, int y) {
+        public FuelSlot(CookingPotScreenHandler handler, Container inventory, int index, int x, int y) {
             super(handler, inventory, index, x, y);
         }
 
         @Override
-        public boolean canInsert(ItemStack stack) {
+        public boolean mayPlace(ItemStack stack) {
             return _handler.isFuel(stack);
         }
     }

@@ -1,92 +1,90 @@
 package xen42.canadamod.entities;
 
 import java.util.UUID;
-
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.TimeUtil;
+import net.minecraft.util.valueproviders.UniformInt;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.BreedGoal;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.FollowParentGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.OcelotAttackGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
+import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.ai.goal.ActiveTargetGoal;
-import net.minecraft.entity.ai.goal.AnimalMateGoal;
-import net.minecraft.entity.ai.goal.AttackGoal;
-import net.minecraft.entity.ai.goal.EscapeDangerGoal;
-import net.minecraft.entity.ai.goal.FollowParentGoal;
-import net.minecraft.entity.ai.goal.HorseBondWithPlayerGoal;
-import net.minecraft.entity.ai.goal.LookAroundGoal;
-import net.minecraft.entity.ai.goal.LookAtEntityGoal;
-import net.minecraft.entity.ai.goal.RevengeGoal;
-import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.ai.goal.TemptGoal;
-import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
-import net.minecraft.entity.ai.pathing.MobNavigation;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedData;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.Angerable;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.mob.Monster;
-import net.minecraft.entity.passive.AbstractHorseEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.registry.tag.FluidTags;
-import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TimeHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.intprovider.UniformIntProvider;
-import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
 import xen42.canadamod.CanadaItems;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.CanadaSounds;
 
-public class MooseEntity extends AbstractHorseEntity implements Angerable {
-    private static final TrackedData<Boolean> LEFT_ANTLER_MISSING = DataTracker.registerData(MooseEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<Boolean> RIGHT_ANTLER_MISSING = DataTracker.registerData(MooseEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+public class MooseEntity extends AbstractHorse implements NeutralMob {
+    private static final EntityDataAccessor<Boolean> LEFT_ANTLER_MISSING = SynchedEntityData.defineId(MooseEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> RIGHT_ANTLER_MISSING = SynchedEntityData.defineId(MooseEntity.class, EntityDataSerializers.BOOLEAN);
 
-	public static final TrackedData<Boolean> DASHING = DataTracker.registerData(MooseEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+	public static final EntityDataAccessor<Boolean> DASHING = SynchedEntityData.defineId(MooseEntity.class, EntityDataSerializers.BOOLEAN);
 
     public int dashCooldown;
 
     public final AnimationState attackAnimationState;
     private int attackAnimationEnd;
 
-    public MooseEntity(EntityType<? extends AbstractHorseEntity> entityType, World world) {
+    public MooseEntity(EntityType<? extends AbstractHorse> entityType, Level world) {
         super(entityType, world);
-        var mobNavigation = (MobNavigation)this.getNavigation();
-        mobNavigation.setCanSwim(true);
+        var mobNavigation = (GroundPathNavigation)this.getNavigation();
+        mobNavigation.setCanFloat(true);
         mobNavigation.setCanWalkOverFences(true);
         attackAnimationState = new AnimationState();
     }
 
-    private static final EntityDimensions BABY_BASE_DIMENSIONS = CanadaMod.MOOSE_ENTITY.getDimensions().scaled(0.5F).withEyeHeight(0.665F);
+    private static final EntityDimensions BABY_BASE_DIMENSIONS = CanadaMod.MOOSE_ENTITY.getDimensions().scale(0.5F).withEyeHeight(0.665F);
 
     @Override
-    protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
-		builder.add(LEFT_ANTLER_MISSING, false);
-		builder.add(RIGHT_ANTLER_MISSING, false);
-		builder.add(DASHING, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+		builder.define(LEFT_ANTLER_MISSING, false);
+		builder.define(RIGHT_ANTLER_MISSING, false);
+		builder.define(DASHING, false);
     }
 
     @Override
@@ -105,49 +103,49 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
     }
 
     public boolean isLeftAntlerMissing() {
-        return this.getDataTracker().get(LEFT_ANTLER_MISSING);
+        return this.getEntityData().get(LEFT_ANTLER_MISSING);
     }
 
     public boolean isRightAntlerMissing() {
-        return this.getDataTracker().get(RIGHT_ANTLER_MISSING);
+        return this.getEntityData().get(RIGHT_ANTLER_MISSING);
     }
 
-    protected void initGoals() {
-        this.goalSelector.add(0, new SwimGoal(this));
-        this.goalSelector.add(1, new AttackGoal(this));
-        this.goalSelector.add(1, new EscapeDangerGoal(this, 2.0D, moose -> moose.isBaby() ? DamageTypeTags.PANIC_CAUSES : DamageTypeTags.PANIC_ENVIRONMENTAL_CAUSES));
-        this.goalSelector.add(2, new AnimalMateGoal(this, 1.0D));
-        this.goalSelector.add(3, new HorseBondWithPlayerGoal(this, 1.2));
-        this.goalSelector.add(4, new TemptGoal(this, 1.2D, stack -> this.isBreedingItem(stack), false));
-        this.goalSelector.add(5, new FollowParentGoal(this, 1.1D));
-        this.goalSelector.add(6, new WanderAroundFarGoal(this, 1.0D));
-        this.goalSelector.add(7, new LookAtEntityGoal(this, PlayerEntity.class, 6.0F));
-        this.goalSelector.add(8, new LookAroundGoal(this));
+    protected void registerGoals() {
+        this.goalSelector.addGoal(0, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new OcelotAttackGoal(this));
+        this.goalSelector.addGoal(1, new PanicGoal(this, 2.0D, moose -> moose.isBaby() ? DamageTypeTags.PANIC_CAUSES : DamageTypeTags.PANIC_ENVIRONMENTAL_CAUSES));
+        this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
+        this.goalSelector.addGoal(3, new RunAroundLikeCrazyGoal(this, 1.2));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.2D, stack -> this.isFood(stack), false));
+        this.goalSelector.addGoal(5, new FollowParentGoal(this, 1.1D));
+        this.goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 1.0D));
+        this.goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 6.0F));
+        this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
 
-        this.targetSelector.add(1, new RevengeGoal(this, new Class[0]).setGroupRevenge(new Class[0]));
-        this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, 10, true, false, this::shouldAngerAt));
+        this.targetSelector.addGoal(1, new HurtByTargetGoal(this, new Class[0]).setAlertOthers(new Class[0]));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, this::isAngryAt));
     }
 
-    public static DefaultAttributeContainer.Builder createMooseAttributes() {
-        return AnimalEntity.createAnimalAttributes().add(EntityAttributes.MAX_HEALTH, 25.0f).add(EntityAttributes.MOVEMENT_SPEED, 0.25f)
-            .add(EntityAttributes.WATER_MOVEMENT_EFFICIENCY, 2f)
-            .add(EntityAttributes.ATTACK_DAMAGE, 3.0D)
-            .add(EntityAttributes.OXYGEN_BONUS)
-            .add(EntityAttributes.JUMP_STRENGTH, 0.6D)
-            .add(EntityAttributes.STEP_HEIGHT, 1.5D)
-            .add(EntityAttributes.FOLLOW_RANGE, 20.0D);
+    public static AttributeSupplier.Builder createMooseAttributes() {
+        return Animal.createAnimalAttributes().add(Attributes.MAX_HEALTH, 25.0f).add(Attributes.MOVEMENT_SPEED, 0.25f)
+            .add(Attributes.WATER_MOVEMENT_EFFICIENCY, 2f)
+            .add(Attributes.ATTACK_DAMAGE, 3.0D)
+            .add(Attributes.OXYGEN_BONUS)
+            .add(Attributes.JUMP_STRENGTH, 0.6D)
+            .add(Attributes.STEP_HEIGHT, 1.5D)
+            .add(Attributes.FOLLOW_RANGE, 20.0D);
     }
 
     public void updateAnimations() {
-        if (attackAnimationState.isRunning() && age > attackAnimationEnd) {
+        if (attackAnimationState.isStarted() && tickCount > attackAnimationEnd) {
             attackAnimationState.stop();
         }
     }
 
     @Override
-    public void mobTick(ServerWorld world) {
-        super.mobTick(world);
-        tickAngerLogic(world, true);
+    public void customServerAiStep(ServerLevel world) {
+        super.customServerAiStep(world);
+        updatePersistentAnger(world, true);
         tryRegenAntler(true, false);
         tryRegenAntler(false, false);
         tryShedAntler(true, false);
@@ -157,8 +155,8 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
     private boolean wasSprinting = false;
 
     @Override
-    protected void tickControlled(PlayerEntity controllingPlayer, Vec3d movementInput) {
-        super.tickControlled(controllingPlayer, movementInput);
+    protected void tickRidden(Player controllingPlayer, Vec3 movementInput) {
+        super.tickRidden(controllingPlayer, movementInput);
 
         if (controllingPlayer.isSprinting() && !wasSprinting && this.dashCooldown <= 0) {
             this.dashCooldown = 20;
@@ -168,8 +166,8 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
     }
 
     @Override
-    public boolean canSprintAsVehicle() {
-        return true; 
+    public boolean canSprint() {
+        return true;
     }
 
     @Override
@@ -178,18 +176,18 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
         updateAnimations();
 
         if(this.isDashing()) {
-            var dir = this.getControllingPassenger() == null ? this.getRotationVec(1.0F) : this.getControllingPassenger().getRotationVec(1.0F);
+            var dir = this.getControllingPassenger() == null ? this.getViewVector(1.0F) : this.getControllingPassenger().getViewVector(1.0F);
             var forward = dir.normalize();
-            this.setVelocity(forward.x * 1.5, this.getVelocity().y, forward.z * 1.5);
+            this.setDeltaMovement(forward.x * 1.5, this.getDeltaMovement().y, forward.z * 1.5);
 
-            var list = getWorld().getEntitiesByClass(LivingEntity.class, getBoundingBox().expand(2f).stretch(forward.multiply(2f)), 
-                (entity) -> entity instanceof Monster || entity instanceof PlayerEntity);
-            
+            var list = level().getEntitiesOfClass(LivingEntity.class, getBoundingBox().inflate(2f).expandTowards(forward.scale(2f)),
+                (entity) -> entity instanceof Enemy || entity instanceof Player);
+
             for (LivingEntity livingEntity : list) {
                 knockBack(livingEntity);
             }
 
-            this.playAngrySound();
+            this.makeMad();
         }
 
         if (this.isDashing() && this.dashCooldown < 15) {
@@ -199,22 +197,22 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
         if (this.dashCooldown > 0) {
 			this.dashCooldown--;
 			if (this.dashCooldown == 0) {
-				this.getWorld().playSound(null, this.getBlockPos(), SoundEvents.ENTITY_CAMEL_DASH_READY, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+				this.level().playSound(null, this.blockPosition(), SoundEvents.CAMEL_DASH_READY, SoundSource.NEUTRAL, 1.0F, 1.0F);
 			}
 		}
     }
 
     public boolean isDashing() {
-		return this.dataTracker.get(DASHING);
+		return this.entityData.get(DASHING);
 	}
 
 	public void setDashing(boolean dashing) {
-		this.dataTracker.set(DASHING, dashing);
+		this.entityData.set(DASHING, dashing);
         this.playJumpSound();
 	}
 
     @Override
-    public boolean isAngry() {
+    public boolean isStanding() {
         // This is horse anger not attacking anger which we override
         return false;
     }
@@ -223,27 +221,27 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
         if (left ? this.isLeftAntlerMissing() : this.isRightAntlerMissing()) {
             // Average length 5 minutes to regen antlers
             if (force || this.random.nextFloat() < 1f / (float)(5 * 60 * 20)) {
-                this.getDataTracker().set(left ? LEFT_ANTLER_MISSING : RIGHT_ANTLER_MISSING, false);
+                this.getEntityData().set(left ? LEFT_ANTLER_MISSING : RIGHT_ANTLER_MISSING, false);
                 this.playSound(CanadaSounds.SOUND_MOOSE_GROW_ANTLER, 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2f + 1.0f);
             }
         }
     }
 
     private void tryShedAntler(boolean left, boolean force) {
-        if (this.getWorld().isClient()) {
+        if (this.level().isClientSide()) {
             return;
         }
 
         // Average length 20 minutes to shed antlers
         if (force || this.random.nextFloat() < 1f / (float)(20 * 60 * 20)) {
             if (left ? !this.isLeftAntlerMissing() : !this.isRightAntlerMissing()) {
-                var yaw = (float)(this.bodyYaw * (Math.PI / 180));
-                var offset = new Vec3d(left ? 0.4f : -0.4f, 0f, -1.5f);
-                var antlerPos = new Vec3d(this.getX(), this.getEyeY(), this.getZ()).add(offset.rotateY(yaw));
+                var yaw = (float)(this.yBodyRot * (Math.PI / 180));
+                var offset = new Vec3(left ? 0.4f : -0.4f, 0f, -1.5f);
+                var antlerPos = new Vec3(this.getX(), this.getEyeY(), this.getZ()).add(offset.yRot(yaw));
 
-                var item = this.dropItem((ServerWorld)this.getWorld(), CanadaItems.ANTLERS);
-                item.setPosition(antlerPos);
-                this.getDataTracker().set(left ? LEFT_ANTLER_MISSING : RIGHT_ANTLER_MISSING, true);
+                var item = this.spawnAtLocation((ServerLevel)this.level(), CanadaItems.ANTLERS);
+                item.setPos(antlerPos);
+                this.getEntityData().set(left ? LEFT_ANTLER_MISSING : RIGHT_ANTLER_MISSING, true);
 
                 this.playSound(CanadaSounds.SOUND_MOOSE_STRIP_ANTLER, 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2f + 1.0f);
             }
@@ -251,135 +249,135 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
     }
 
     private void knockBack(Entity entity) {
-        if (this.getWorld() instanceof ServerWorld serverWorld) {
+        if (this.level() instanceof ServerLevel serverWorld) {
             double d = entity.getX() - getX();
             double e = entity.getZ() - getZ();
             double f = Math.max(d * d + e * e, 0.001D);
-            entity.addVelocity(d / f * 5.0D, 0.2D, e / f * 5.0D);
-            entity.damage(serverWorld, getDamageSources().mobAttack(this.getControllingPassenger() == null ? this : this.getControllingPassenger()), 2);
+            entity.push(d / f * 5.0D, 0.2D, e / f * 5.0D);
+            entity.hurtServer(serverWorld, damageSources().mobAttack(this.getControllingPassenger() == null ? this : this.getControllingPassenger()), 2);
         }
     }
 
     @Override
-    public boolean isBreedingItem(ItemStack stack) {
-        return stack.isOf(Items.SEAGRASS) || stack.isIn(ItemTags.LEAVES);
+    public boolean isFood(ItemStack stack) {
+        return stack.is(Items.SEAGRASS) || stack.is(ItemTags.LEAVES);
     }
 
     @Override
-    public boolean canBreedWith(AnimalEntity other) { 
+    public boolean canMate(Animal other) {
         if (other != this && other instanceof MooseEntity otherMoose) {
-            return canBreed() && otherMoose.canBreed();
-        } 
+            return canParent() && otherMoose.canParent();
+        }
         return false;
     }
 
     @Override
-    protected boolean canBreed() {
-        return !this.hasPassengers() && !this.hasVehicle() && !this.isBaby() && this.getHealth() >= this.getMaxHealth() && this.isInLove();
+    protected boolean canParent() {
+        return !this.isVehicle() && !this.isPassenger() && !this.isBaby() && this.getHealth() >= this.getMaxHealth() && this.isInLove();
     }
 
     @Override
-    public PassiveEntity createChild(ServerWorld world, PassiveEntity entity) {
-        return (MooseEntity)CanadaMod.MOOSE_ENTITY.create(world, SpawnReason.BREEDING);
+    public AgeableMob getBreedOffspring(ServerLevel world, AgeableMob entity) {
+        return (MooseEntity)CanadaMod.MOOSE_ENTITY.create(world, EntitySpawnReason.BREEDING);
     }
 
     @Override
-    public EntityDimensions getBaseDimensions(EntityPose pose) {
-        return isBaby() ? BABY_BASE_DIMENSIONS : super.getBaseDimensions(pose);
+    public EntityDimensions getDefaultDimensions(Pose pose) {
+        return isBaby() ? BABY_BASE_DIMENSIONS : super.getDefaultDimensions(pose);
     }
 
     @Override
-    public void tickMovement() {
+    public void aiStep() {
         if (this.getControllingPassenger() != null) {
-            if (this.isSubmergedInWater()) {
-                this.swimUpward(FluidTags.WATER);
+            if (this.isUnderWater()) {
+                this.jumpInLiquid(FluidTags.WATER);
             }
-            if ((this.isTouchingWater() && this.jumping)) {
-                this.setVelocity(this.getVelocity().x, 0.5, this.getVelocity().z);
+            if ((this.isInWater() && this.allowStandSliding)) {
+                this.setDeltaMovement(this.getDeltaMovement().x, 0.5, this.getDeltaMovement().z);
             }
         }
-        super.tickMovement();
+        super.aiStep();
     }
 
     @Override
-    public int addTemper(int difference) {
+    public int modifyTemper(int difference) {
         if (difference > 0) {
             this.playAttackAnimation();
         }
-        return super.addTemper(difference);
+        return super.modifyTemper(difference);
     }
 
     @Override
-    public ActionResult interactMob(PlayerEntity player, Hand hand) { 
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
         // If the moose wants to kill something it should not let u do anything
         if (attacking != null || this.attackingPlayer != null || this.getTarget() != null) {
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
-        var itemStack = player.getStackInHand(hand);
+        var itemStack = player.getItemInHand(hand);
 
         // No idea why but its using the wrong hand here
-        var mainHandStack = player.getStackInHand(Hand.MAIN_HAND);
-        if (isBreedingItem(mainHandStack)) {
-            hand = Hand.MAIN_HAND;
+        var mainHandStack = player.getItemInHand(InteractionHand.MAIN_HAND);
+        if (isFood(mainHandStack)) {
+            hand = InteractionHand.MAIN_HAND;
             itemStack = mainHandStack;
         }
-        var offHandStack = player.getStackInHand(Hand.OFF_HAND);
-        if (isBreedingItem(offHandStack)) {
-            hand = Hand.OFF_HAND;
+        var offHandStack = player.getItemInHand(InteractionHand.OFF_HAND);
+        if (isFood(offHandStack)) {
+            hand = InteractionHand.OFF_HAND;
             itemStack = offHandStack;
         }
 
-        var isBreedingItem = isBreedingItem(itemStack);
+        var isBreedingItem = isFood(itemStack);
 
         var canBreed = this.getHealth() == this.getMaxHealth() && !this.isLeftAntlerMissing() && !this.isRightAntlerMissing() && !isBaby();
 
         // does healing interaction stuff
         if (isBreedingItem) {
             if (!canBreed) {
-                return interactHorse(player, itemStack);
+                return fedFood(player, itemStack);
             }
             // does breeding
-            else if (this.getBreedingAge() == 0 && this.canEat()) {
-                this.setLoveTicks(600);
+            else if (this.getAge() == 0 && this.canFallInLove()) {
+                this.setInLoveTime(600);
 
-                if (!this.getWorld().isClient ) {
-                    this.eat(player, hand, itemStack);
-                    this.lovePlayer(player);
-                    this.playEatSound();
-                    return ActionResult.SUCCESS_SERVER;
+                if (!this.level().isClientSide ) {
+                    this.usePlayerItem(player, hand, itemStack);
+                    this.setInLove(player);
+                    this.playEatingSound();
+                    return InteractionResult.SUCCESS_SERVER;
                 }
 
-                if (this.getWorld().isClient) {
-                    return ActionResult.CONSUME;
+                if (this.level().isClientSide) {
+                    return InteractionResult.CONSUME;
                 }
             }
         }
 
         // If not giving food, make untame guy angry and refuse ur item
-        if (!isBreedingItem && !itemStack.isEmpty() && !this.isTame()) {
-            this.playAngrySound();
-            return ActionResult.SUCCESS;
+        if (!isBreedingItem && !itemStack.isEmpty() && !this.isTamed()) {
+            this.makeMad();
+            return InteractionResult.SUCCESS;
         }
 
         // Not hungry
         if (isBreedingItem) {
-            return ActionResult.FAIL;
+            return InteractionResult.FAIL;
         }
 
         // Does saddling and stuff
-        return super.interactMob(player, hand);
+        return super.mobInteract(player, hand);
     }
 
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
-        super.dropEquipment(world, source, causedByPlayer);
-        Entity entity = source.getAttacker();
-        if (entity instanceof CreeperEntity creeperEntity) {
-            if (creeperEntity.shouldDropHead()) {
+    protected void dropCustomDeathLoot(ServerLevel world, DamageSource source, boolean causedByPlayer) {
+        super.dropCustomDeathLoot(world, source, causedByPlayer);
+        Entity entity = source.getEntity();
+        if (entity instanceof Creeper creeperEntity) {
+            if (creeperEntity.canDropMobsSkull()) {
                 ItemStack itemStack = this.getSkull();
                 if (!itemStack.isEmpty()) {
-                    creeperEntity.onHeadDropped();
-                    this.dropStack(world, itemStack);
+                    creeperEntity.increaseDroppedSkulls();
+                    this.spawnAtLocation(world, itemStack);
                 }
             }
         }
@@ -391,8 +389,8 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
     }
 
     @Override
-    protected boolean receiveFood(PlayerEntity player, ItemStack item) {
-        if (!isBreedingItem(item)) {
+    protected boolean handleEating(Player player, ItemStack item) {
+        if (!isFood(item)) {
             return false;
         }
 
@@ -410,26 +408,26 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
 
         boolean isBaby = isBaby();
         if (isBaby) {
-            getWorld().addParticleClient((ParticleEffect)ParticleTypes.HAPPY_VILLAGER, getParticleX(1.0D), getRandomBodyY() + 0.5D, getParticleZ(1.0D), 0.0D, 0.0D, 0.0D);
-            if (!(getWorld()).isClient) {
-                growUp(10);
+            level().addParticle((ParticleOptions)ParticleTypes.HAPPY_VILLAGER, getRandomX(1.0D), getRandomY() + 0.5D, getRandomZ(1.0D), 0.0D, 0.0D, 0.0D);
+            if (!(level()).isClientSide) {
+                ageUp(10);
             }
         }
 
-        boolean canLove = (getBreedingAge() == 0 && canEat());
+        boolean canLove = (getAge() == 0 && canFallInLove());
         if (canLove) {
-            lovePlayer(player);
+            setInLove(player);
         }
 
         if (isHurt || canLove || isBaby) {
             if (!isSilent()) {
-                SoundEvent soundEvent = getEatSound();
+                SoundEvent soundEvent = getEatingSound();
                 if (soundEvent != null) {
-                    getWorld().playSound(null, getX(), getY(), getZ(), soundEvent, getSoundCategory(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
+                    level().playSound(null, getX(), getY(), getZ(), soundEvent, getSoundSource(), 1.0F, 1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
                 }
             }
 
-            emitGameEvent(GameEvent.EAT);
+            gameEvent(GameEvent.EAT);
             return true;
         }
 
@@ -442,34 +440,34 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
     }
 
     @Override
-    public void playAngrySound() {
-        this.playSound(this.getAngrySound());
+    public void makeMad() {
+        this.makeSound(this.getAngrySound());
     }
 
     @Override
-    public boolean isTame() {
-        return super.isTame() && attacking == null;
+    public boolean isTamed() {
+        return super.isTamed() && attacking == null;
     }
 
     @Override
-    public void onAttacking(Entity target) {
-        super.onAttacking(target);
+    public void setLastHurtMob(Entity target) {
+        super.setLastHurtMob(target);
         playAttackAnimation();
     }
 
     @Override
-    public boolean tryAttack(ServerWorld world, Entity target) {
+    public boolean doHurtTarget(ServerLevel world, Entity target) {
         playAttackAnimation();
-        return super.tryAttack(world, target);
+        return super.doHurtTarget(world, target);
     }
 
     private void playAttackAnimation() {
-        attackAnimationState.start(this.age);
-        this.attackAnimationEnd = this.age + 20;
+        attackAnimationState.start(this.tickCount);
+        this.attackAnimationEnd = this.tickCount + 20;
     }
 
-    private static final UniformIntProvider ANGER_TIME_RANGE = TimeHelper.betweenSeconds(20, 39);
-    private int angerTime; 
+    private static final UniformInt ANGER_TIME_RANGE = TimeUtil.rangeOfSeconds(20, 39);
+    private int angerTime;
     @Nullable
     private UUID angryAt;
 
@@ -480,139 +478,139 @@ public class MooseEntity extends AbstractHorseEntity implements Angerable {
     private LivingEntity attacker;
 
     @Nullable
-    private PlayerEntity attackingPlayer;
+    private Player attackingPlayer;
 
     @Override
-    public void setTarget(@Nullable LivingEntity target) {        
-        if (this.isControlledByPlayer()) {
+    public void setTarget(@Nullable LivingEntity target) {
+        if (this.isClientAuthoritative()) {
             return;
         }
 
         if (target == null && target != this.getTarget()) {
-            this.playAngrySound();
+            this.makeMad();
             this.playAttackAnimation();
         }
 
-        if (target instanceof PlayerEntity player) {
+        if (target instanceof Player player) {
             setPlayerTarget(player);
         }
         else if (target == null) {
             setPlayerTarget(null);
         }
-        
+
         super.setTarget(target);
     }
 
-    public void openInventory(PlayerEntity player) {
-        if (!this.getWorld().isClient) {
-            player.openHorseInventory(this, this.items);
+    public void openCustomInventoryScreen(Player player) {
+        if (!this.level().isClientSide) {
+            player.openHorseInventory(this, this.inventory);
         }
     }
 
     @Override
-    public float getScaleFactor() {
+    public float getAgeScale() {
         return isBaby() ? 0.5F : 1.0F;
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        writeAngerToNbt(nbt);
-        nbt.putBoolean("IsLeftAntlerMissing", this.getDataTracker().get(LEFT_ANTLER_MISSING));
-        nbt.putBoolean("IsRightAntlerMissing", this.getDataTracker().get(RIGHT_ANTLER_MISSING));
-        nbt.putBoolean("IsDashing", this.getDataTracker().get(DASHING));
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        addPersistentAngerSaveData(nbt);
+        nbt.putBoolean("IsLeftAntlerMissing", this.getEntityData().get(LEFT_ANTLER_MISSING));
+        nbt.putBoolean("IsRightAntlerMissing", this.getEntityData().get(RIGHT_ANTLER_MISSING));
+        nbt.putBoolean("IsDashing", this.getEntityData().get(DASHING));
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        readAngerFromNbt(getWorld(), nbt);
-        this.getDataTracker().set(LEFT_ANTLER_MISSING, nbt.getBoolean("IsLeftAntlerMissing").orElse(false));
-        this.getDataTracker().set(RIGHT_ANTLER_MISSING, nbt.getBoolean("IsRightAntlerMissing").orElse(false));
-        this.getDataTracker().set(DASHING, nbt.getBoolean("IsDashing").orElse(false));
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
+        readPersistentAngerSaveData(level(), nbt);
+        this.getEntityData().set(LEFT_ANTLER_MISSING, nbt.getBoolean("IsLeftAntlerMissing").orElse(false));
+        this.getEntityData().set(RIGHT_ANTLER_MISSING, nbt.getBoolean("IsRightAntlerMissing").orElse(false));
+        this.getEntityData().set(DASHING, nbt.getBoolean("IsDashing").orElse(false));
     }
 
-    public void setPlayerTarget(@Nullable PlayerEntity attacking) {
+    public void setPlayerTarget(@Nullable Player attacking) {
         this.attackingPlayer = attacking;
-        this.playerHitTimer = this.age;
+        this.lastHurtByPlayerMemoryTime = this.tickCount;
     }
 
     @Override
-    public void setAttacker(@Nullable LivingEntity attacker) {
-        if (this.isControlledByPlayer()) {
+    public void setLastHurtByMob(@Nullable LivingEntity attacker) {
+        if (this.isClientAuthoritative()) {
             return;
         }
 
-        super.setAttacker(attacker);
+        super.setLastHurtByMob(attacker);
         this.attacker = attacker;
         setTarget(attacker);
     }
 
     @Nullable
-    public LivingEntity getAttacker() {
+    public LivingEntity getLastHurtByMob() {
         return this.attacker;
     }
 
     @Override
-    public void chooseRandomAngerTime() {
-        setAngerTime(ANGER_TIME_RANGE.get(this.random));
+    public void startPersistentAngerTimer() {
+        setRemainingPersistentAngerTime(ANGER_TIME_RANGE.sample(this.random));
     }
 
     @Override
-    public boolean damage(ServerWorld world, DamageSource source, float amount) {
-        if (source.getSource() instanceof LivingEntity && this.random.nextBetween(0, 10) == 0) {
+    public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
+        if (source.getDirectEntity() instanceof LivingEntity && this.random.nextIntBetweenInclusive(0, 10) == 0) {
             this.tryShedAntler(this.random.nextBoolean(), true);
         }
-        return super.damage(world, source, amount);
+        return super.hurtServer(world, source, amount);
     }
 
     @Override
-    public void onDamaged(DamageSource damageSource) {
-        if (damageSource.getSource() instanceof LivingEntity entity) {
-            this.setAttacker(entity);
+    public void handleDamageEvent(DamageSource damageSource) {
+        if (damageSource.getDirectEntity() instanceof LivingEntity entity) {
+            this.setLastHurtByMob(entity);
         }
 
-        super.onDamaged(damageSource);
+        super.handleDamageEvent(damageSource);
     }
 
     @Override
-    public void onDeath(DamageSource damageSource) {
-        if (!this.getWorld().isClient() && !this.isBaby()) {
+    public void die(DamageSource damageSource) {
+        if (!this.level().isClientSide() && !this.isBaby()) {
             if (!this.isLeftAntlerMissing()) {
-                var item = this.dropItem((ServerWorld)this.getWorld(), CanadaItems.ANTLERS);
-                item.setPosition(this.getEyePos());
+                var item = this.spawnAtLocation((ServerLevel)this.level(), CanadaItems.ANTLERS);
+                item.setPos(this.getEyePosition());
             }
             if (!this.isRightAntlerMissing()) {
-                var item = this.dropItem((ServerWorld)this.getWorld(), CanadaItems.ANTLERS);
-                item.setPosition(this.getEyePos());
+                var item = this.spawnAtLocation((ServerLevel)this.level(), CanadaItems.ANTLERS);
+                item.setPos(this.getEyePosition());
             }
         }
 
-        super.onDeath(damageSource);
+        super.die(damageSource);
     }
 
     @Override
-    public int getAngerTime() {
+    public int getRemainingPersistentAngerTime() {
         return this.angerTime;
     }
 
     @Override
-    public UUID getAngryAt() {
+    public UUID getPersistentAngerTarget() {
         return this.angryAt;
     }
 
     @Override
-    public void setAngerTime(int angerTime) {
+    public void setRemainingPersistentAngerTime(int angerTime) {
         this.angerTime = angerTime;
     }
 
     @Override
-    public void setAngryAt(UUID angryAt) {
+    public void setPersistentAngerTarget(UUID angryAt) {
         this.angryAt = angryAt;
     }
 
     @Override
-    public ItemStack getPickBlockStack() {
+    public ItemStack getPickResult() {
         return new ItemStack(CanadaItems.MOOSE_SPAWN_EGG);
     }
 }

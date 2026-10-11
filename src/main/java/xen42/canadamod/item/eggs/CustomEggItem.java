@@ -1,42 +1,41 @@
 package xen42.canadamod.item.eggs;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.AnimalEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ProjectileItem;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileItem;
+import net.minecraft.world.level.Level;
 
-public abstract class CustomEggItem<e extends AnimalEntity> extends Item implements ProjectileItem {
+public abstract class CustomEggItem<e extends Animal> extends Item implements ProjectileItem {
 	public static final float POWER = 1.5F;
 
-	public CustomEggItem(Item.Settings settings) {
+	public CustomEggItem(Item.Properties settings) {
 		super(settings);
 	}
 
     @Override
-	public ActionResult use(World world, PlayerEntity user, Hand hand) {
-		ItemStack itemStack = user.getStackInHand(hand);
+	public InteractionResult use(Level world, Player user, InteractionHand hand) {
+		ItemStack itemStack = user.getItemInHand(hand);
 		world.playSound(
-			null, user.getX(), user.getY(), user.getZ(), SoundEvents.ENTITY_EGG_THROW, SoundCategory.PLAYERS, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F)
+			null, user.getX(), user.getY(), user.getZ(), SoundEvents.EGG_THROW, SoundSource.PLAYERS, 0.5F, 0.4F / (world.getRandom().nextFloat() * 0.4F + 0.8F)
 		);
-		if (world instanceof ServerWorld serverWorld) {
-			ProjectileEntity.spawnWithVelocity(this::createEntity, serverWorld, itemStack, user, 0.0F, 1.5F, 1.0F);
+		if (world instanceof ServerLevel serverWorld) {
+			Projectile.spawnProjectileFromRotation(this::createEntity, serverWorld, itemStack, user, 0.0F, 1.5F, 1.0F);
 		}
 
-		user.incrementStat(Stats.USED.getOrCreateStat(this));
-		itemStack.decrementUnlessCreative(1, user);
-		return ActionResult.SUCCESS;
+		user.awardStat(Stats.ITEM_USED.get(this));
+		itemStack.consume(1, user);
+		return InteractionResult.SUCCESS;
 	}
 
-	public abstract ProjectileEntity createEntity(World world, LivingEntity owner, ItemStack stack);
+	public abstract Projectile createEntity(Level world, LivingEntity owner, ItemStack stack);
 }

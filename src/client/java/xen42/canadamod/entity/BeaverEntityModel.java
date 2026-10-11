@@ -1,68 +1,68 @@
 package xen42.canadamod.entity;
 
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.entity.model.QuadrupedEntityModel;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.client.model.Dilation;
-import net.minecraft.client.model.ModelData;
-import net.minecraft.client.model.ModelPartBuilder;
-import net.minecraft.client.model.ModelPartData;
-import net.minecraft.client.model.ModelTransform;
-import net.minecraft.client.model.TexturedModelData;
+import net.minecraft.client.model.QuadrupedModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.Mth;
 
-public class BeaverEntityModel extends QuadrupedEntityModel<BeaverEntityRenderState> {
+public class BeaverEntityModel extends QuadrupedModel<BeaverEntityRenderState> {
 	private ModelPart tail;
-	
+
 	public BeaverEntityModel(ModelPart root) {
-        super(root);
-      	this.tail = root.getChild("tail");	
+								super(root);
+							this.tail = root.getChild("tail");
 	}
 
-	public static TexturedModelData getTexturedModelData() {
-		ModelData modelData = new ModelData();
-		ModelPartData modelPartData = modelData.getRoot();
+	public static LayerDefinition getTexturedModelData() {
+		MeshDefinition modelData = new MeshDefinition();
+		PartDefinition modelPartData = modelData.getRoot();
 
-		ModelPartData head = modelPartData.addChild("head", ModelPartBuilder.create().uv(0, 26).cuboid(-3.0F, -3.0F, -3.0F, 6.0F, 5.0F, 4.0F, new Dilation(0.0F))
-		.uv(28, 21).cuboid(-2.0F, -1.0F, -4.0F, 4.0F, 2.0F, 1.0F, new Dilation(0.0F))
-		.uv(20, 31).cuboid(-1.0F, 1.0F, -4.0F, 2.0F, 1.0F, 0.0F, new Dilation(0.0F))
-		.uv(2, 1).cuboid(2.0F, -4.0F, -2.0F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F))
-		.uv(2, 1).cuboid(-3.0F, -4.0F, -2.0F, 1.0F, 1.0F, 1.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 18.0F, -5.0F));
+		PartDefinition head = modelPartData.addOrReplaceChild("head", CubeListBuilder.create().texOffs(0, 26).addBox(-3.0F, -3.0F, -3.0F, 6.0F, 5.0F, 4.0F, new CubeDeformation(0.0F))
+		.texOffs(28, 21).addBox(-2.0F, -1.0F, -4.0F, 4.0F, 2.0F, 1.0F, new CubeDeformation(0.0F))
+		.texOffs(20, 31).addBox(-1.0F, 1.0F, -4.0F, 2.0F, 1.0F, 0.0F, new CubeDeformation(0.0F))
+		.texOffs(2, 1).addBox(2.0F, -4.0F, -2.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+		.texOffs(2, 1).addBox(-3.0F, -4.0F, -2.0F, 1.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 18.0F, -5.0F));
 
-		ModelPartData tail = modelPartData.addChild("tail", ModelPartBuilder.create().uv(0, 17).cuboid(-3.0F, -1.0F, -1.0F, 6.0F, 1.0F, 8.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 19.0F, 6.0F));
+		PartDefinition tail = modelPartData.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 17).addBox(-3.0F, -1.0F, -1.0F, 6.0F, 1.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 19.0F, 6.0F));
 
-		ModelPartData body = modelPartData.addChild("body", ModelPartBuilder.create().uv(0, 0).cuboid(-4.0F, -10.0F, -4.0F, 8.0F, 7.0F, 10.0F, new Dilation(0.0F)), ModelTransform.origin(0.0F, 24.0F, 0.0F));
+		PartDefinition body = modelPartData.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -10.0F, -4.0F, 8.0F, 7.0F, 10.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-		ModelPartData leg_front_left = modelPartData.addChild("left_front_leg", ModelPartBuilder.create().uv(28, 30).cuboid(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new Dilation(0.0F)), ModelTransform.origin(3.0F, 21.0F, -3.0F));
+		PartDefinition leg_front_left = modelPartData.addOrReplaceChild("left_front_leg", CubeListBuilder.create().texOffs(28, 30).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(3.0F, 21.0F, -3.0F));
 
-		ModelPartData leg_front_right = modelPartData.addChild("right_front_leg", ModelPartBuilder.create().uv(28, 25).cuboid(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new Dilation(0.0F)), ModelTransform.origin(-3.0F, 21.0F, -3.0F));
+		PartDefinition leg_front_right = modelPartData.addOrReplaceChild("right_front_leg", CubeListBuilder.create().texOffs(28, 25).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(-3.0F, 21.0F, -3.0F));
 
-		ModelPartData leg_hind_left = modelPartData.addChild("left_hind_leg", ModelPartBuilder.create().uv(28, 30).cuboid(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new Dilation(0.0F)), ModelTransform.origin(3.0F, 21.0F, 5.0F));
+		PartDefinition leg_hind_left = modelPartData.addOrReplaceChild("left_hind_leg", CubeListBuilder.create().texOffs(28, 30).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(3.0F, 21.0F, 5.0F));
 
-		ModelPartData leg_hind_right = modelPartData.addChild("right_hind_leg", ModelPartBuilder.create().uv(28, 25).cuboid(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new Dilation(0.0F)), ModelTransform.origin(-3.0F, 21.0F, 5.0F));
+		PartDefinition leg_hind_right = modelPartData.addOrReplaceChild("right_hind_leg", CubeListBuilder.create().texOffs(28, 25).addBox(-1.0F, 0.0F, -1.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(-3.0F, 21.0F, 5.0F));
 
-		return TexturedModelData.of(modelData, 64, 64);
+		return LayerDefinition.create(modelData, 64, 64);
 	}
 
 	@Override
-	public void setAngles(BeaverEntityRenderState livingEntityRenderState) {
-		this.resetTransforms();
-		super.setAngles(livingEntityRenderState);
+	public void setupAnim(BeaverEntityRenderState livingEntityRenderState) {
+		this.resetPose();
+		super.setupAnim(livingEntityRenderState);
 
-		this.animate(livingEntityRenderState.chopAnimationState, BeaverEntityAnimation.CHOP, livingEntityRenderState.age, 1f);
+		this.animate(livingEntityRenderState.chopAnimationState, BeaverEntityAnimation.CHOP, livingEntityRenderState.ageInTicks, 1f);
 
 		if (livingEntityRenderState.isFrenzied) {
-			this.tail.pitch = 30 / MathHelper.DEGREES_PER_RADIAN;
+			this.tail.xRot = 30 / Mth.RAD_TO_DEG;
 		}
 		else if (livingEntityRenderState.isFatigued) {
-			this.tail.pitch = -20 / MathHelper.DEGREES_PER_RADIAN;
+			this.tail.xRot = -20 / Mth.RAD_TO_DEG;
 		}
 
-		float f = livingEntityRenderState.limbSwingAnimationProgress;
-		float g = livingEntityRenderState.limbSwingAmplitude;
-		this.tail.pitch += MathHelper.cos(f * 0.6662F) * 0.2F * g;
+		float f = livingEntityRenderState.walkAnimationPos;
+		float g = livingEntityRenderState.walkAnimationSpeed;
+		this.tail.xRot += Mth.cos(f * 0.6662F) * 0.2F * g;
 
-		head.xScale = livingEntityRenderState.baby ? 1.5f : 1f;
-		head.yScale = livingEntityRenderState.baby ? 1.5f : 1f;
-		head.zScale = livingEntityRenderState.baby ? 1.5f : 1f;
+		head.xScale = livingEntityRenderState.isBaby ? 1.5f : 1f;
+		head.yScale = livingEntityRenderState.isBaby ? 1.5f : 1f;
+		head.zScale = livingEntityRenderState.isBaby ? 1.5f : 1f;
 	}
 }

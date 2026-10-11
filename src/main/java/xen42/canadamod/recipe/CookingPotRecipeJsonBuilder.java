@@ -3,42 +3,40 @@ package xen42.canadamod.recipe;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementRequirements;
+import net.minecraft.advancements.AdvancementRewards;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.recipes.RecipeBuilder;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.ItemLike;
 import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.advancement.Advancement;
-import net.minecraft.advancement.AdvancementCriterion;
-import net.minecraft.advancement.AdvancementRequirements;
-import net.minecraft.advancement.AdvancementRewards;
-import net.minecraft.advancement.criterion.RecipeUnlockedCriterion;
-import net.minecraft.data.recipe.CraftingRecipeJsonBuilder;
-import net.minecraft.data.recipe.RecipeExporter;
-import net.minecraft.data.recipe.RecipeGenerator;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
 import xen42.canadamod.CanadaMod;
 
-public class CookingPotRecipeJsonBuilder implements CraftingRecipeJsonBuilder {
+public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
 
-	private final Map<String, AdvancementCriterion<?>> criteria = new LinkedHashMap<String, AdvancementCriterion<?>>();
+	private final Map<String, Criterion<?>> criteria = new LinkedHashMap<String, Criterion<?>>();
 	private final ItemStack result;
     @Nullable
     private String group;
     private final ArrayList<Ingredient> _inputsList;
     private boolean _requiresBowl;
     private boolean _requiresBottle;
-    private final RegistryEntryLookup<Item> _registryLookup;
+    private final HolderGetter<Item> _registryLookup;
 
-    public CookingPotRecipeJsonBuilder(RegistryEntryLookup<Item> registryLookup, ItemConvertible result, int count) {
+    public CookingPotRecipeJsonBuilder(HolderGetter<Item> registryLookup, ItemLike result, int count) {
         this.result = new ItemStack(result, count);
 
         this._registryLookup = registryLookup;
@@ -57,24 +55,24 @@ public class CookingPotRecipeJsonBuilder implements CraftingRecipeJsonBuilder {
         return this;
     }
 
-	public CookingPotRecipeJsonBuilder input(ItemConvertible item, RecipeGenerator recipeGenerator) {
-		this._inputsList.add(Ingredient.ofItem(item));
-        return this.criterion(RecipeGenerator.hasItem(item), recipeGenerator.conditionsFromItem(item));
+	public CookingPotRecipeJsonBuilder input(ItemLike item, RecipeProvider recipeGenerator) {
+		this._inputsList.add(Ingredient.of(item));
+        return this.unlockedBy(RecipeProvider.getHasName(item), recipeGenerator.has(item));
 	}
 
-	public CookingPotRecipeJsonBuilder input(TagKey<Item> tag, RecipeGenerator recipeGenerator) {
-		this._inputsList.add(Ingredient.fromTag(_registryLookup.getOrThrow(tag)));
-        return this.criterion("has_" + tag.getName(), recipeGenerator.conditionsFromTag(tag));
+	public CookingPotRecipeJsonBuilder input(TagKey<Item> tag, RecipeProvider recipeGenerator) {
+		this._inputsList.add(Ingredient.of(_registryLookup.getOrThrow(tag)));
+        return this.unlockedBy("has_" + tag.getName(), recipeGenerator.has(tag));
 	}
 
     @Override
-    public CookingPotRecipeJsonBuilder criterion(String name, AdvancementCriterion<?> criterion) {
+    public CookingPotRecipeJsonBuilder unlockedBy(String name, Criterion<?> criterion) {
 		this.criteria.put(name, criterion);
 		return this;
     }
 
     @Override
-    public Item getOutputItem() {
+    public Item getResult() {
         return this.result.getItem();
     }
 
@@ -85,9 +83,9 @@ public class CookingPotRecipeJsonBuilder implements CraftingRecipeJsonBuilder {
     }
 
     @Override
-    public void offerTo(RecipeExporter exporter, RegistryKey<Recipe<?>> recipeKey) {
+    public void save(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         if (this.criteria.isEmpty()) {
-            throw new IllegalStateException("No way of obtaining recipe " + recipeKey.getValue());
+            throw new IllegalStateException("No way of obtaining recipe " + recipeKey.location());
         }
 
         if (_inputsList.size() > 4) {
@@ -100,33 +98,33 @@ public class CookingPotRecipeJsonBuilder implements CraftingRecipeJsonBuilder {
 
         var recipe = new CookingPotRecipe(this.group, this.result, this._inputsList, this._requiresBowl, this._requiresBottle);
 
-		Advancement.Builder builder = exporter.getAdvancementBuilder()
-			.criterion("has_the_recipe", RecipeUnlockedCriterion.create(recipeKey))
+		Advancement.Builder builder = exporter.advancement()
+			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipeKey))
 			.rewards(AdvancementRewards.Builder.recipe(recipeKey))
-			.criteriaMerger(AdvancementRequirements.CriterionMerger.OR);
-        
-		this.criteria.forEach(builder::criterion);
+			.requirements(AdvancementRequirements.Strategy.OR);
 
-		exporter.accept(recipeKey, recipe, builder.build(recipeKey.getValue().withPrefixedPath("recipes/cooking_pot/")));
+		this.criteria.forEach(builder::addCriterion);
+
+		exporter.accept(recipeKey, recipe, builder.build(recipeKey.location().withPrefix("recipes/cooking_pot/")));
     }
 
     @Override
-    public void offerTo(RecipeExporter exporter) {
-		this.offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, getItemId(this.getOutputItem())));
+    public void save(RecipeOutput exporter) {
+		this.save(exporter, ResourceKey.create(Registries.RECIPE, getDefaultRecipeId(this.getResult())));
     }
 
     @Override
-	public void offerTo(RecipeExporter exporter, String recipePath) {
-		Identifier identifier = getItemId(this.getOutputItem());
-		Identifier identifier2 = Identifier.of(CanadaMod.MOD_ID, recipePath);
+	public void save(RecipeOutput exporter, String recipePath) {
+		ResourceLocation identifier = getDefaultRecipeId(this.getResult());
+		ResourceLocation identifier2 = ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, recipePath);
 		if (identifier2.equals(identifier)) {
 			throw new IllegalStateException("Recipe " + recipePath + " should remove its 'save' argument as it is equal to default one");
 		} else {
-			this.offerTo(exporter, RegistryKey.of(RegistryKeys.RECIPE, identifier2));
+			this.save(exporter, ResourceKey.create(Registries.RECIPE, identifier2));
 		}
 	}
 
-    public static Identifier getItemId(ItemConvertible item) {
-		return Identifier.of(CanadaMod.MOD_ID, Registries.ITEM.getId(item.asItem()).getPath());
+    public static ResourceLocation getDefaultRecipeId(ItemLike item) {
+		return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, BuiltInRegistries.ITEM.getKey(item.asItem()).getPath());
 	}
 }

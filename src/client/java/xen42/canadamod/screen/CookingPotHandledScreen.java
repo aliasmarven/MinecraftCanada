@@ -1,50 +1,50 @@
 package xen42.canadamod.screen;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.ScreenPos;
-import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenPosition;
+import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
 import xen42.canadamod.CanadaMod;
 
-public class CookingPotHandledScreen extends RecipeBookScreen<CookingPotScreenHandler> {
-    private static final Identifier LIT_PROGRESS_TEXTURE = Identifier.ofVanilla("container/furnace/lit_progress");
-    private static final Identifier BURN_PROGRESS_TEXTURE = Identifier.ofVanilla("container/furnace/burn_progress");
-    private static final Identifier TEXTURE = Identifier.of(CanadaMod.MOD_ID, "textures/gui/cooking_pot_gui.png");
+public class CookingPotHandledScreen extends AbstractRecipeBookScreen<CookingPotScreenHandler> {
+    private static final ResourceLocation LIT_PROGRESS_TEXTURE = ResourceLocation.withDefaultNamespace("container/furnace/lit_progress");
+    private static final ResourceLocation BURN_PROGRESS_TEXTURE = ResourceLocation.withDefaultNamespace("container/furnace/burn_progress");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/gui/cooking_pot_gui.png");
 
-    public CookingPotHandledScreen(CookingPotScreenHandler handler, PlayerInventory inventory, Text title) {
+    public CookingPotHandledScreen(CookingPotScreenHandler handler, Inventory inventory, Component title) {
         super(handler, new CookingPotRecipeBookWidget(handler), inventory, title);
-        this.recipeBookWidget = (CookingPotRecipeBookWidget)this.recipeBook;
+        this.recipeBookWidget = (CookingPotRecipeBookWidget)this.recipeBookComponent;
     }
 
     private final CookingPotRecipeBookWidget recipeBookWidget;
 
     @Override
-    protected ScreenPos getRecipeBookButtonPos() {
-        return new ScreenPos(this.x + 108, this.height / 2 - 28);
+    protected ScreenPosition getRecipeBookButtonPosition() {
+        return new ScreenPosition(this.leftPos + 108, this.height / 2 - 28);
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float deltaTicks, int mouseX, int mouseY) {
-        int i = this.x;
-        int j = (this.height - this.backgroundHeight) / 2;
-        context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, i, j, 0.0F, 0.0F, 
-            this.backgroundWidth, this.backgroundHeight, 256, 256);
+    protected void renderBg(GuiGraphics context, float deltaTicks, int mouseX, int mouseY) {
+        int i = this.leftPos;
+        int j = (this.height - this.imageHeight) / 2;
+        context.blit(RenderType::guiTextured, TEXTURE, i, j, 0.0F, 0.0F,
+            this.imageWidth, this.imageHeight, 256, 256);
 
-        int n = MathHelper.ceil((this.handler.getFuelProgress() * 13.0F)) + 1;
-        context.drawGuiTexture(RenderLayer::getGuiTextured, LIT_PROGRESS_TEXTURE, 14, 14, 0, 14 - n, i + 81, j + 58 - n, 14, n);
+        int n = Mth.ceil((this.menu.getFuelProgress() * 13.0F)) + 1;
+        context.blitSprite(RenderType::guiTextured, LIT_PROGRESS_TEXTURE, 14, 14, 0, 14 - n, i + 81, j + 58 - n, 14, n);
 
-        int l = MathHelper.ceil(this.handler.getCookProgress() * 24.0F);
-        context.drawGuiTexture(RenderLayer::getGuiTextured, BURN_PROGRESS_TEXTURE, 24, 16, 0, 0, i + 109, j + 34, l, 16);
+        int l = Mth.ceil(this.menu.getCookProgress() * 24.0F);
+        context.blitSprite(RenderType::guiTextured, BURN_PROGRESS_TEXTURE, 24, 16, 0, 0, i + 109, j + 34, l, 16);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         renderBackground(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
-        drawMouseoverTooltip(context, mouseX, mouseY);
+        renderTooltip(context, mouseX, mouseY);
     }
 }

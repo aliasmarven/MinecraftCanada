@@ -1,36 +1,36 @@
 package xen42.canadamod.armor;
 
-import net.minecraft.client.model.Dilation;
-import net.minecraft.client.model.ModelData;
-import net.minecraft.client.model.ModelPartBuilder;
-import net.minecraft.client.model.ModelPartData;
-import net.minecraft.client.model.ModelTransform;
-import net.minecraft.client.model.TexturedModelData;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 
 public class MooseHatModel {
-    
-    public static TexturedModelData getModel() {
-		ModelData modelData = new ModelData();
-		ModelPartData modelPartData = modelData.getRoot();
-		ModelPartData hat = modelPartData.addChild("hat", ModelPartBuilder.create().uv(0, 37).cuboid(-4.0F, -8.0F, -4.0F, 8.0F, 4.0F, 8.0F, new Dilation(0.1F)), ModelTransform.origin(0.0F, 24.0F, 0.0F));
 
-		ModelPartData left_antler = hat.addChild("left_antler", ModelPartBuilder.create().uv(0, 1).cuboid(-8.0F, -7.0F, -6.0F, 8.0F, 2.0F, 2.0F, new Dilation(0.0F))
-		.uv(43, 10).cuboid(-8.0F, -10.0F, -5.0F, 6.0F, 4.0F, 2.0F, new Dilation(0.0F))
-		.uv(40, 12).cuboid(-9.0F, -11.0F, -5.0F, 1.0F, 5.0F, 2.0F, new Dilation(0.0F))
-		.uv(41, 1).cuboid(-3.0F, -14.0F, -5.0F, 1.0F, 4.0F, 2.0F, new Dilation(0.0F))
-		.uv(19, 16).cuboid(-5.0F, -14.0F, -5.0F, 1.0F, 4.0F, 2.0F, new Dilation(0.0F))
-		.uv(0, 9).cuboid(-7.0F, -13.0F, -5.0F, 1.0F, 3.0F, 2.0F, new Dilation(0.0F))
-		.uv(0, 19).cuboid(-4.0F, -13.0F, -5.0F, 1.0F, 3.0F, 2.0F, new Dilation(0.0F))
-		.uv(21, 14).cuboid(-6.0F, -12.0F, -5.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.origin(-3.0F, 0.0F, 5.0F));
+    public static LayerDefinition getModel() {
+		MeshDefinition modelData = new MeshDefinition();
+		PartDefinition modelPartData = modelData.getRoot();
+		PartDefinition hat = modelPartData.addOrReplaceChild("hat", CubeListBuilder.create().texOffs(0, 37).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 4.0F, 8.0F, new CubeDeformation(0.1F)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-		ModelPartData right_antler = hat.addChild("right_antler", ModelPartBuilder.create().uv(0, 6).cuboid(-7.0F, -12.0F, -6.0F, 8.0F, 2.0F, 2.0F, new Dilation(0.0F))
-		.uv(47, 2).cuboid(-5.0F, -15.0F, -5.0F, 6.0F, 4.0F, 2.0F, new Dilation(0.0F))
-		.uv(22, 2).cuboid(1.0F, -16.0F, -5.0F, 1.0F, 5.0F, 2.0F, new Dilation(0.0F))
-		.uv(35, 8).cuboid(-3.0F, -19.0F, -5.0F, 1.0F, 4.0F, 2.0F, new Dilation(0.0F))
-		.uv(48, 11).cuboid(-5.0F, -19.0F, -5.0F, 1.0F, 4.0F, 2.0F, new Dilation(0.0F))
-		.uv(20, 15).cuboid(-1.0F, -18.0F, -5.0F, 1.0F, 3.0F, 2.0F, new Dilation(0.0F))
-		.uv(40, 18).cuboid(-4.0F, -18.0F, -5.0F, 1.0F, 3.0F, 2.0F, new Dilation(0.0F))
-		.uv(28, 16).cuboid(-2.0F, -17.0F, -5.0F, 1.0F, 2.0F, 2.0F, new Dilation(0.0F)), ModelTransform.origin(11.0F, 5.0F, 5.0F));
-		return TexturedModelData.of(modelData, 64, 64);
+		PartDefinition left_antler = hat.addOrReplaceChild("left_antler", CubeListBuilder.create().texOffs(0, 1).addBox(-8.0F, -7.0F, -6.0F, 8.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(43, 10).addBox(-8.0F, -10.0F, -5.0F, 6.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(40, 12).addBox(-9.0F, -11.0F, -5.0F, 1.0F, 5.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(41, 1).addBox(-3.0F, -14.0F, -5.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(19, 16).addBox(-5.0F, -14.0F, -5.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(0, 9).addBox(-7.0F, -13.0F, -5.0F, 1.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(0, 19).addBox(-4.0F, -13.0F, -5.0F, 1.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(21, 14).addBox(-6.0F, -12.0F, -5.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(-3.0F, 0.0F, 5.0F));
+
+		PartDefinition right_antler = hat.addOrReplaceChild("right_antler", CubeListBuilder.create().texOffs(0, 6).addBox(-7.0F, -12.0F, -6.0F, 8.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(47, 2).addBox(-5.0F, -15.0F, -5.0F, 6.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(22, 2).addBox(1.0F, -16.0F, -5.0F, 1.0F, 5.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(35, 8).addBox(-3.0F, -19.0F, -5.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(48, 11).addBox(-5.0F, -19.0F, -5.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(20, 15).addBox(-1.0F, -18.0F, -5.0F, 1.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(40, 18).addBox(-4.0F, -18.0F, -5.0F, 1.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+		.texOffs(28, 16).addBox(-2.0F, -17.0F, -5.0F, 1.0F, 2.0F, 2.0F, new CubeDeformation(0.0F)), PartPose.offset(11.0F, 5.0F, 5.0F));
+		return LayerDefinition.create(modelData, 64, 64);
     }
 }
