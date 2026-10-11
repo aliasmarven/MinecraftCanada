@@ -281,7 +281,7 @@ public class ThermosItem extends Item {
         ThermosContentsComponent thermosContentsComponent = (ThermosContentsComponent)entity.getItem().get(CanadaItems.THERMOS_CONTENTS);
         if (thermosContentsComponent != null) {
             entity.getItem().set(CanadaItems.THERMOS_CONTENTS, ThermosContentsComponent.DEFAULT);
-            ItemUtils.onContainerDestroyed(entity, thermosContentsComponent.iterateCopy());
+            ItemUtils.onContainerDestroyed(entity, java.util.stream.StreamSupport.stream(thermosContentsComponent.iterateCopy().spliterator(), false));
         }
     }
 

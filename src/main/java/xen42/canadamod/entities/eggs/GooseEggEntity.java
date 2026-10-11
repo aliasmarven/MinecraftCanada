@@ -13,7 +13,7 @@ import xen42.canadamod.CanadaMod;
 public class GooseEggEntity extends CustomEggEntity {
 
     public GooseEggEntity(EntityType<? extends ThrowableItemProjectile> entity, Level world) {
-        super(EntityType.EGG, world);
+        super(net.minecraft.world.entity.EntityTypes.EGG, world);
     }
 
 	public GooseEggEntity(Level world, LivingEntity owner, ItemStack stack) {

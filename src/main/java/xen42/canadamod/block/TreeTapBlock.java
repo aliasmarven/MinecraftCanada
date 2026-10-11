@@ -35,7 +35,6 @@ import xen42.canadamod.CanadaItems;
 public class TreeTapBlock extends HorizontalDirectionalBlock {
     public static int MAX_SAP = 4;
     public static IntegerProperty SAP_LEVEL = IntegerProperty.create("sap_level", 0, MAX_SAP);
-    public static final MapCodec<TreeTapBlock> CODEC = simpleCodec(TreeTapBlock::new);
 
     public final VoxelShape northShape;
     public final VoxelShape southShape;
@@ -53,9 +52,6 @@ public class TreeTapBlock extends HorizontalDirectionalBlock {
         this.westShape = Block.box(16 - width, 0, 0, 16f, 16f, 16f);
     }
 
-    public MapCodec<? extends TreeTapBlock> codec() {
-        return CODEC;
-    }
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
@@ -149,7 +145,13 @@ public class TreeTapBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos) {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
+        return true;
+    }
+
+    @Override
+    protected int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos,
+                                        Direction direction) {
         return state.getValue(SAP_LEVEL);
     }
 

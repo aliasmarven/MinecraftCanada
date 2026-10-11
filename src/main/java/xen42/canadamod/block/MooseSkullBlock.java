@@ -22,7 +22,6 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class MooseSkullBlock extends BaseEntityBlock {
-    public static final MapCodec<MooseSkullBlock> CODEC = simpleCodec(MooseSkullBlock::new);
 
     private static final int MAX_ROTATIONS = RotationSegment.getMaxSegmentIndex() + 1;
     public static final IntegerProperty ROTATION = BlockStateProperties.ROTATION_16;
@@ -68,10 +67,6 @@ public class MooseSkullBlock extends BaseEntityBlock {
         builder.add(BlockStateProperties.ROTATION_16, WEIRD_HACK);
     }
 
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
 
     @Override
     protected RenderShape getRenderShape(BlockState state) {

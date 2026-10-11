@@ -40,7 +40,6 @@ public class CookingPotBlock extends BaseEntityBlock {
 
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
     public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
-    public static final MapCodec<CookingPotBlock> CODEC = simpleCodec(CookingPotBlock::new);
 
     @Override
     protected BlockState rotate(BlockState state, Rotation rotation) {
@@ -121,10 +120,6 @@ public class CookingPotBlock extends BaseEntityBlock {
         return new CookingPotBlockEntity(pos, state);
     }
 
-    @Override
-    protected MapCodec<? extends BaseEntityBlock> codec() {
-        return CODEC;
-    }
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {

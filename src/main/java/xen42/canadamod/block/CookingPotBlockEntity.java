@@ -96,14 +96,14 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements S
     }
 
     @Override
-    protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-        super.loadAdditional(nbt, registries);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput nbt) {
+        super.loadAdditional(nbt);
         this.inventory = NonNullList.withSize(getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(nbt, this.inventory, registries);
-        this.cookTimeRemaining = nbt.getShort("cookTimeRemaining").orElse((short)0);
-        this.cookTimeTotal = nbt.getShort("cookTimeTotal").orElse((short)0);
-        this.burnTimeRemaining = nbt.getShort("burnTimeRemaining").orElse((short)0);
-        this.burnTimeTotal = nbt.getShort("burnTimeTotal").orElse((short)0);
+        ContainerHelper.loadAllItems(nbt, this.inventory);
+        this.cookTimeRemaining = nbt.getShortOr("cookTimeRemaining", (short)0);
+        this.cookTimeTotal = nbt.getShortOr("cookTimeTotal", (short)0);
+        this.burnTimeRemaining = nbt.getShortOr("burnTimeRemaining", (short)0);
+        this.burnTimeTotal = nbt.getShortOr("burnTimeTotal", (short)0);
     }
 
     @Override
@@ -113,9 +113,9 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements S
     }
 
     @Override
-    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-        super.saveAdditional(nbt, registries);
-        ContainerHelper.saveAllItems(nbt, this.inventory, registries);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput nbt) {
+        super.saveAdditional(nbt);
+        ContainerHelper.saveAllItems(nbt, this.inventory);
         nbt.putShort("cookTimeRemaining", (short)this.cookTimeRemaining);
         nbt.putShort("cookTimeTotal", (short)this.cookTimeTotal);
         nbt.putShort("burnTimeRemaining", (short)this.burnTimeRemaining);

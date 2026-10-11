@@ -21,15 +21,15 @@ public abstract class CustomEggEntity extends ThrowableItemProjectile {
 	private static final EntityDimensions EMPTY_DIMENSIONS = EntityDimensions.fixed(0.0F, 0.0F);
 
     public CustomEggEntity(EntityType<? extends ThrowableItemProjectile> entity, Level world) {
-        super(EntityType.EGG, world);
+        super(net.minecraft.world.entity.EntityTypes.EGG, world);
     }
 
 	public CustomEggEntity(Level world, LivingEntity owner, ItemStack stack) {
-		super(EntityType.EGG, owner, world, stack);
+		super(net.minecraft.world.entity.EntityTypes.EGG, owner, world, stack);
 	}
 
 	public CustomEggEntity(Level world, double x, double y, double z, ItemStack stack) {
-		super(EntityType.EGG, x, y, z, world, stack);
+		super(net.minecraft.world.entity.EntityTypes.EGG, x, y, z, world, stack);
 	}
 
 	@Override
@@ -40,7 +40,7 @@ public abstract class CustomEggEntity extends ThrowableItemProjectile {
 			for (int i = 0; i < 8; i++) {
 				this.level()
 					.addParticle(
-						new ItemParticleOption(ParticleTypes.ITEM, this.getItem()),
+						new ItemParticleOption(ParticleTypes.ITEM, this.getItem().getItem()),
 						this.getX(),
 						this.getY(),
 						this.getZ(),

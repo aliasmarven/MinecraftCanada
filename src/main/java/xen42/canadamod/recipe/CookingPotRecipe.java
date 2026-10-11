@@ -43,7 +43,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
     }
 
     @Override
-    public ItemStack assemble(CookingPotRecipeInput input, Provider registries) {
+    public ItemStack assemble(CookingPotRecipeInput input) {
         return this.result.copy();
     }
 
@@ -95,7 +95,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
         var cookingPotItem = CanadaBlocks.COOKING_POT.asItem();
 		return List.of(
             new CookingPotRecipeDisplay(ingredientDisplays, containerDisplay,
-                new ItemStackSlotDisplay(this.result), new SlotDisplay.ItemSlotDisplay(cookingPotItem))
+                new ItemStackSlotDisplay(net.minecraft.world.item.ItemStackTemplate.fromStack(this.result)), new SlotDisplay.ItemSlotDisplay(cookingPotItem))
         );
 	}
 

@@ -184,10 +184,10 @@ public class BeaverChopTreeGoal extends Goal {
         if (isChoppingTree) {
             // Don't let them move away
             this.beaver.getNavigation().stop();
-            this.beaver.getLookControl().setLookAt(this.beaver.getChoppingTreePos().getCenter());
+            this.beaver.getLookControl().setLookAt(net.minecraft.world.phys.Vec3.atCenterOf(this.beaver.getChoppingTreePos()));
 
             if (!this.beaver.level().getBlockState(this.beaver.getChoppingTreePos()).is(BlockTags.LOGS) ||
-                this.beaver.getChoppingTreePos().getCenter().distanceTo(this.beaver.position()) > 2f ||
+                net.minecraft.world.phys.Vec3.atCenterOf(this.beaver.getChoppingTreePos()).distanceTo(this.beaver.position()) > 2f ||
                 this.beaver.getLastDamageSource() != null) {
                 // If something else broke it give up, or if we moved away or got hurts
                 this.beaver.stopChopping();
@@ -210,11 +210,11 @@ public class BeaverChopTreeGoal extends Goal {
                 if (this.beaver.getChoppingTreePos() != null) {
 
                     this.beaver.getNavigation().stop();
-                    this.beaver.getLookControl().setLookAt(this.beaver.getChoppingTreePos().getCenter());
+                    this.beaver.getLookControl().setLookAt(net.minecraft.world.phys.Vec3.atCenterOf(this.beaver.getChoppingTreePos()));
                 }
             }
         }
-        else if (this.beaver.getChoppingTreePos().getCenter().distanceTo(this.beaver.position()) < 1.6f) {
+        else if (net.minecraft.world.phys.Vec3.atCenterOf(this.beaver.getChoppingTreePos()).distanceTo(this.beaver.position()) < 1.6f) {
             // Reached the tree, chop it
             this.isChoppingTree = true;
             choppingTicks = MAX_BREAKING_TICKS;

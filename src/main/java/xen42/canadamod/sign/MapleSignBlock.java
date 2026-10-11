@@ -10,14 +10,9 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import xen42.canadamod.CanadaBlocks;
 
 public class MapleSignBlock extends StandingSignBlock {
-    public static final MapCodec<StandingSignBlock> CODEC = RecordCodecBuilder.mapCodec((instance) -> {
-        return instance.group(WoodType.CODEC.fieldOf("wood_type").forGetter((sign) -> sign.type()), propertiesCodec())
-        .apply(instance, (type, settings) -> new MapleSignBlock(settings));
-    });
 
-    public MapCodec<StandingSignBlock> codec() {
-        return CODEC;
-    }
+
+
 
     public MapleSignBlock(Properties settings) {
         super(CanadaBlocks.MAPLE_WOOD_TYPE, settings);

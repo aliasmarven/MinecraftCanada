@@ -10,12 +10,12 @@ import xen42.canadamod.CanadaItems;
 
 public class MapleBoatEntity {
     public static final EntityType<Boat> MAPLE_BOAT =
-        EntityType.register("maple_boat", EntityType.Builder.<Boat>of(EntityType.boatFactory(() -> CanadaItems.MAPLE_BOAT), MobCategory.MISC)
-            .noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10));
+        net.minecraft.core.Registry.register(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("canadamod", "maple_boat"), EntityType.Builder.<Boat>of((type, world) -> new Boat(type, world, () -> CanadaItems.MAPLE_BOAT), MobCategory.MISC)
+            .noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10).build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("canadamod", "maple_boat"))));
 
     public static final EntityType<ChestBoat> MAPLE_CHEST_BOAT =
-        EntityType.register("maple_chest_boat", EntityType.Builder.<ChestBoat>of(EntityType.chestBoatFactory(() -> CanadaItems.MAPLE_CHEST_BOAT), MobCategory.MISC)
-            .noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10));
+        net.minecraft.core.Registry.register(net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("canadamod", "maple_chest_boat"), EntityType.Builder.<ChestBoat>of((type, world) -> new ChestBoat(type, world, () -> CanadaItems.MAPLE_CHEST_BOAT), MobCategory.MISC)
+            .noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10).build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.fromNamespaceAndPath("canadamod", "maple_chest_boat"))));
 
     public static void initialize() {
         DispenserBlock.registerBehavior(CanadaItems.MAPLE_CHEST_BOAT, new BoatDispenseItemBehavior(MAPLE_CHEST_BOAT));

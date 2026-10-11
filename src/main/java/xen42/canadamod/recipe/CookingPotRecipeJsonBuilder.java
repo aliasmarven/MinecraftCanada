@@ -6,8 +6,8 @@ import java.util.Map;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.advancements.triggers.Criterion;
+import net.minecraft.advancements.triggers.RecipeUnlockedTrigger;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -72,6 +72,10 @@ public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
     }
 
     @Override
+    public ResourceKey<Recipe<?>> defaultId() {
+        return RecipeBuilder.getDefaultRecipeId(this.result);
+    }
+
     public Item getResult() {
         return this.result.getItem();
     }
@@ -85,7 +89,7 @@ public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
     @Override
     public void save(RecipeOutput exporter, ResourceKey<Recipe<?>> recipeKey) {
         if (this.criteria.isEmpty()) {
-            throw new IllegalStateException("No way of obtaining recipe " + recipeKey.location());
+            throw new IllegalStateException("No way of obtaining recipe " + recipeKey.identifier());
         }
 
         if (_inputsList.size() > 4) {
@@ -105,7 +109,7 @@ public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
 
 		this.criteria.forEach(builder::addCriterion);
 
-		exporter.accept(recipeKey, recipe, builder.build(recipeKey.location().withPrefix("recipes/cooking_pot/")));
+		exporter.accept(recipeKey, recipe, builder.build(recipeKey.identifier().withPrefix("recipes/cooking_pot/")));
     }
 
     @Override

@@ -15,14 +15,9 @@ import xen42.canadamod.CanadaBlocks;
 import xen42.canadamod.CanadaItems;
 
 public class MapleWallHangingSignBlock extends WallHangingSignBlock {
-   public static final MapCodec<WallHangingSignBlock> CODEC = RecordCodecBuilder.mapCodec((instance) -> {
-      return instance.group(WoodType.CODEC.fieldOf("wood_type").forGetter((sign) -> CanadaBlocks.MAPLE_WOOD_TYPE), propertiesCodec())
-        .apply(instance, (type, settings) -> new MapleWallHangingSignBlock(settings));
-   });
 
-   public MapCodec<WallHangingSignBlock> codec() {
-      return CODEC;
-   }
+
+
 
     public MapleWallHangingSignBlock(Properties settings) {
         super(CanadaBlocks.MAPLE_WOOD_TYPE, settings);
