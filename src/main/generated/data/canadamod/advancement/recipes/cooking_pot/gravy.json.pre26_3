@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "canadamod:gravy"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_translation{key='tag.item.c.flour', fallback='#c:flour', args=[]}": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:flour"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_translation{key='tag.item.c.foods.raw_meat', fallback='#c:foods/raw_meat', args=[]}": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:foods/raw_meat"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_translation{key='tag.item.c.flour', fallback='#c:flour', args=[]}",
+      "has_translation{key='tag.item.c.foods.raw_meat', fallback='#c:foods/raw_meat', args=[]}"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "canadamod:gravy"
+    ]
+  }
+}

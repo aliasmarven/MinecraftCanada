@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:maple_sign"
+        "recipes": "canadamod:maple_sign"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

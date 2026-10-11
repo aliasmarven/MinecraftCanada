@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:stripped_maple_wood"
+        "recipes": "canadamod:stripped_maple_wood"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

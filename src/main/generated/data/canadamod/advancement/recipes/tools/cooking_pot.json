@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:cooking_pot"
+        "recipes": "canadamod:cooking_pot"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

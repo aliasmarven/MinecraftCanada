@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "canadamod:slime_ball"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_translation{key='tag.item.c.flour', fallback='#c:flour', args=[]}": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:flour"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_translation{key='tag.item.c.sap', fallback='#c:sap', args=[]}": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#c:sap"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_translation{key='tag.item.c.flour', fallback='#c:flour', args=[]}",
+      "has_translation{key='tag.item.c.sap', fallback='#c:sap', args=[]}"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "canadamod:slime_ball"
+    ]
+  }
+}

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:rubber"
+        "recipes": "canadamod:rubber"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:maple_button"
+        "recipes": "canadamod:maple_button"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

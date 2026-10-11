@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:cooked_venison_from_smelting_venison"
+        "recipes": "minecraft:cooked_venison_from_smelting_venison"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

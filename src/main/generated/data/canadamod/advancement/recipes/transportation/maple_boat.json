@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:maple_boat"
+        "recipes": "canadamod:maple_boat"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

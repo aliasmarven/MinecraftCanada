@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:slime_ball"
+        "recipes": "canadamod:slime_ball"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

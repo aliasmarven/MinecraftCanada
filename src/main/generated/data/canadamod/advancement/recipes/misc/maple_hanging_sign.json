@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "minecraft:chain"
+            "items": "minecraft:iron_chain"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:maple_hanging_sign"
+        "recipes": "canadamod:maple_hanging_sign"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

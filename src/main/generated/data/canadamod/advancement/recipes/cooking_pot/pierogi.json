@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:pierogi"
+        "recipes": "canadamod:pierogi"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:donair"
+        "recipes": "canadamod:donair"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

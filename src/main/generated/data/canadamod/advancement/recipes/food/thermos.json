@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:thermos"
+        "recipes": "canadamod:thermos"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

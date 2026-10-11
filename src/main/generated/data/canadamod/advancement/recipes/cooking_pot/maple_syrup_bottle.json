@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:maple_syrup_bottle"
+        "recipes": "canadamod:maple_syrup_bottle"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

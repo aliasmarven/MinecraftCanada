@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:tree_tap"
+        "recipes": "canadamod:tree_tap"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

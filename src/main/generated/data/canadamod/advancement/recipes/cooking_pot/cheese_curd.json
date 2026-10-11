@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:cheese_curd"
+        "recipes": "canadamod:cheese_curd"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

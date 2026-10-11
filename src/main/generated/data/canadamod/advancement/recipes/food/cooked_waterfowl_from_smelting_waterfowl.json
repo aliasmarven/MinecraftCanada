@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "minecraft:cooked_waterfowl_from_smelting_waterfowl"
+        "recipes": "minecraft:cooked_waterfowl_from_smelting_waterfowl"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

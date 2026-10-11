@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "X": "minecraft:chain",
+    "X": "minecraft:iron_chain",
     "Y": "#canadamod:maple_logs"
   },
   "pattern": [

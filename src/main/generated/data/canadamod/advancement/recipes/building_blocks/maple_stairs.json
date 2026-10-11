@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:maple_stairs"
+        "recipes": "canadamod:maple_stairs"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

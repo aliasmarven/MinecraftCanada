@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:maple_fence"
+        "recipes": "canadamod:maple_fence"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

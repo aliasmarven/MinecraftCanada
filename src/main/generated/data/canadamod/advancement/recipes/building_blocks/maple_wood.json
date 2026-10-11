@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:maple_wood"
+        "recipes": "canadamod:maple_wood"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

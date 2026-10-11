@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:moose_helmet"
+        "recipes": "canadamod:moose_helmet"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

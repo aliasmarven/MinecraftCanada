@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:maple_trapdoor"
+        "recipes": "canadamod:maple_trapdoor"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

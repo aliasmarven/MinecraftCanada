@@ -33,7 +33,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:poutine"
+        "recipes": "canadamod:poutine"
       },
       "trigger": "minecraft:recipe_unlocked"
     }

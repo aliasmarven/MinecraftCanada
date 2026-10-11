@@ -3,7 +3,7 @@
   "criteria": {
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:mushroom_stew"
+        "recipes": "canadamod:mushroom_stew"
       },
       "trigger": "minecraft:recipe_unlocked"
     },

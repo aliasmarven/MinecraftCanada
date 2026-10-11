@@ -23,7 +23,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "canadamod:butter_tart"
+        "recipes": "canadamod:butter_tart"
       },
       "trigger": "minecraft:recipe_unlocked"
     },
