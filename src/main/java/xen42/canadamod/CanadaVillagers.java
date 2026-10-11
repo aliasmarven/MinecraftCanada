@@ -40,8 +40,8 @@ public class CanadaVillagers {
 
         var profession = new VillagerProfession(
                 Component.translatable("entity." +
-                        key.location().getNamespace() + ".villager." +
-                        key.location().getPath()),
+                        key.identifier().getNamespace() + ".villager." +
+                        key.identifier().getPath()),
                 entry -> entry.is(poi),
                 entry -> entry.is(poi),
                 ImmutableSet.of(),
@@ -52,7 +52,7 @@ public class CanadaVillagers {
 
         return Registry.register(
                 BuiltInRegistries.VILLAGER_PROFESSION,
-                key.location(),
+                key.identifier(),
                 profession
         );
     }

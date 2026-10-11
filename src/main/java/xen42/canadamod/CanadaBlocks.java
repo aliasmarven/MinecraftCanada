@@ -3,11 +3,10 @@ package xen42.canadamod;
 import java.util.Optional;
 import java.util.function.Function;
 
-import net.fabricmc.fabric.api.item.v1.FabricItem.Settings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
-import net.fabricmc.fabric.api.registry.FuelRegistryEvents;
-import net.fabricmc.fabric.api.registry.StrippableBlockRegistry;
+
+
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -78,8 +77,15 @@ public class CanadaBlocks {
     public static Block MAPLE_HANGING_SIGN;
     public static Block MAPLE_WALL_HANGING_SIGN;
 
-	public static final TreeGrower MAPLE_SAPLING_GENERATED = new TreeGrower("maple", Optional.empty(),
-		Optional.of(CanadaConfiguredFeatures.MAPLE_CONFIGURED_FEATURE), Optional.of(CanadaConfiguredFeatures.MAPLE_CONFIGURED_FEATURE));
+	public static final TreeGrower MAPLE_SAPLING_GENERATED = new TreeGrower(
+        "maple",
+        net.minecraft.util.random.WeightedList.of(
+                CanadaConfiguredFeatures.MAPLE_CONFIGURED_FEATURE),
+        net.minecraft.util.random.WeightedList.of(),
+        net.minecraft.util.random.WeightedList.of(
+                CanadaConfiguredFeatures.MAPLE_CONFIGURED_FEATURE),
+        CanadaConfiguredFeatures.MAPLE_CONFIGURED_FEATURE
+);
 
 	public static final Block MAPLE_SAPLING = register("maple_sapling",
         settings -> new SaplingBlock(MAPLE_SAPLING_GENERATED, settings),
@@ -263,23 +269,10 @@ public class CanadaBlocks {
 			MAPLE_SLAB, MAPLE_FENCE, MAPLE_FENCE_GATE, MAPLE_DOOR, MAPLE_TRAPDOOR, MAPLE_PRESSURE_PLATE, MAPLE_BUTTON
 		};
 
-		StrippableBlockRegistry.register(CanadaBlocks.MAPLE_LOG, CanadaBlocks.STRIPPED_MAPLE_LOG);
-		StrippableBlockRegistry.register(CanadaBlocks.MAPLE_WOOD, CanadaBlocks.STRIPPED_MAPLE_WOOD);
+		
+		
 
-		FuelRegistryEvents.BUILD.register((builder, context) -> {
-            int time = context.baseSmeltTime();
-			for (var woodItem : new Block[] { MAPLE_LOG, MAPLE_WOOD, STRIPPED_MAPLE_LOG, STRIPPED_MAPLE_WOOD, MAPLE_PLANKS,
-												MAPLE_TRAPDOOR, MAPLE_FENCE_GATE, MAPLE_FENCE }) {
-				builder.add(woodItem, time);
-			}
-			for (var woodItem : new Block[] { MAPLE_STAIRS, MAPLE_SLAB, MAPLE_PRESSURE_PLATE }) {
-				builder.add(woodItem, time / 2);
-			}
-			for (var woodItem : new Block[] { MAPLE_DOOR, MAPLE_SIGN, MAPLE_HANGING_SIGN }) {
-				builder.add(woodItem, time * 2 / 3);
-			}
-			builder.add(MAPLE_BUTTON, time / 3);
-        });
+		
 
         MAPLE_SIGN_BLOCK_ENTITY = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE,
@@ -291,6 +284,24 @@ public class CanadaBlocks {
             Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_hanging_sign"),
 			FabricBlockEntityTypeBuilder.<HangingSignBlockEntity>create(MapleHangingSignBlockEntity::new, MAPLE_HANGING_SIGN, MAPLE_WALL_HANGING_SIGN).build());
 	}
+
+    private static String mapleFuelProvider(String name) {
+        return switch (name) {
+            case "maple_log", "maple_wood",
+                 "stripped_maple_log", "stripped_maple_wood",
+                 "maple_planks", "maple_trapdoor",
+                 "maple_fence_gate", "maple_fence" -> "maple_full";
+
+            case "maple_stairs", "maple_slab",
+                 "maple_pressure_plate" -> "maple_half";
+
+            case "maple_door" -> "maple_two_thirds";
+
+            case "maple_button" -> "maple_one_third";
+
+            default -> null;
+        };
+    }
 
     private static Block register(String name, Function<BlockBehaviour.Properties, Block> blockFactory, BlockBehaviour.Properties settings, boolean shouldRegisterItem) {
 		// Create a registry key for the block
@@ -305,7 +316,22 @@ public class CanadaBlocks {
 			// can be the same.
 			ResourceKey<Item> itemKey = keyOfItem(name);
 
-			BlockItem blockItem = new BlockItem(block, new Item.Properties().setId(itemKey));
+			Item.Properties itemProperties = new Item.Properties().setId(itemKey);
+            String fuelProvider = mapleFuelProvider(name);
+
+            if (fuelProvider != null) {
+                ResourceKey<net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider> fuelKey =
+                        ResourceKey.create(
+                                Registries.CONTEXT_INT_PROVIDER,
+                                Identifier.fromNamespaceAndPath(
+                                        CanadaMod.MOD_ID, "cooking/" + fuelProvider
+                                )
+                        );
+
+                itemProperties.cookingFuel(fuelKey);
+            }
+
+            BlockItem blockItem = new BlockItem(block, itemProperties);
 			Registry.register(BuiltInRegistries.ITEM, itemKey, blockItem);
 		}
 

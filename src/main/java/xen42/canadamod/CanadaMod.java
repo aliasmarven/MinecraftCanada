@@ -189,8 +189,7 @@ public class CanadaMod implements ModInitializer {
 		CanadaVillagers.initialize();
 		CanadaPlacedFeatures.onInitialize();
 
-		BiomeModifications.addFeature(context -> context.getBiomeKey().location()
-			.equals(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_forest")), GenerationStep.Decoration.VEGETAL_DECORATION, CanadaPlacedFeatures.MAPLE_FOREST_VEGETATION);
+		BiomeModifications.addFeature(BiomeSelectors.includeByKey(MAPLE_BIOME_KEY), GenerationStep.Decoration.VEGETAL_DECORATION, CanadaPlacedFeatures.MAPLE_FOREST_VEGETATION);
 
 		SpawnPlacements.register(BEAVER_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawn);
 		SpawnPlacements.register(MOOSE_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawn);
