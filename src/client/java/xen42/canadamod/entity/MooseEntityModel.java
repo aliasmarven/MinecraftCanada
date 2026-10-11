@@ -1,5 +1,6 @@
 package xen42.canadamod.entity;
 
+import net.minecraft.client.animation.KeyframeAnimation;
 import net.minecraft.client.model.QuadrupedModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -10,9 +11,12 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 
 public class MooseEntityModel extends QuadrupedModel<MooseEntityRenderState> {
+    private final KeyframeAnimation attackAnimation;
+
 	private ModelPart leftAntler, rightAntler, saddle, harness;
     protected MooseEntityModel(ModelPart root) {
         super(root);
+        this.attackAnimation = MooseEntityAnimation.ATTACK.bake(root);
 		this.leftAntler = head.getChild("oops_the_head_is_backwards").getChild("left_antler");
 		this.rightAntler = head.getChild("oops_the_head_is_backwards").getChild("right_antler");
 		this.harness = head.getChild("oops_the_head_is_backwards").getChild("harness");
@@ -76,7 +80,7 @@ public class MooseEntityModel extends QuadrupedModel<MooseEntityRenderState> {
 	public void setupAnim(MooseEntityRenderState livingEntityRenderState) {
 		super.setupAnim(livingEntityRenderState);
 
-		this.animate(livingEntityRenderState.attackAnimationState, MooseEntityAnimation.ATTACK, livingEntityRenderState.ageInTicks, 1f);
+		this.attackAnimation.apply(livingEntityRenderState.attackAnimationState, livingEntityRenderState.ageInTicks, 1f);
 
 		leftAntler.skipDraw = livingEntityRenderState.isBaby || livingEntityRenderState.leftAntlerMissing;
 		rightAntler.skipDraw = livingEntityRenderState.isBaby || livingEntityRenderState.rightAntlerMissing;

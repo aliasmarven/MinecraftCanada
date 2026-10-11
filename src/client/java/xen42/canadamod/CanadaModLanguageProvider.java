@@ -2,19 +2,19 @@ package xen42.canadamod;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricLanguageProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import xen42.canadamod.entities.MapleBoatEntity;
 
 public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
-    public CanadaModLanguageProvider(FabricDataOutput output, String languageCode, CompletableFuture<HolderLookup.Provider> registryLookup) {
+    public CanadaModLanguageProvider(FabricPackOutput output, String languageCode, CompletableFuture<HolderLookup.Provider> registryLookup) {
     	super(output, languageCode, registryLookup);
     }
 
@@ -35,6 +35,16 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 			this.original = original;
 		}
 
+        @Override
+        public boolean has(String key) {
+            return original.has(key);
+        }
+
+        @Override
+        public String overwrite(String key, String value) {
+            return original.overwrite(key, processValue(value));
+        }
+
 		@Override
 		public void add(String key, String value) {
 			original.add(key, processValue(value));
@@ -46,7 +56,7 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 		}
 
 		public void addVillagerProfession(ResourceKey<VillagerProfession> key, String value) {
-			add("entity." + key.location().getNamespace() + ".villager." + key.location().getPath(), value);
+			add("entity." + key.identifier().getNamespace() + ".villager." + key.identifier().getPath(), value);
 		}
 
 		public void addFilledMap(TagKey<Structure> structure, String value) {
@@ -56,11 +66,11 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 
 	public static class English extends CanadaModLanguageProvider {
 
-		public English(FabricDataOutput output, String languageCode, CompletableFuture<Provider> registryLookup) {
+		public English(FabricPackOutput output, String languageCode, CompletableFuture<Provider> registryLookup) {
 			super(output, languageCode, registryLookup);
 		}
 
-		public English(FabricDataOutput output, CompletableFuture<Provider> registryLookup) {
+		public English(FabricPackOutput output, CompletableFuture<Provider> registryLookup) {
 			this(output, "en_us", registryLookup);
 		}
 
@@ -186,7 +196,7 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 		private static final String NORMAL_CHARS = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_,;.?!/\\'\"";
 		private static final String UPSIDE_DOWN_CHARS = " ɐqɔpǝɟᵷɥᴉɾʞꞁɯuodbɹsʇnʌʍxʎzⱯᗺƆᗡƎℲ⅁HIՐꞰꞀWNOԀὉᴚS⟘∩ΛMXʎZ0⥝ᘔƐ߈ϛ9ㄥ86‾'⸵˙¿¡\\/,„";
 
-		public EnglishUpsideDown(FabricDataOutput output, CompletableFuture<Provider> registryLookup) {
+		public EnglishUpsideDown(FabricPackOutput output, CompletableFuture<Provider> registryLookup) {
 			super(output, "en_ud", registryLookup);
 		}
 

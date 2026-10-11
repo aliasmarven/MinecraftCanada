@@ -1,9 +1,9 @@
 package xen42.canadamod.screen;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -28,23 +28,30 @@ public class CookingPotHandledScreen extends AbstractRecipeBookScreen<CookingPot
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float deltaTicks, int mouseX, int mouseY) {
+    public void extractContents(
+            GuiGraphicsExtractor context,
+            int mouseX, int mouseY, float deltaTicks) {
+
         int i = this.leftPos;
         int j = (this.height - this.imageHeight) / 2;
-        context.blit(RenderType::guiTextured, TEXTURE, i, j, 0.0F, 0.0F,
+
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE,
+            i, j, 0.0F, 0.0F,
             this.imageWidth, this.imageHeight, 256, 256);
 
-        int n = Mth.ceil((this.menu.getFuelProgress() * 13.0F)) + 1;
-        context.blitSprite(RenderType::guiTextured, LIT_PROGRESS_TEXTURE, 14, 14, 0, 14 - n, i + 81, j + 58 - n, 14, n);
+        int n = Mth.ceil(this.menu.getFuelProgress() * 13.0F) + 1;
+        context.blitSprite(RenderPipelines.GUI_TEXTURED,
+            LIT_PROGRESS_TEXTURE,
+            14, 14, 0, 14 - n,
+            i + 81, j + 58 - n, 14, n);
 
         int l = Mth.ceil(this.menu.getCookProgress() * 24.0F);
-        context.blitSprite(RenderType::guiTextured, BURN_PROGRESS_TEXTURE, 24, 16, 0, 0, i + 109, j + 34, l, 16);
+        context.blitSprite(RenderPipelines.GUI_TEXTURED,
+            BURN_PROGRESS_TEXTURE,
+            24, 16, 0, 0,
+            i + 109, j + 34, l, 16);
+
+        super.extractContents(context, mouseX, mouseY, deltaTicks);
     }
 
-    @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        renderBackground(context, mouseX, mouseY, delta);
-        super.render(context, mouseX, mouseY, delta);
-        renderTooltip(context, mouseX, mouseY);
-    }
 }

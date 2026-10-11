@@ -55,8 +55,8 @@ public class CookingPotRecipeBookWidget extends RecipeBookComponent<CookingPotSc
 	}
 
     @Override
-    protected void initFilterButtonTextures() {
-		this.filterButton.initTextureValues(TEXTURES);
+    protected WidgetSprites getFilterButtonTextures() {
+        return TEXTURES;
     }
 
     @Override

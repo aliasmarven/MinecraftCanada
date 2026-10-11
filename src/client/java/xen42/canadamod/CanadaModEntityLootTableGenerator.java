@@ -2,8 +2,8 @@ package xen42.canadamod;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricEntityLootTableProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricEntityLootSubProvider;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -14,17 +14,48 @@ import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.functions.SmeltItemFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
-import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 
-public class CanadaModEntityLootTableGenerator extends FabricEntityLootTableProvider {
-    protected CanadaModEntityLootTableGenerator(FabricDataOutput dataOutput, CompletableFuture<Provider> registryLookup) {
+public class CanadaModEntityLootTableGenerator extends FabricEntityLootSubProvider {
+    protected CanadaModEntityLootTableGenerator(FabricPackOutput dataOutput, CompletableFuture<Provider> registryLookup) {
         super(dataOutput, registryLookup);
     }
 
     @Override
     public String getName() {
         return "CanadaModEntityLootTableGenerator";
+    }
+
+    private static net.minecraft.core.Holder<
+            net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider>
+            exactInt(int value) {
+        return net.minecraft.core.Holder.direct(
+            new net.minecraft.world.level.storage.loot.providers.number.ints.ConstantValue(value)
+        );
+    }
+
+    private static net.minecraft.core.Holder<
+            net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider>
+            uniformInt(int min, int max) {
+        return net.minecraft.core.Holder.direct(
+            new net.minecraft.world.level.storage.loot.providers.number.ints.UniformGenerator(
+                exactInt(min), exactInt(max)
+            )
+        );
+    }
+
+    private static net.minecraft.core.Holder<
+            net.minecraft.world.level.storage.loot.providers.number.floats.ContextFloatProvider>
+            uniformFloat(float min, float max) {
+        return net.minecraft.core.Holder.direct(
+            new net.minecraft.world.level.storage.loot.providers.number.floats.UniformGenerator(
+                net.minecraft.core.Holder.direct(
+                    new net.minecraft.world.level.storage.loot.providers.number.floats.ConstantValue(min)
+                ),
+                net.minecraft.core.Holder.direct(
+                    new net.minecraft.world.level.storage.loot.providers.number.floats.ConstantValue(max)
+                )
+            )
+        );
     }
 
     @Override
@@ -34,11 +65,11 @@ public class CanadaModEntityLootTableGenerator extends FabricEntityLootTableProv
                 LootTable.lootTable()
                 .withPool(
                     LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(1.0F))
+                        .setRolls(exactInt(1))
                         .add(
                             LootItem.lootTableItem(CanadaItems.PELT)
-                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 1.0F)))
-                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(registries, UniformGenerator.between(0.0F, 1.0F)))
+                                .apply(SetItemCountFunction.setCount(uniformInt(0, 1)))
+                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(enchantments, uniformFloat(0f, 1f)))
                         )
                 )
             );
@@ -47,22 +78,30 @@ public class CanadaModEntityLootTableGenerator extends FabricEntityLootTableProv
                 LootTable.lootTable()
                 .withPool(
                     LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(0.5F))
+                        .setRolls(exactInt(1))
+                        .when(net.minecraft.core.Holder.direct(
+                            net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition
+                                .randomChance(0.5F).build()
+                        ))
                         .add(
                             LootItem.lootTableItem(CanadaItems.VENISON)
-                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
-                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(registries, UniformGenerator.between(1.0F, 2.0F)))
+                                .apply(SetItemCountFunction.setCount(uniformInt(0, 2)))
+                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(enchantments, uniformFloat(1f, 2f)))
                                 .apply((LootItemFunction.Builder)SmeltItemFunction.smelted()
                                     .when((LootItemCondition.Builder)shouldSmeltLoot()))
                         )
                 )
                 .withPool(
                     LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(0.5F))
+                        .setRolls(exactInt(1))
+                        .when(net.minecraft.core.Holder.direct(
+                            net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition
+                                .randomChance(0.5F).build()
+                        ))
                         .add(
                             LootItem.lootTableItem(Items.LEATHER)
-                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
-                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(registries, UniformGenerator.between(1.0F, 2.0F)))
+                                .apply(SetItemCountFunction.setCount(uniformInt(0, 2)))
+                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(enchantments, uniformFloat(1f, 2f)))
                         )
                 )
             );
@@ -72,21 +111,21 @@ public class CanadaModEntityLootTableGenerator extends FabricEntityLootTableProv
                 LootTable.lootTable()
                 .withPool(
                     LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(1))
+                        .setRolls(exactInt(1))
                         .add(
                             LootItem.lootTableItem(CanadaItems.WATERFOWL)
-                                .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+                                .apply(SetItemCountFunction.setCount(exactInt(1)))
                                 .apply((LootItemFunction.Builder)SmeltItemFunction.smelted()
                                     .when((LootItemCondition.Builder)shouldSmeltLoot()))
                         )
                 )
                 .withPool(
                     LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(1))
+                        .setRolls(exactInt(1))
                         .add(
                             LootItem.lootTableItem(Items.FEATHER)
-                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
-                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(registries, UniformGenerator.between(0.0F, 3.0F)))
+                                .apply(SetItemCountFunction.setCount(uniformInt(0, 2)))
+                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(enchantments, uniformFloat(0f, 3f)))
                         )
                 )
             );
@@ -95,21 +134,21 @@ public class CanadaModEntityLootTableGenerator extends FabricEntityLootTableProv
                 LootTable.lootTable()
                 .withPool(
                     LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(1))
+                        .setRolls(exactInt(1))
                         .add(
                             LootItem.lootTableItem(CanadaItems.WATERFOWL)
-                                .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
+                                .apply(SetItemCountFunction.setCount(exactInt(1)))
                                 .apply((LootItemFunction.Builder)SmeltItemFunction.smelted()
                                     .when((LootItemCondition.Builder)shouldSmeltLoot()))
                         )
                 )
                 .withPool(
                     LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(1))
+                        .setRolls(exactInt(1))
                         .add(
                             LootItem.lootTableItem(Items.FEATHER)
-                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
-                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(registries, UniformGenerator.between(0.0F, 3.0F)))
+                                .apply(SetItemCountFunction.setCount(uniformInt(0, 2)))
+                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(enchantments, uniformFloat(0f, 3f)))
                         )
                 )
             );
@@ -118,11 +157,11 @@ public class CanadaModEntityLootTableGenerator extends FabricEntityLootTableProv
                 LootTable.lootTable()
                 .withPool(
                     LootPool.lootPool()
-                        .setRolls(ConstantValue.exactly(1))
+                        .setRolls(exactInt(1))
                         .add(
                             LootItem.lootTableItem(Items.SALMON)
-                                .apply(SetItemCountFunction.setCount(UniformGenerator.between(0.0F, 2.0F)))
-                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(registries, UniformGenerator.between(1.0F, 2.0F)))
+                                .apply(SetItemCountFunction.setCount(uniformInt(0, 2)))
+                                .apply(EnchantedCountIncreaseFunction.lootingMultiplier(enchantments, uniformFloat(1f, 2f)))
                                 .apply((LootItemFunction.Builder)SmeltItemFunction.smelted()
                                     .when((LootItemCondition.Builder)shouldSmeltLoot()))
                         )

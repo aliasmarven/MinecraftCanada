@@ -5,9 +5,9 @@ import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -71,7 +71,7 @@ public class ThermosTooltipComponent implements ClientTooltipComponent {
         return Math.min(12, this.thermosContents.size());
     }
 
-    public void renderImage(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    public void extractImage(Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor context) {
         if (this.thermosContents.isEmpty()) {
             this.drawEmptyTooltip(textRenderer, x, y, width, height, context);
         } else {
@@ -80,12 +80,12 @@ public class ThermosTooltipComponent implements ClientTooltipComponent {
 
     }
 
-    private void drawEmptyTooltip(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    private void drawEmptyTooltip(Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor context) {
         drawEmptyDescription(x + this.getXMargin(width), y, textRenderer, context);
         this.drawProgressBar(x + this.getXMargin(width), y + getDescriptionHeight(textRenderer) + 4, textRenderer, context);
     }
 
-    private void drawNonEmptyTooltip(Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    private void drawNonEmptyTooltip(Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor context) {
         boolean bl = this.thermosContents.size() > 12;
         List<ItemStack> list = this.firstStacksInContents(this.thermosContents.getNumberOfStacksShown());
         int i = x + this.getXMargin(width) + 96;
@@ -126,51 +126,51 @@ public class ThermosTooltipComponent implements ClientTooltipComponent {
         return this.thermosContents.stream().skip((long)items.size()).mapToInt(ItemStack::getCount).sum();
     }
 
-    private void drawItem(int index, int x, int y, List<ItemStack> stacks, int seed, Font textRenderer, GuiGraphics drawContext) {
+    private void drawItem(int index, int x, int y, List<ItemStack> stacks, int seed, Font textRenderer, GuiGraphicsExtractor drawContext) {
         int i = stacks.size() - index;
         boolean bl = i == this.thermosContents.getSelectedStackIndex();
         ItemStack itemStack = (ItemStack)stacks.get(i);
         if (bl) {
-            drawContext.blitSprite(RenderType::guiTextured, BUNDLE_SLOT_HIGHLIGHT_BACK_TEXTURE, x, y, 24, 24);
+            drawContext.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_HIGHLIGHT_BACK_TEXTURE, x, y, 24, 24);
         } else {
-            drawContext.blitSprite(RenderType::guiTextured, BUNDLE_SLOT_BACKGROUND_TEXTURE, x, y, 24, 24);
+            drawContext.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_BACKGROUND_TEXTURE, x, y, 24, 24);
         }
 
-        drawContext.renderItem(itemStack, x + 4, y + 4, seed);
-        drawContext.renderItemDecorations(textRenderer, itemStack, x + 4, y + 4);
+        drawContext.item(itemStack, x + 4, y + 4, seed);
+        drawContext.itemDecorations(textRenderer, itemStack, x + 4, y + 4);
         if (bl) {
-            drawContext.blitSprite(RenderType::guiTexturedOverlay, BUNDLE_SLOT_HIGHLIGHT_FRONT_TEXTURE, x, y, 24, 24);
+            drawContext.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_SLOT_HIGHLIGHT_FRONT_TEXTURE, x, y, 24, 24);
         }
 
     }
 
-    private static void drawExtraItemsCount(int x, int y, int numExtra, Font textRenderer, GuiGraphics drawContext) {
-        drawContext.drawCenteredString(textRenderer, "+" + numExtra, x + 12, y + 10, 16777215);
+    private static void drawExtraItemsCount(int x, int y, int numExtra, Font textRenderer, GuiGraphicsExtractor drawContext) {
+        drawContext.centeredText(textRenderer, "+" + numExtra, x + 12, y + 10, 16777215);
     }
 
-    private void drawSelectedItemTooltip(Font textRenderer, GuiGraphics drawContext, int x, int y, int width) {
+    private void drawSelectedItemTooltip(Font textRenderer, GuiGraphicsExtractor drawContext, int x, int y, int width) {
         if (this.thermosContents.hasSelectedStack()) {
             ItemStack itemStack = this.thermosContents.get(this.thermosContents.getSelectedStackIndex());
             Component text = itemStack.getStyledHoverName();
             int i = textRenderer.width(text.getVisualOrderText());
             int j = x + width / 2 - 12;
-            drawContext.renderTooltip(textRenderer, text, j - i / 2, y - 15, (Identifier)itemStack.get(DataComponents.TOOLTIP_STYLE));
+            drawContext.setTooltipForNextFrame(textRenderer, text, j - i / 2, y - 15, itemStack.get(DataComponents.TOOLTIP_STYLE));
         }
 
     }
 
-    private void drawProgressBar(int x, int y, Font textRenderer, GuiGraphics drawContext) {
-        drawContext.blitSprite(RenderType::guiTextured, this.getProgressBarFillTexture(), x + 1, y, this.getProgressBarFill(), 13);
-        drawContext.blitSprite(RenderType::guiTextured, BUNDLE_PROGRESS_BAR_BORDER_TEXTURE, x, y, 96, 13);
+    private void drawProgressBar(int x, int y, Font textRenderer, GuiGraphicsExtractor drawContext) {
+        drawContext.blitSprite(RenderPipelines.GUI_TEXTURED, this.getProgressBarFillTexture(), x + 1, y, this.getProgressBarFill(), 13);
+        drawContext.blitSprite(RenderPipelines.GUI_TEXTURED, BUNDLE_PROGRESS_BAR_BORDER_TEXTURE, x, y, 96, 13);
         Component text = this.getProgressBarLabel();
         if (text != null) {
-            drawContext.drawCenteredString(textRenderer, text, x + 48, y + 3, 16777215);
+            drawContext.centeredText(textRenderer, text, x + 48, y + 3, 16777215);
         }
 
     }
 
-    private static void drawEmptyDescription(int x, int y, Font textRenderer, GuiGraphics drawContext) {
-        drawContext.drawWordWrap(textRenderer, BUNDLE_EMPTY_DESCRIPTION, x, y, 96, 11184810);
+    private static void drawEmptyDescription(int x, int y, Font textRenderer, GuiGraphicsExtractor drawContext) {
+        drawContext.textWithWordWrap(textRenderer, BUNDLE_EMPTY_DESCRIPTION, x, y, 96, 11184810);
     }
 
     private static int getDescriptionHeight(Font textRenderer) {

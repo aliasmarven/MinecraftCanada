@@ -1,6 +1,6 @@
 package xen42.canadamod.entity;
 
-import net.minecraft.client.model.PolarBearModel;
+import net.minecraft.client.model.animal.polarbear.PolarBearModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartNames;
 import net.minecraft.client.model.geom.PartPose;

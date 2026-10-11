@@ -3,7 +3,7 @@ package xen42.canadamod;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
 import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
 import net.fabricmc.fabric.api.tag.convention.v2.ConventionalItemTags;
 import net.minecraft.core.HolderLookup.Provider;
@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.Blocks;
 import xen42.canadamod.recipe.CookingPotRecipeJsonBuilder;
 
 public class CanadaModRecipeGenerator extends FabricRecipeProvider {
-    public CanadaModRecipeGenerator(FabricDataOutput generator, CompletableFuture<Provider> registriesFuture) {
+    public CanadaModRecipeGenerator(FabricPackOutput generator, CompletableFuture<Provider> registriesFuture) {
         super(generator, registriesFuture);
     }
 
@@ -37,8 +37,11 @@ public class CanadaModRecipeGenerator extends FabricRecipeProvider {
     }
 
     @Override
-    protected RecipeProvider createRecipeProvider(Provider registryLookup, RecipeOutput exporter) {
-        return new RecipeProvider(registryLookup, exporter) {
+    protected RecipeProvider createRecipeProvider(
+            Provider registryLookup,
+            net.minecraft.data.worldgen.BootstrapContext<net.minecraft.world.item.crafting.Recipe<?>> recipes,
+            net.minecraft.data.worldgen.BootstrapContext<net.minecraft.advancements.Advancement> advancements) {
+        return new RecipeProvider(recipes, advancements) {
             @Override
             public void buildRecipes() {
                 shaped(RecipeCategory.MISC, Items.LEATHER)
@@ -112,10 +115,10 @@ public class CanadaModRecipeGenerator extends FabricRecipeProvider {
                     .pattern("X X")
                     .pattern("YYY")
                     .pattern("YYY")
-                    .define('X', Items.CHAIN)
+                    .define('X', Items.IRON_CHAIN)
                     .define('Y', CanadaTags.ItemTags.MAPLE_LOGS)
                     .unlockedBy(hasTag(CanadaTags.ItemTags.MAPLE_LOGS), has(CanadaTags.ItemTags.MAPLE_LOGS))
-                    .unlockedBy(getHasName(Items.CHAIN), has(Items.CHAIN))
+                    .unlockedBy(getHasName(Items.IRON_CHAIN), has(Items.IRON_CHAIN))
                     .save(output);
 
                 woodenBoat(CanadaItems.MAPLE_BOAT, CanadaBlocks.MAPLE_PLANKS);
@@ -273,8 +276,8 @@ public class CanadaModRecipeGenerator extends FabricRecipeProvider {
                     .unlockedBy(getHasName(CanadaItems.ANTLERS), has(CanadaItems.ANTLERS))
                     .save(output);
 
-                oreSmelting(List.of(CanadaItems.VENISON), RecipeCategory.FOOD, CanadaItems.COOKED_VENISON, 0.35f, 200, CanadaItems.VENISON.getName().toString());
-                oreSmelting(List.of(CanadaItems.WATERFOWL), RecipeCategory.FOOD, CanadaItems.COOKED_WATERFOWL, 0.35f, 200, CanadaItems.WATERFOWL.getName().toString());
+                oreSmelting(List.of(CanadaItems.VENISON), RecipeCategory.FOOD, net.minecraft.world.item.crafting.CookingBookCategory.FOOD, CanadaItems.COOKED_VENISON, 0.35f, 200, net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(CanadaItems.VENISON).getPath());
+                oreSmelting(List.of(CanadaItems.WATERFOWL), RecipeCategory.FOOD, net.minecraft.world.item.crafting.CookingBookCategory.FOOD, CanadaItems.COOKED_WATERFOWL, 0.35f, 200, net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(CanadaItems.WATERFOWL).getPath());
             }
 
             public static CookingPotRecipeJsonBuilder createCookingPotRecipe(Provider registryLookup, ItemLike output, int count) {

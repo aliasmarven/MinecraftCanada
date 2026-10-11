@@ -2,13 +2,13 @@ package xen42.canadamod;
 
 import java.util.concurrent.CompletableFuture;
 
-import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
-import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootTableProvider;
+import net.fabricmc.fabric.api.datagen.v1.FabricPackOutput;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricBlockLootSubProvider;
 import net.minecraft.core.HolderLookup.Provider;
 
-public class CanadaModBlockLootTableGenerator extends FabricBlockLootTableProvider {
+public class CanadaModBlockLootTableGenerator extends FabricBlockLootSubProvider {
 
-    protected CanadaModBlockLootTableGenerator(FabricDataOutput dataOutput,
+    protected CanadaModBlockLootTableGenerator(FabricPackOutput dataOutput,
             CompletableFuture<Provider> registryLookup) {
         super(dataOutput, registryLookup);
     }
