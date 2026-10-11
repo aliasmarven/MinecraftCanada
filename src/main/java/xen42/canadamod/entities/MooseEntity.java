@@ -373,10 +373,15 @@ public class MooseEntity extends AbstractHorse implements NeutralMob {
         super.dropCustomDeathLoot(world, source, causedByPlayer);
         Entity entity = source.getEntity();
         if (entity instanceof Creeper creeperEntity) {
-            if (creeperEntity.canDropMobsSkull()) {
+            var skullAccessor =
+                (xen42.canadamod.mixin.CreeperSkullAccessor) creeperEntity;
+
+            if (creeperEntity.isPowered()
+                    && !skullAccessor.canadamod$getDroppedSkulls()) {
                 ItemStack itemStack = this.getSkull();
+
                 if (!itemStack.isEmpty()) {
-                    creeperEntity.increaseDroppedSkulls();
+                    skullAccessor.canadamod$setDroppedSkulls(true);
                     this.spawnAtLocation(world, itemStack);
                 }
             }

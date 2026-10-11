@@ -44,7 +44,7 @@ public class BeaverChopTreeGoal extends Goal {
             return false;
         }
 
-        if (!(beaver.level() instanceof ServerLevel serverWorld) || !serverWorld.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+        if (!(beaver.level() instanceof ServerLevel serverWorld) || !serverWorld.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING)) {
             return false;
         }
 

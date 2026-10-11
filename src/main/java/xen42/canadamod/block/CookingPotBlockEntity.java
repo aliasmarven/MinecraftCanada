@@ -122,6 +122,32 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements S
         nbt.putShort("burnTimeTotal", (short)this.burnTimeTotal);
     }
 
+    private static void consumeWithRemainder(
+            ServerLevel world, CookingPotBlockEntity blockEntity, int slotIndex) {
+        ItemStack stack = blockEntity.inventory.get(slotIndex);
+        if (stack.isEmpty()) {
+            return;
+        }
+
+        var remainder = stack.getItem().getCraftingRemainder();
+        stack.shrink(1);
+
+        if (remainder != null) {
+            ItemStack returned = remainder.create();
+
+            if (stack.isEmpty()) {
+                blockEntity.inventory.set(slotIndex, returned);
+            } else {
+                BlockPos pos = blockEntity.getBlockPos();
+                net.minecraft.world.Containers.dropItemStack(
+                    world, pos.getX() + 0.5, pos.getY() + 0.5,
+                    pos.getZ() + 0.5, returned);
+            }
+        }
+
+        blockEntity.setChanged();
+    }
+
     public static void tick(ServerLevel world, BlockPos pos, BlockState state, CookingPotBlockEntity blockEntity) {
         var wasBurning = blockEntity.isCooking();
 
@@ -142,13 +168,19 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements S
         if (canAcceptOutput && currentRecipeResult != ItemStack.EMPTY) {
             var fuelStack = blockEntity.getItem(CookingPotScreenHandler.FUEL_SLOT);
             if (!blockEntity.hasFuel() && !fuelStack.isEmpty()) {
-                blockEntity.burnTimeRemaining = world.fuelValues().burnDuration(fuelStack);
-                blockEntity.burnTimeTotal = blockEntity.burnTimeRemaining;
-                if (fuelStack.getRecipeRemainder().isEmpty()) {
-                    fuelStack.shrink(1);
-                }
-                else {
-                    blockEntity.inventory.set(CookingPotScreenHandler.FUEL_SLOT, fuelStack.getRecipeRemainder());
+                int burnDuration =
+                    net.minecraft.world.level.storage.loot.providers.number.ints.ResolvableInt.getFromItem(
+                        fuelStack,
+                        net.minecraft.core.component.DataComponents.COOKING_FUEL,
+                        net.minecraft.world.item.component.CookingFuel::burnTime,
+                        blockEntity.getLootContext(world),
+                        0
+                    );
+
+                if (burnDuration > 0) {
+                    blockEntity.burnTimeRemaining = burnDuration;
+                    blockEntity.burnTimeTotal = burnDuration;
+                    consumeWithRemainder(world, blockEntity, CookingPotScreenHandler.FUEL_SLOT);
                 }
             }
 
@@ -247,12 +279,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements S
                     var slot = blockEntity.inventory.get(slotIndex);
 
                     if (!slot.isEmpty()) {
-                        if (slot.getRecipeRemainder().isEmpty()) {
-                            slot.shrink(1);
-                        }
-                        else {
-                            blockEntity.inventory.set(slotIndex, slot.getRecipeRemainder());
-                        }
+                        consumeWithRemainder(world, blockEntity, slotIndex);
                     }
                 }
 
@@ -281,7 +308,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements S
         if (CookingPotScreenHandler.isContainer(stack)) {
             return slot == CookingPotScreenHandler.CONTAINER_SLOT;
         }
-        else if (level.fuelValues().isFuel(stack)) {
+        else if (stack.has(net.minecraft.core.component.DataComponents.COOKING_FUEL)) {
             return slot == CookingPotScreenHandler.FUEL_SLOT;
         }
 

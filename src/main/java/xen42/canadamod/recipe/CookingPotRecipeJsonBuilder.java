@@ -103,7 +103,12 @@ public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
         var recipe = new CookingPotRecipe(this.group, this.result, this._inputsList, this._requiresBowl, this._requiresBottle);
 
 		Advancement.Builder builder = exporter.advancement()
-			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(recipeKey))
+			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(
+                net.minecraft.core.Holder.Reference.createStandAlone(
+                    new net.minecraft.core.HolderOwner<Recipe<?>>() {},
+                    recipeKey
+                )
+            ))
 			.rewards(AdvancementRewards.Builder.recipe(recipeKey))
 			.requirements(AdvancementRequirements.Strategy.OR);
 

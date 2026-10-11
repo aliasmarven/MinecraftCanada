@@ -279,7 +279,7 @@ public class CookingPotScreenHandler extends RecipeBookMenu {
 
             slotAtIndex.onTake(player, itemStackAtIndex);
             if (slot == OUTPUT_SLOT) {
-                player.drop(itemStackAtIndex, false);
+                player.drop(itemStackAtIndex, false, net.minecraft.util.Prediction.SERVER_ONLY);
             }
         }
 
@@ -287,7 +287,7 @@ public class CookingPotScreenHandler extends RecipeBookMenu {
     }
 
     public boolean isFuel(ItemStack item) {
-        return this.player.level().fuelValues().isFuel(item);
+        return item.has(net.minecraft.core.component.DataComponents.COOKING_FUEL);
     }
 
     public static boolean isContainer(ItemStack item) {

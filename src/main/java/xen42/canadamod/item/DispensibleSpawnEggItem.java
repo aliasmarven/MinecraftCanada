@@ -19,7 +19,7 @@ public class DispensibleSpawnEggItem extends SpawnEggItem {
             @Override
             public ItemStack execute(BlockSource source, ItemStack stack) {
                 Direction direction = source.state().getValue(DispenserBlock.FACING);
-                EntityType<?> entityType = ((SpawnEggItem) stack.getItem()).getType(source.level().registryAccess(), stack);
+                EntityType<?> entityType = SpawnEggItem.getType(stack);
 
                 try {
                     entityType.spawn(source.level(), stack, null, source.pos().relative(direction), EntitySpawnReason.DISPENSER, direction != Direction.UP, false);
@@ -41,8 +41,7 @@ public class DispensibleSpawnEggItem extends SpawnEggItem {
 
     public DispensibleSpawnEggItem(EntityType<? extends Mob> entityType, Properties properties,
                                     @Nullable DispenseItemBehavior dispenseItemBehavior) {
-        super(entityType, properties);
-        SpawnEggItem.BY_ID.remove(entityType);
+        super(properties.spawnEgg(entityType));
         if (dispenseItemBehavior != null) {
             DispenserBlock.registerBehavior(this, dispenseItemBehavior);
         }

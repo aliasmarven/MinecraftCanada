@@ -55,11 +55,13 @@ public class GrizzlyEntity extends PolarBear {
 		return CanadaSounds.ENTITY_GRIZZLY_BEAR_DEATH;
 	}
 
+    private int nextGrizzlyWarningTick = 0;
+
     @Override
-	protected void playWarningSound() {
-		if (this.warningSoundTicks <= 0) {
-			this.makeSound(CanadaSounds.ENTITY_GRIZZLY_BEAR_WARNING);
-			this.warningSoundTicks = 40;
-		}
-	}
+    protected void playWarningSound() {
+        if (this.tickCount >= this.nextGrizzlyWarningTick) {
+            this.makeSound(CanadaSounds.ENTITY_GRIZZLY_BEAR_WARNING);
+            this.nextGrizzlyWarningTick = this.tickCount + 40;
+        }
+    }
 }
