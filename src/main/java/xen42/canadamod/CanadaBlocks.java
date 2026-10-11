@@ -99,7 +99,7 @@ public class CanadaBlocks {
 	public static Block TREE_TAP = register(
 			"tree_tap",
 			TreeTapBlock::new,
-			BlockBehaviour.Properties.of().forceSolidOn().sound(SoundType.CHAIN).noOcclusion().pushReaction(PushReaction.DESTROY).instabreak(),
+			BlockBehaviour.Properties.of().forceSolidOn().sound(SoundType.CHAIN).noOcclusion().pushReaction(PushReaction.POPPED).instabreak(),
 			false
 		);
 
@@ -107,7 +107,7 @@ public class CanadaBlocks {
 		"cooking_pot",
 		CookingPotBlock::new,
 		BlockBehaviour.Properties.of().lightLevel(Blocks.litBlockEmission(13)).noOcclusion()
-			.mapColor(MapColor.STONE).pushReaction(PushReaction.DESTROY).destroyTime(0.3f),
+			.mapColor(MapColor.STONE).pushReaction(PushReaction.POPPED).destroyTime(0.3f),
 		true
 	);
 
@@ -117,14 +117,14 @@ public class CanadaBlocks {
 	public static Block MOOSE_HEAD = register(
 		"moose_head",
 		MooseSkullBlock::new,
-		BlockBehaviour.Properties.of().strength(1.0F).pushReaction(PushReaction.DESTROY),
+		BlockBehaviour.Properties.of().strength(1.0F).pushReaction(PushReaction.POPPED),
 		false
 	);
 
 	public static Block MOOSE_WALL_HEAD = register(
 		"moose_head_wall",
 		MooseWallSkullBlock::new,
-		BlockBehaviour.Properties.of().strength(1.0F).pushReaction(PushReaction.DESTROY),
+		BlockBehaviour.Properties.of().strength(1.0F).pushReaction(PushReaction.POPPED),
 		false
 	);
 
@@ -155,7 +155,7 @@ public class CanadaBlocks {
 					MAPLE_LEAF_PARTICLE);
 		MAPLE_LEAVES = register(
 			"maple_leaves",
-			(settings) -> new UntintedParticleLeavesBlock(0.01F, MAPLE_LEAF_PARTICLE, settings),
+			(settings) -> new UntintedParticleLeavesBlock(0.01F, MAPLE_LEAF_PARTICLE, net.minecraft.world.level.block.sounds.AmbientLeavesBlockSoundPlayer.noAmbientSound(), settings),
 			BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES),
 			true
 		);
@@ -269,10 +269,10 @@ public class CanadaBlocks {
 			MAPLE_SLAB, MAPLE_FENCE, MAPLE_FENCE_GATE, MAPLE_DOOR, MAPLE_TRAPDOOR, MAPLE_PRESSURE_PLATE, MAPLE_BUTTON
 		};
 
-		
-		
 
-		
+
+
+
 
         MAPLE_SIGN_BLOCK_ENTITY = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE,

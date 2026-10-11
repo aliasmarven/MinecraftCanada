@@ -166,11 +166,11 @@ public class CanadaItems {
     public static void initialize() {
         MAPLE_HANGING_SIGN_ITEM = register("maple_hanging_sign", settings ->
             new HangingSignItem(CanadaBlocks.MAPLE_HANGING_SIGN, CanadaBlocks.MAPLE_WALL_HANGING_SIGN, settings),
-            new Item.Properties().stacksTo(16));
+            new Item.Properties().stacksTo(16).cookingFuel(ResourceKey.create(Registries.CONTEXT_INT_PROVIDER, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "cooking/maple_two_thirds"))));
 
         MAPLE_SIGN_ITEM = register("maple_sign", settings ->
             new StandingAndWallBlockItem(CanadaBlocks.MAPLE_SIGN, CanadaBlocks.MAPLE_WALL_SIGN, Direction.DOWN, settings),
-            new Item.Properties().stacksTo(16));
+            new Item.Properties().stacksTo(16).cookingFuel(ResourceKey.create(Registries.CONTEXT_INT_PROVIDER, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "cooking/maple_two_thirds"))));
 
         // Add custom items to groups
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register((itemGroup) -> {

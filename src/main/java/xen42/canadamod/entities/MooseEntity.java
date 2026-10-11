@@ -341,14 +341,14 @@ public class MooseEntity extends AbstractHorse implements NeutralMob {
             else if (this.getAge() == 0 && this.canFallInLove()) {
                 this.setInLoveTime(600);
 
-                if (!this.level().isClientSide ) {
+                if (!this.level().isClientSide() ) {
                     this.usePlayerItem(player, hand, itemStack);
                     this.setInLove(player);
                     this.playEatingSound();
                     return InteractionResult.SUCCESS_SERVER;
                 }
 
-                if (this.level().isClientSide) {
+                if (this.level().isClientSide()) {
                     return InteractionResult.CONSUME;
                 }
             }
@@ -409,7 +409,7 @@ public class MooseEntity extends AbstractHorse implements NeutralMob {
         boolean isBaby = isBaby();
         if (isBaby) {
             level().addParticle((ParticleOptions)ParticleTypes.HAPPY_VILLAGER, getRandomX(1.0D), getRandomY() + 0.5D, getRandomZ(1.0D), 0.0D, 0.0D, 0.0D);
-            if (!(level()).isClientSide) {
+            if (!(level()).isClientSide()) {
                 ageUp(10);
             }
         }
@@ -467,9 +467,9 @@ public class MooseEntity extends AbstractHorse implements NeutralMob {
     }
 
     private static final UniformInt ANGER_TIME_RANGE = TimeUtil.rangeOfSeconds(20, 39);
-    private int angerTime;
+    private long angerEndTime = -1L;
     @Nullable
-    private UUID angryAt;
+    private net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> angryAt;
 
     @Nullable
     private LivingEntity attacking;
@@ -502,7 +502,7 @@ public class MooseEntity extends AbstractHorse implements NeutralMob {
     }
 
     public void openCustomInventoryScreen(Player player) {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             player.openHorseInventory(this, this.inventory);
         }
     }
@@ -513,7 +513,7 @@ public class MooseEntity extends AbstractHorse implements NeutralMob {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag nbt) {
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput nbt) {
         super.addAdditionalSaveData(nbt);
         addPersistentAngerSaveData(nbt);
         nbt.putBoolean("IsLeftAntlerMissing", this.getEntityData().get(LEFT_ANTLER_MISSING));
@@ -522,12 +522,12 @@ public class MooseEntity extends AbstractHorse implements NeutralMob {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput nbt) {
         super.readAdditionalSaveData(nbt);
         readPersistentAngerSaveData(level(), nbt);
-        this.getEntityData().set(LEFT_ANTLER_MISSING, nbt.getBoolean("IsLeftAntlerMissing").orElse(false));
-        this.getEntityData().set(RIGHT_ANTLER_MISSING, nbt.getBoolean("IsRightAntlerMissing").orElse(false));
-        this.getEntityData().set(DASHING, nbt.getBoolean("IsDashing").orElse(false));
+        this.getEntityData().set(LEFT_ANTLER_MISSING, nbt.getBooleanOr("IsLeftAntlerMissing", false));
+        this.getEntityData().set(RIGHT_ANTLER_MISSING, nbt.getBooleanOr("IsRightAntlerMissing", false));
+        this.getEntityData().set(DASHING, nbt.getBooleanOr("IsDashing", false));
     }
 
     public void setPlayerTarget(@Nullable Player attacking) {
@@ -553,7 +553,7 @@ public class MooseEntity extends AbstractHorse implements NeutralMob {
 
     @Override
     public void startPersistentAngerTimer() {
-        setRemainingPersistentAngerTime(ANGER_TIME_RANGE.sample(this.random));
+        setTimeToRemainAngry(ANGER_TIME_RANGE.sample(this.random));
     }
 
     @Override
@@ -590,22 +590,23 @@ public class MooseEntity extends AbstractHorse implements NeutralMob {
     }
 
     @Override
-    public int getRemainingPersistentAngerTime() {
-        return this.angerTime;
+    public long getPersistentAngerEndTime() {
+        return this.angerEndTime;
     }
 
     @Override
-    public UUID getPersistentAngerTarget() {
+    public net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> getPersistentAngerTarget() {
         return this.angryAt;
     }
 
     @Override
-    public void setRemainingPersistentAngerTime(int angerTime) {
-        this.angerTime = angerTime;
+    public void setPersistentAngerEndTime(long angerEndTime) {
+        this.angerEndTime = angerEndTime;
     }
 
     @Override
-    public void setPersistentAngerTarget(UUID angryAt) {
+    public void setPersistentAngerTarget(
+            @Nullable net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> angryAt) {
         this.angryAt = angryAt;
     }
 

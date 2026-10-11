@@ -43,7 +43,7 @@ public abstract class ConsumableComponentMixin {
             stack.getAllOfType(ConsumableListener.class).forEach((consumable) -> {
                 consumable.onConsume(world, user, stack, thisConsumable);
             });
-            if (!world.isClientSide) {
+            if (!world.isClientSide()) {
                 this.onConsumeEffects().forEach((effect) -> {
                     effect.apply(world, stack, user);
                 });

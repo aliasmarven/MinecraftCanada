@@ -61,7 +61,7 @@ public abstract class CustomEggEntity extends ThrowableItemProjectile {
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		if (!this.level().isClientSide) {
+		if (!this.level().isClientSide()) {
 			if (this.random.nextInt(8) == 0) {
 				int i = 1;
 				if (this.random.nextInt(32) == 0) {

@@ -212,7 +212,7 @@ public class CanadaMod implements ModInitializer {
 		BiomeModifications.addSpawn(beaverBiomes, MobCategory.CREATURE, DUCK_ENTITY, 100, 2, 4);
 		BiomeModifications.addSpawn(beaverBiomes, MobCategory.CREATURE, GOOSE_ENTITY, 80, 1, 2);
 
-		PayloadTypeRegistry.playS2C().register(BeaverChopTreeEffectPayload.PAYLOAD_ID, BeaverChopTreeEffectPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(BeaverChopTreeEffectPayload.PAYLOAD_ID, BeaverChopTreeEffectPayload.CODEC);
 
 		CanadaSounds.onInit();
 	}

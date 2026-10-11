@@ -70,7 +70,7 @@ public class BeaverEntity extends Animal {
         chopAnimationState = new AnimationState();
     }
 
-    private static final EntityDimensions BABY_BASE_DIMENSIONS = EntityType.COW.getDimensions().scale(0.5F).withEyeHeight(0.665F);
+    private static final EntityDimensions BABY_BASE_DIMENSIONS = net.minecraft.world.entity.EntityTypes.COW.getDimensions().scale(0.5F).withEyeHeight(0.665F);
 
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
@@ -219,19 +219,19 @@ public class BeaverEntity extends Animal {
         var didEat = false;
         if (this.isFatigueRefreshItem(itemStack) && this.isFatigued()) {
             didEat = true;
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 this.getEntityData().set(CHOP_FATIGUE, 0);
             }
         }
         if (this.isFrenzyItem(itemStack) && !this.isFrenzied()) {
             didEat = true;
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 this.getEntityData().set(CHOP_FRENZY, 20 * 30);
             }
         }
 
         if (didEat) {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 this.usePlayerItem(player, hand, itemStack);
                 this.playEatingSound();
                 return InteractionResult.SUCCESS_SERVER;
@@ -288,7 +288,7 @@ public class BeaverEntity extends Animal {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag nbt) {
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput nbt) {
         super.addAdditionalSaveData(nbt);
 
         nbt.putInt("chopFatigue", this.getEntityData().get(CHOP_FATIGUE));
@@ -296,10 +296,10 @@ public class BeaverEntity extends Animal {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput nbt) {
         super.readAdditionalSaveData(nbt);
 
-        this.getEntityData().set(CHOP_FATIGUE, nbt.getInt("chopFatigue").orElse(0));
-        this.getEntityData().set(CHOP_FRENZY, nbt.getInt("chopFrenzy").orElse(0));
+        this.getEntityData().set(CHOP_FATIGUE, nbt.getIntOr("chopFatigue", 0));
+        this.getEntityData().set(CHOP_FRENZY, nbt.getIntOr("chopFrenzy", 0));
     }
 }

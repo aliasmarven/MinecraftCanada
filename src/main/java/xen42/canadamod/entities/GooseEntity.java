@@ -53,9 +53,9 @@ import xen42.canadamod.CanadaSounds;
 public class GooseEntity extends Chicken implements NeutralMob {
 
 	private static final UniformInt ANGER_TIME_RANGE = TimeUtil.rangeOfSeconds(20, 39);
-	private int angerTime;
+	private long angerEndTime = -1L;
 	@Nullable
-	private UUID angryAt;
+	private net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> angryAt;
 
 	private static final EntityDataAccessor<Boolean> ANGRY = SynchedEntityData.defineId(GooseEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -191,7 +191,7 @@ public class GooseEntity extends Chicken implements NeutralMob {
 	@Override
 	public void tick() {
 		super.tick();
-		if (!this.level().isClientSide) {
+		if (!this.level().isClientSide()) {
 			this.updatePersistentAnger((ServerLevel)this.level(), false);
 			// Make them give up if hurt too much
 			if (this.getHealth() < 2 && this.isAngry()) {
@@ -293,46 +293,43 @@ public class GooseEntity extends Chicken implements NeutralMob {
 	}
 
 	@Override
-	public void readAdditionalSaveData(CompoundTag nbt) {
+	public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput nbt) {
 		super.readAdditionalSaveData(nbt);
 		this.readPersistentAngerSaveData(this.level(), nbt);
 	}
 
 	@Override
-	public void addAdditionalSaveData(CompoundTag nbt) {
+	public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput nbt) {
 		super.addAdditionalSaveData(nbt);
 		this.addPersistentAngerSaveData(nbt);
 	}
 
 	@Override
 	public void startPersistentAngerTimer() {
-		this.setRemainingPersistentAngerTime(ANGER_TIME_RANGE.sample(this.random));
+		this.setTimeToRemainAngry(ANGER_TIME_RANGE.sample(this.random));
 	}
 
 	@Override
-	public void setRemainingPersistentAngerTime(int angerTime) {
-		this.angerTime = angerTime;
-		if (angerTime > 0) {
-			this.entityData.set(ANGRY, true);
-		}
+	public void setPersistentAngerEndTime(long angerEndTime) {
+		this.angerEndTime = angerEndTime;
+		this.entityData.set(ANGRY, this.isAngry() || this.angryAt != null);
 	}
 
 	@Override
-	public int getRemainingPersistentAngerTime() {
-		return this.angerTime;
+	public long getPersistentAngerEndTime() {
+		return this.angerEndTime;
 	}
 
 	@Override
-	public void setPersistentAngerTarget(@Nullable UUID angryAt) {
+	public void setPersistentAngerTarget(
+			@Nullable net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> angryAt) {
 		this.angryAt = angryAt;
-		if (angryAt != null) {
-			this.entityData.set(ANGRY, true);
-		}
+		this.entityData.set(ANGRY, this.isAngry() || angryAt != null);
 	}
 
 	@Nullable
 	@Override
-	public UUID getPersistentAngerTarget() {
+	public net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> getPersistentAngerTarget() {
 		return this.angryAt;
 	}
 }
