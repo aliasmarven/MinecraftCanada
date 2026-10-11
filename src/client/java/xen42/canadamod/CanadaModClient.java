@@ -5,7 +5,6 @@ import com.mojang.math.Axis;
 import java.util.function.Supplier;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer;
@@ -20,16 +19,19 @@ import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.texture.UvMapping;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.block.BlockModelResolver;
+import net.minecraft.client.renderer.block.BlockModelRenderState;
+import net.minecraft.client.renderer.block.model.BlockDisplayContext;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
-import net.minecraft.client.renderer.blockentity.SignRenderer;
+import net.minecraft.client.renderer.blockentity.StandingSignRenderer;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.sounds.SoundSource;
@@ -37,7 +39,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.properties.WoodType;
 import xen42.canadamod.armor.BeaverHatModel;
 import xen42.canadamod.armor.MooseHatModel;
 import xen42.canadamod.block.MooseSkullBlock;
@@ -83,12 +84,12 @@ public class CanadaModClient implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		addCustomWoodTypeTexture(CanadaBlocks.MAPLE_WOOD_TYPE);
 
-		BlockRenderLayerMap.INSTANCE.putBlock(CanadaBlocks.MAPLE_DOOR, RenderType.cutout());
-		BlockRenderLayerMap.INSTANCE.putBlock(CanadaBlocks.MAPLE_SAPLING, RenderType.cutout());
-		BlockRenderLayerMap.INSTANCE.putBlock(CanadaBlocks.POTTED_MAPLE_SAPLING, RenderType.cutout());
-		BlockRenderLayerMap.INSTANCE.putBlock(CanadaBlocks.TREE_TAP, RenderType.cutout());
+
+
+
+
+
 
 		EntityRendererRegistry.register(MapleBoatEntity.MAPLE_BOAT, context -> new BoatRenderer(context, MAPLE_BOAT));
 		EntityRendererRegistry.register(MapleBoatEntity.MAPLE_CHEST_BOAT, context -> new BoatRenderer(context, MAPLE_CHEST_BOAT));
@@ -97,7 +98,7 @@ public class CanadaModClient implements ClientModInitializer {
 
 		ParticleProviderRegistry.getInstance().register(CanadaBlocks.MAPLE_LEAF_PARTICLE, MapleLeavesFactory::new);
 
-		BlockEntityRenderers.register(CanadaBlocks.MAPLE_SIGN_BLOCK_ENTITY, SignRenderer::new);
+		BlockEntityRenderers.register(CanadaBlocks.MAPLE_SIGN_BLOCK_ENTITY, StandingSignRenderer::new);
 		BlockEntityRenderers.register(CanadaBlocks.MAPLE_HANGING_SIGN_BLOCK_ENTITY, HangingSignRenderer::new);
 
 		MenuScreens.register(CanadaMod.COOKING_POT_SCREEN_HANDLER_TYPE, CookingPotHandledScreen::new);
@@ -130,7 +131,7 @@ public class CanadaModClient implements ClientModInitializer {
 				if (beaver != null) {
 					beaver.isChopping = payload.stage != -1;
 				}
-				context.client().levelRenderer.destroyBlockProgress(payload.id, payload.pos, payload.stage);
+				context.client().level.destroyBlockProgress(payload.id, payload.pos, payload.stage);
 
 				// Don't play sound when setting a guy to -1
 				if (payload.stage > 0) {
@@ -142,15 +143,6 @@ public class CanadaModClient implements ClientModInitializer {
 		});
 	}
 
-	public void addCustomWoodTypeTexture(WoodType type) {
-		Identifier textureId = Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "entity/signs/" + type.name());
-		Material spriteId = new Material(Sheets.SIGN_MATERIALS.get(WoodType.OAK).atlasLocation(), textureId);
-		Sheets.SIGN_MATERIALS.put(type, spriteId);
-
-		Identifier hangingTextureId = Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "entity/signs/hanging/" + type.name());
-		Material hangingSpriteId = new Material(Sheets.HANGING_SIGN_MATERIALS.get(WoodType.OAK).atlasLocation(), hangingTextureId);
-		Sheets.HANGING_SIGN_MATERIALS.put(type, hangingSpriteId);
-	}
 
 	private class CustomArmorRenderer implements ArmorRenderer {
 		private Supplier<LayerDefinition> model;
@@ -160,7 +152,7 @@ public class CanadaModClient implements ClientModInitializer {
 		}
 
 		@Override
-		public void render(PoseStack matrices, MultiBufferSource vertexConsumers, ItemStack stack,
+		public void render(PoseStack matrices, SubmitNodeCollector vertexConsumers, ItemStack stack,
 				HumanoidRenderState bipedEntityRenderState, EquipmentSlot slot, int light,
 				HumanoidModel<HumanoidRenderState> contextModel) {
 			if (slot != EquipmentSlot.HEAD) {
@@ -170,24 +162,58 @@ public class CanadaModClient implements ClientModInitializer {
 			var name = stack.getItem().toString().split(":")[1];
 
 			ModelPart part = model.get().bakeRoot().getChild("hat");
-			part.copyFrom(contextModel.getHead());
-			part.render(matrices, vertexConsumers.getBuffer(RenderType.armorCutoutNoCull(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/armor/" + name + ".png"))),
-				light, OverlayTexture.NO_OVERLAY);
+			part.loadPose(contextModel.getHead().storePose());
+			vertexConsumers.submitModelPart(
+                part,
+                matrices,
+                RenderTypes.armorCutoutNoCull(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/armor/" + name + ".png")),
+                light,
+                OverlayTexture.NO_OVERLAY,
+                new UvMapping() {
+                    @Override
+                    public float getU(float u) {
+                        return u;
+                    }
 
-			Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.HEAD, light, OverlayTexture.NO_OVERLAY, matrices,
-				vertexConsumers, Minecraft.getInstance().level, 0);
+                    @Override
+                    public float getV(float v) {
+                        return v;
+                    }
+                }
+            );
+
+			ItemStackRenderState itemState = new ItemStackRenderState();
+
+            Minecraft.getInstance().getItemModelResolver().updateForTopItem(
+                itemState,
+                stack,
+                ItemDisplayContext.HEAD,
+                Minecraft.getInstance().level,
+                null,
+                0
+            );
+
+            itemState.submit(
+                matrices,
+                vertexConsumers,
+                light,
+                OverlayTexture.NO_OVERLAY,
+                -1
+            );
 		}
 	}
 
 	private class BlockOnHeadArmorRenderer implements ArmorRenderer {
 		private Block block;
+        private final BlockModelResolver modelResolver =
+            new BlockModelResolver(Minecraft.getInstance().getModelManager());
 
 		public BlockOnHeadArmorRenderer(Block block) {
 			this.block = block;
 		}
 
 		@Override
-		public void render(PoseStack matrices, MultiBufferSource vertexConsumers, ItemStack stack,
+		public void render(PoseStack matrices, SubmitNodeCollector vertexConsumers, ItemStack stack,
 				HumanoidRenderState bipedEntityRenderState, EquipmentSlot slot, int light,
 				HumanoidModel<HumanoidRenderState> contextModel) {
 			if (slot != EquipmentSlot.HEAD) {
@@ -211,8 +237,19 @@ public class CanadaModClient implements ClientModInitializer {
 				state = state.setValue(MooseSkullBlock.WEIRD_HACK, false);
 			}
 
-			Minecraft.getInstance().getBlockRenderer().renderSingleBlock(state, matrices, vertexConsumers,
-				light, OverlayTexture.NO_OVERLAY);
+			BlockModelRenderState modelState = new BlockModelRenderState();
+            this.modelResolver.update(
+                modelState,
+                state,
+                BlockDisplayContext.create()
+            );
+            modelState.submit(
+                matrices,
+                vertexConsumers,
+                light,
+                OverlayTexture.NO_OVERLAY,
+                -1
+            );
 
 			matrices.popPose();
 		}

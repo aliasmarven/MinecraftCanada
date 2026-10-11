@@ -51,7 +51,7 @@ public class CanadaModModelGenerator extends FabricModelProvider {
         blockStateModelGenerator.woodProvider(CanadaBlocks.MAPLE_LOG).log(CanadaBlocks.MAPLE_LOG).wood(CanadaBlocks.MAPLE_WOOD);
         blockStateModelGenerator.woodProvider(CanadaBlocks.STRIPPED_MAPLE_LOG).log(CanadaBlocks.STRIPPED_MAPLE_LOG).wood(CanadaBlocks.STRIPPED_MAPLE_WOOD);
         blockStateModelGenerator.createTrivialCube(CanadaBlocks.MAPLE_LEAVES);
-        blockStateModelGenerator.createHangingSign(CanadaBlocks.STRIPPED_MAPLE_LOG, CanadaBlocks.MAPLE_HANGING_SIGN, CanadaBlocks.MAPLE_WALL_HANGING_SIGN);
+        // Maple sign models and all orientations are supplied as 26.3 JSON resources in src/main/generated/assets/canadamod.
         blockStateModelGenerator.createPlant(CanadaBlocks.MAPLE_SAPLING, CanadaBlocks.POTTED_MAPLE_SAPLING, PlantType.NOT_TINTED);
 
         blockStateModelGenerator.createTrivialCube(CanadaBlocks.RUBBER_BLOCK);

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_hanging_sign_rot_1",
+  "textures": {
+    "all": "canadamod:block/maple_hanging_sign",
+    "particle": "canadamod:block/stripped_maple_log"
+  }
+}

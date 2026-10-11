@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
-      "model": "canadamod:block/maple_hanging_sign"
+    "facing=east": {
+      "model": "canadamod:block/maple_wall_hanging_sign",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "canadamod:block/maple_wall_hanging_sign",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "canadamod:block/maple_wall_hanging_sign"
+    },
+    "facing=west": {
+      "model": "canadamod:block/maple_wall_hanging_sign",
+      "y": 90
     }
   }
 }
