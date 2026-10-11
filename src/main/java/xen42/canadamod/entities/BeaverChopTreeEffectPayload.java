@@ -4,11 +4,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import xen42.canadamod.CanadaMod;
 
 public class BeaverChopTreeEffectPayload implements CustomPacketPayload {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "beaver_chop_tree_effect");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "beaver_chop_tree_effect");
     public static final CustomPacketPayload.Type<BeaverChopTreeEffectPayload> PAYLOAD_ID = new CustomPacketPayload.Type<>(ID);
 
     public int id;

@@ -30,7 +30,7 @@ import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -59,13 +59,13 @@ import xen42.canadamod.entity.MooseSkullBlockEntityRenderer;
 import xen42.canadamod.screen.CookingPotHandledScreen;
 
 public class CanadaModClient implements ClientModInitializer {
-	public static final ModelLayerLocation MAPLE_BOAT = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "boat/maple"), "main");
-	public static final ModelLayerLocation MAPLE_CHEST_BOAT = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "chest_boat/maple"), "main");
-	public static final ModelLayerLocation MODEL_BEAVER_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "beaver"), "main");
-	public static final ModelLayerLocation MODEL_MOOSE_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "moose"), "main");
-	public static final ModelLayerLocation MODEL_DUCK_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "duck"), "main");
-	public static final ModelLayerLocation MODEL_GOOSE_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "goose"), "main");
-	public static final ModelLayerLocation MODEL_GRIZZLY_LAYER = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "grizzly"), "main");
+	public static final ModelLayerLocation MAPLE_BOAT = new ModelLayerLocation(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "boat/maple"), "main");
+	public static final ModelLayerLocation MAPLE_CHEST_BOAT = new ModelLayerLocation(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "chest_boat/maple"), "main");
+	public static final ModelLayerLocation MODEL_BEAVER_LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "beaver"), "main");
+	public static final ModelLayerLocation MODEL_MOOSE_LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "moose"), "main");
+	public static final ModelLayerLocation MODEL_DUCK_LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "duck"), "main");
+	public static final ModelLayerLocation MODEL_GOOSE_LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "goose"), "main");
+	public static final ModelLayerLocation MODEL_GRIZZLY_LAYER = new ModelLayerLocation(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "grizzly"), "main");
 
 	public class MapleBoat implements EntityModelLayerRegistry.TexturedModelDataProvider {
 		@Override
@@ -143,11 +143,11 @@ public class CanadaModClient implements ClientModInitializer {
 	}
 
 	public void addCustomWoodTypeTexture(WoodType type) {
-		ResourceLocation textureId = ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "entity/signs/" + type.name());
+		Identifier textureId = Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "entity/signs/" + type.name());
 		Material spriteId = new Material(Sheets.SIGN_MATERIALS.get(WoodType.OAK).atlasLocation(), textureId);
 		Sheets.SIGN_MATERIALS.put(type, spriteId);
 
-		ResourceLocation hangingTextureId = ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "entity/signs/hanging/" + type.name());
+		Identifier hangingTextureId = Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "entity/signs/hanging/" + type.name());
 		Material hangingSpriteId = new Material(Sheets.HANGING_SIGN_MATERIALS.get(WoodType.OAK).atlasLocation(), hangingTextureId);
 		Sheets.HANGING_SIGN_MATERIALS.put(type, hangingSpriteId);
 	}
@@ -171,7 +171,7 @@ public class CanadaModClient implements ClientModInitializer {
 
 			ModelPart part = model.get().bakeRoot().getChild("hat");
 			part.copyFrom(contextModel.getHead());
-			part.render(matrices, vertexConsumers.getBuffer(RenderType.armorCutoutNoCull(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/armor/" + name + ".png"))),
+			part.render(matrices, vertexConsumers.getBuffer(RenderType.armorCutoutNoCull(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/armor/" + name + ".png"))),
 				light, OverlayTexture.NO_OVERLAY);
 
 			Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.HEAD, light, OverlayTexture.NO_OVERLAY, matrices,

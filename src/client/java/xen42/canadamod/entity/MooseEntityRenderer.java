@@ -3,7 +3,7 @@ package xen42.canadamod.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.CanadaModClient;
@@ -21,8 +21,8 @@ public class MooseEntityRenderer extends MobRenderer<MooseEntity, MooseEntityRen
     }
 
     @Override
-    public ResourceLocation getTextureLocation(MooseEntityRenderState state) {
-        return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/moose/moose.png");
+    public Identifier getTextureLocation(MooseEntityRenderState state) {
+        return Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/moose/moose.png");
     }
 
     @Override

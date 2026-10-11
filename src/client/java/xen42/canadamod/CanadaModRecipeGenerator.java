@@ -11,7 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -32,8 +32,8 @@ public class CanadaModRecipeGenerator extends FabricRecipeProvider {
     }
 
     @Override
-    public ResourceLocation getRecipeIdentifier(ResourceLocation identifier) {
-        return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, identifier.getPath());
+    public Identifier getRecipeIdentifier(Identifier identifier) {
+        return Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, identifier.getPath());
     }
 
     @Override

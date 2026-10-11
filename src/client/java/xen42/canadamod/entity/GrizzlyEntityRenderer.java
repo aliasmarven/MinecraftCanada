@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.PolarBearRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.CanadaModClient;
 import xen42.canadamod.entities.GrizzlyEntity;
@@ -16,8 +16,8 @@ public class GrizzlyEntityRenderer extends MobRenderer<GrizzlyEntity, PolarBearR
     }
 
     @Override
-    public ResourceLocation getTextureLocation(PolarBearRenderState state) {
-        return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/grizzly/grizzly.png");
+    public Identifier getTextureLocation(PolarBearRenderState state) {
+        return Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/grizzly/grizzly.png");
     }
 
     @Override

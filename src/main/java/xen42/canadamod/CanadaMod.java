@@ -6,14 +6,13 @@ import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.world.poi.PointOfInterestHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.effect.MobEffect;
@@ -65,18 +64,18 @@ import org.slf4j.LoggerFactory;
 public class CanadaMod implements ModInitializer {
 	public static final String MOD_ID = "canadamod";
 
-	public static final ResourceKey<Biome> MAPLE_BIOME_KEY = ResourceKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_forest"));
+	public static final ResourceKey<Biome> MAPLE_BIOME_KEY = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_forest"));
 
-	public static final ResourceKey<RecipeType<?>> COOKING_POT_RECIPE_TYPE_KEY = ResourceKey.create(Registries.RECIPE_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "cooking_pot"));
-	public static final RecipeType<CookingPotRecipe> COOKING_POT_RECIPE_TYPE = Registry.register(BuiltInRegistries.RECIPE_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "cooking_pot"), new RecipeType<CookingPotRecipe>() {
+	public static final ResourceKey<RecipeType<?>> COOKING_POT_RECIPE_TYPE_KEY = ResourceKey.create(Registries.RECIPE_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, "cooking_pot"));
+	public static final RecipeType<CookingPotRecipe> COOKING_POT_RECIPE_TYPE = Registry.register(BuiltInRegistries.RECIPE_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, "cooking_pot"), new RecipeType<CookingPotRecipe>() {
 		public String toString() {
 			return "cooking_pot";
 		}
 	});
-	public static final RecipeSerializer<CookingPotRecipe> COOKING_POT_RECIPE_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, ResourceLocation.fromNamespaceAndPath(MOD_ID, "cooking_pot"), new CookingPotRecipe.Serializer());
-	public static final RecipeDisplay.Type<CookingPotRecipeDisplay> COOKING_POT_RECIPE_DISPLAY = Registry.register(BuiltInRegistries.RECIPE_DISPLAY, ResourceLocation.fromNamespaceAndPath(MOD_ID, "cooking_pot"), CookingPotRecipeDisplay.SERIALIZER);
+	public static final RecipeSerializer<CookingPotRecipe> COOKING_POT_RECIPE_SERIALIZER = Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Identifier.fromNamespaceAndPath(MOD_ID, "cooking_pot"), new RecipeSerializer<>(CookingPotRecipe.Serializer.CODEC, CookingPotRecipe.Serializer.PACKET_CODEC));
+	public static final RecipeDisplay.Type<CookingPotRecipeDisplay> COOKING_POT_RECIPE_DISPLAY = Registry.register(BuiltInRegistries.RECIPE_DISPLAY, Identifier.fromNamespaceAndPath(MOD_ID, "cooking_pot"), CookingPotRecipeDisplay.SERIALIZER);
 	public static final RecipeBookCategory COOKING_POT_RECIPE_BOOK_CATEGORY = Registry.register(BuiltInRegistries.RECIPE_BOOK_CATEGORY,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "cooking_pot"), new RecipeBookCategory() {
+		Identifier.fromNamespaceAndPath(MOD_ID, "cooking_pot"), new RecipeBookCategory() {
 		public String toString() {
 			return "COOKING_POT";
 		}
@@ -84,7 +83,7 @@ public class CanadaMod implements ModInitializer {
 
 	public static final MenuType<CookingPotScreenHandler> COOKING_POT_SCREEN_HANDLER_TYPE = Registry.register(
 		BuiltInRegistries.MENU,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "cooking_pot"),
+		Identifier.fromNamespaceAndPath(MOD_ID, "cooking_pot"),
 		new MenuType<CookingPotScreenHandler>(CookingPotScreenHandler::new, null));
 
 	public static final BlockEntityType<CookingPotBlockEntity> COOKING_POT_ENTITY = registerBlockEntityType(
@@ -98,59 +97,59 @@ public class CanadaMod implements ModInitializer {
 			new Block[] { CanadaBlocks.MOOSE_HEAD, CanadaBlocks.MOOSE_WALL_HEAD }).build()
 	);
 	public static <T extends BlockEntityType<?>> T registerBlockEntityType(String path, T blockEntityType) {
-		return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, path), blockEntityType);
+		return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, path), blockEntityType);
 	}
 
-	public static final ResourceKey<EntityType<?>> BEAVER_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID,"beaver"));
+	public static final ResourceKey<EntityType<?>> BEAVER_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID,"beaver"));
 	public static final EntityType<BeaverEntity> BEAVER_ENTITY = Registry.register(
 		BuiltInRegistries.ENTITY_TYPE,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "beaver"),
+		Identifier.fromNamespaceAndPath(MOD_ID, "beaver"),
 		EntityType.Builder.of(BeaverEntity::new, MobCategory.CREATURE).sized(0.5f, 0.5f).build(BEAVER_ENTITY_KEY));
 
-	public static final ResourceKey<EntityType<?>> MOOSE_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID,"moose"));
+	public static final ResourceKey<EntityType<?>> MOOSE_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID,"moose"));
 	public static final EntityType<MooseEntity> MOOSE_ENTITY = Registry.register(
 		BuiltInRegistries.ENTITY_TYPE,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "moose"),
+		Identifier.fromNamespaceAndPath(MOD_ID, "moose"),
 		EntityType.Builder.of(MooseEntity::new, MobCategory.CREATURE).sized(1.75f, 2.5f).build(MOOSE_ENTITY_KEY));
 
-	public static final ResourceKey<EntityType<?>> DUCK_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID,"duck"));
+	public static final ResourceKey<EntityType<?>> DUCK_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID,"duck"));
 	public static final EntityType<DuckEntity> DUCK_ENTITY = Registry.register(
 		BuiltInRegistries.ENTITY_TYPE,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "duck"),
+		Identifier.fromNamespaceAndPath(MOD_ID, "duck"),
 		EntityType.Builder.of(DuckEntity::new, MobCategory.CREATURE).sized(0.4f, 0.7f).build(DUCK_ENTITY_KEY));
 
-	public static final ResourceKey<EntityType<?>> GOOSE_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID,"goose"));
+	public static final ResourceKey<EntityType<?>> GOOSE_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID,"goose"));
 	public static final EntityType<GooseEntity> GOOSE_ENTITY = Registry.register(
 		BuiltInRegistries.ENTITY_TYPE,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "goose"),
+		Identifier.fromNamespaceAndPath(MOD_ID, "goose"),
 		EntityType.Builder.of(GooseEntity::new, MobCategory.CREATURE).sized(0.4f, 0.7f).build(GOOSE_ENTITY_KEY));
 
-	public static final ResourceKey<EntityType<?>> GRIZZLY_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID,"grizzly"));
+	public static final ResourceKey<EntityType<?>> GRIZZLY_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID,"grizzly"));
 	public static final EntityType<GrizzlyEntity> GRIZZLY_ENTITY = Registry.register(
 		BuiltInRegistries.ENTITY_TYPE,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "grizzly"),
+		Identifier.fromNamespaceAndPath(MOD_ID, "grizzly"),
 		EntityType.Builder.of(GrizzlyEntity::new, MobCategory.CREATURE).sized(1.4f, 1.4f).build(GRIZZLY_ENTITY_KEY));
 
-	public static final ResourceKey<EntityType<?>> DUCK_EGG_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID,"duck_egg_entity"));
+	public static final ResourceKey<EntityType<?>> DUCK_EGG_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID,"duck_egg_entity"));
 	public static final EntityType<CustomEggEntity> DUCK_EGG_ENTITY = Registry.register(
 		BuiltInRegistries.ENTITY_TYPE,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "duck_egg_entity"),
+		Identifier.fromNamespaceAndPath(MOD_ID, "duck_egg_entity"),
 		EntityType.Builder.<CustomEggEntity>of(DuckEggEntity::new, MobCategory.MISC).sized(0.0f, 0.0f).build(DUCK_EGG_ENTITY_KEY));
 
-	public static final ResourceKey<EntityType<?>> GOOSE_EGG_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID,"goose_egg_entity"));
+	public static final ResourceKey<EntityType<?>> GOOSE_EGG_ENTITY_KEY = ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID,"goose_egg_entity"));
 	public static final EntityType<CustomEggEntity> GOOSE_EGG_ENTITY = Registry.register(
 		BuiltInRegistries.ENTITY_TYPE,
-		ResourceLocation.fromNamespaceAndPath(MOD_ID, "goose_egg_entity"),
+		Identifier.fromNamespaceAndPath(MOD_ID, "goose_egg_entity"),
 		EntityType.Builder.<CustomEggEntity>of(GooseEggEntity::new, MobCategory.MISC).sized(0.0f, 0.0f).build(GOOSE_EGG_ENTITY_KEY));
 
 	private static Holder<MobEffect> registerStatusEffect(String id, MobEffect statusEffect) {
-		return Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, ResourceLocation.fromNamespaceAndPath(MOD_ID, id), statusEffect);
+		return Registry.registerForHolder(BuiltInRegistries.MOB_EFFECT, Identifier.fromNamespaceAndPath(MOD_ID, id), statusEffect);
 	}
 	public static Holder<MobEffect> BEAVER_EFFECT;
 	public static Holder<MobEffect> MOOSE_EFFECT;
 
-	public static final ResourceKey<Structure> MAPLE_CABIN_KEY = ResourceKey.create(Registries.STRUCTURE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "maple_cabin"));
-	public static final StructureType<JigsawStructure> MAPLE_CABIN_TYPE_KEY = Registry.register(BuiltInRegistries.STRUCTURE_TYPE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "maple_cabin"),
+	public static final ResourceKey<Structure> MAPLE_CABIN_KEY = ResourceKey.create(Registries.STRUCTURE, Identifier.fromNamespaceAndPath(MOD_ID, "maple_cabin"));
+	public static final StructureType<JigsawStructure> MAPLE_CABIN_TYPE_KEY = Registry.register(BuiltInRegistries.STRUCTURE_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, "maple_cabin"),
 		() -> JigsawStructure.CODEC);
 
 	// This logger is used to write text to the console and the log file.
@@ -174,13 +173,13 @@ public class CanadaMod implements ModInitializer {
 
 		BEAVER_EFFECT = registerStatusEffect("beaver_effect",
 			(new CustomStatusEffect(MobEffectCategory.BENEFICIAL, 10187841))
-			.addAttributeModifier(Attributes.BLOCK_BREAK_SPEED, ResourceLocation.fromNamespaceAndPath(MOD_ID, "effect.beaver_effect"), 3f, Operation.ADD_MULTIPLIED_TOTAL)
-			.addAttributeModifier(Attributes.SUBMERGED_MINING_SPEED, ResourceLocation.fromNamespaceAndPath(MOD_ID, "effect.beaver_effect"), 2f, Operation.ADD_MULTIPLIED_TOTAL)
+			.addAttributeModifier(Attributes.BLOCK_BREAK_SPEED, Identifier.fromNamespaceAndPath(MOD_ID, "effect.beaver_effect"), 3f, Operation.ADD_MULTIPLIED_TOTAL)
+			.addAttributeModifier(Attributes.SUBMERGED_MINING_SPEED, Identifier.fromNamespaceAndPath(MOD_ID, "effect.beaver_effect"), 2f, Operation.ADD_MULTIPLIED_TOTAL)
 		);
 		MOOSE_EFFECT = registerStatusEffect("moose_effect",
 			(new CustomStatusEffect(MobEffectCategory.BENEFICIAL, 7079970))
-			.addAttributeModifier(Attributes.MAX_HEALTH, ResourceLocation.fromNamespaceAndPath(MOD_ID, "effect.moose_effect"), 6.0, Operation.ADD_VALUE)
-			.addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE, ResourceLocation.fromNamespaceAndPath(MOD_ID, "effect.moose_effect"), 2f, Operation.ADD_MULTIPLIED_TOTAL)
+			.addAttributeModifier(Attributes.MAX_HEALTH, Identifier.fromNamespaceAndPath(MOD_ID, "effect.moose_effect"), 6.0, Operation.ADD_VALUE)
+			.addAttributeModifier(Attributes.KNOCKBACK_RESISTANCE, Identifier.fromNamespaceAndPath(MOD_ID, "effect.moose_effect"), 2f, Operation.ADD_MULTIPLIED_TOTAL)
 		);
 
 		CanadaBlocks.initialize();
@@ -191,7 +190,7 @@ public class CanadaMod implements ModInitializer {
 		CanadaPlacedFeatures.onInitialize();
 
 		BiomeModifications.addFeature(context -> context.getBiomeKey().location()
-			.equals(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_forest")), GenerationStep.Decoration.VEGETAL_DECORATION, CanadaPlacedFeatures.MAPLE_FOREST_VEGETATION);
+			.equals(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_forest")), GenerationStep.Decoration.VEGETAL_DECORATION, CanadaPlacedFeatures.MAPLE_FOREST_VEGETATION);
 
 		SpawnPlacements.register(BEAVER_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawn);
 		SpawnPlacements.register(MOOSE_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawn);

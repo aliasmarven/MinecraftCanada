@@ -3,7 +3,7 @@ package xen42.canadamod.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.CanadaModClient;
 import xen42.canadamod.entities.BeaverEntity;
@@ -15,8 +15,8 @@ public class BeaverEntityRenderer extends MobRenderer<BeaverEntity, BeaverEntity
     }
 
     @Override
-    public ResourceLocation getTextureLocation(BeaverEntityRenderState state) {
-        return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/beaver/beaver.png");
+    public Identifier getTextureLocation(BeaverEntityRenderState state) {
+        return Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/beaver/beaver.png");
     }
 
     @Override

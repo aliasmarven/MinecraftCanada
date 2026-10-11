@@ -15,7 +15,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.BlockFamilies;
 import net.minecraft.data.BlockFamily;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -145,7 +145,7 @@ public class CanadaBlocks {
 			true
 		);
 		Registry.register(BuiltInRegistries.PARTICLE_TYPE,
-					ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple"),
+					Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple"),
 					MAPLE_LEAF_PARTICLE);
 		MAPLE_LEAVES = register(
 			"maple_leaves",
@@ -283,12 +283,12 @@ public class CanadaBlocks {
 
         MAPLE_SIGN_BLOCK_ENTITY = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_sign"),
+            Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_sign"),
 			FabricBlockEntityTypeBuilder.<SignBlockEntity>create(MapleSignEntity::new, MAPLE_SIGN, MAPLE_WALL_SIGN).build());
 
 		MAPLE_HANGING_SIGN_BLOCK_ENTITY = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_hanging_sign"),
+            Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_hanging_sign"),
 			FabricBlockEntityTypeBuilder.<HangingSignBlockEntity>create(MapleHangingSignBlockEntity::new, MAPLE_HANGING_SIGN, MAPLE_WALL_HANGING_SIGN).build());
 	}
 
@@ -313,10 +313,10 @@ public class CanadaBlocks {
 	}
 
 	private static ResourceKey<Block> keyOfBlock(String name) {
-		return ResourceKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
+		return ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
 	}
 
 	private static ResourceKey<Item> keyOfItem(String name) {
-		return ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
+		return ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
 	}
 }

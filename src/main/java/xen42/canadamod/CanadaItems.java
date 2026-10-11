@@ -7,15 +7,14 @@ import java.util.function.UnaryOperator;
 
 import com.google.common.collect.Maps;
 
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -29,7 +28,6 @@ import net.minecraft.world.item.HangingSignItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.SignItem;
 import net.minecraft.world.item.StandingAndWallBlockItem;
 import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.Consumables;
@@ -77,7 +75,11 @@ public class CanadaItems {
         new DispensibleSpawnEggItem(CanadaMod.GRIZZLY_ENTITY, settings), new Item.Properties());
 
     public static final Item TREE_TAP = register("tree_tap", (settings) -> new BlockItem(CanadaBlocks.TREE_TAP, settings), new Item.Properties());
-    public static final Item MAPLE_SAPLING = register("maple_sapling", (settings) -> new BlockItem(CanadaBlocks.MAPLE_SAPLING, settings), new Item.Properties());
+    public static final Item MAPLE_SAPLING = register("maple_sapling", (settings) -> new BlockItem(CanadaBlocks.MAPLE_SAPLING, settings),
+        new Item.Properties().compostable(ResourceKey.create(
+            Registries.CONTEXT_INT_PROVIDER,
+            Identifier.fromNamespaceAndPath("minecraft", "compostable/low")
+        )));
 
     public static final FoodProperties MAPLE_SYRUP_FOOD = new FoodProperties.Builder().nutrition(4).saturationModifier(1.4F).alwaysEdible().build();
     public static final Consumable MAPLE_SYRUP_CONSUME = Consumables.defaultDrink().consumeSeconds(2.0F)
@@ -150,7 +152,7 @@ public class CanadaItems {
 
     public static Item register(String name, Function<Item.Properties, Item> itemFactory, Item.Properties settings) {
 		// Create the item key.
-		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
+		ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
 
 		// Create the item instance.
 		Item item = itemFactory.apply(settings.setId(itemKey));
@@ -167,11 +169,11 @@ public class CanadaItems {
             new Item.Properties().stacksTo(16));
 
         MAPLE_SIGN_ITEM = register("maple_sign", settings ->
-            new SignItem(CanadaBlocks.MAPLE_SIGN, CanadaBlocks.MAPLE_WALL_SIGN, settings),
+            new StandingAndWallBlockItem(CanadaBlocks.MAPLE_SIGN, CanadaBlocks.MAPLE_WALL_SIGN, Direction.DOWN, settings),
             new Item.Properties().stacksTo(16));
 
         // Add custom items to groups
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register((itemGroup) -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register((itemGroup) -> {
             itemGroup.accept(PELT);
             itemGroup.accept(ANTLERS);
             itemGroup.accept(FLOUR);
@@ -182,19 +184,19 @@ public class CanadaItems {
             itemGroup.accept(GOOSE_EGG);
         });
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.BUILDING_BLOCKS).register((itemGroup) -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.BUILDING_BLOCKS).register((itemGroup) -> {
             for (var block : CanadaBlocks.MAPLE_BLOCKS) {
                 itemGroup.accept(block.asItem());
             }
             itemGroup.accept(CanadaBlocks.RUBBER_BLOCK);
         });
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.NATURAL_BLOCKS).register((itemGroup) -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register((itemGroup) -> {
             itemGroup.accept(CanadaBlocks.MAPLE_LEAVES.asItem());
             itemGroup.accept(CanadaBlocks.MAPLE_SAPLING.asItem());
         });
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register((itemGroup) -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register((itemGroup) -> {
             itemGroup.accept(MAPLE_SIGN_ITEM);
             itemGroup.accept(MAPLE_HANGING_SIGN_ITEM);
             itemGroup.accept(TREE_TAP);
@@ -202,12 +204,12 @@ public class CanadaItems {
             itemGroup.accept(MOOSE_HEAD);
         });
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register((itemGroup) -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register((itemGroup) -> {
             itemGroup.accept(MAPLE_BOAT);
             itemGroup.accept(MAPLE_CHEST_BOAT);
         });
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FOOD_AND_DRINKS).register((itemGroup) -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register((itemGroup) -> {
             itemGroup.accept(MAPLE_SYRUP_BOTTLE);
             itemGroup.accept(GRAVY);
             itemGroup.accept(CHEESE_CURD);
@@ -222,7 +224,7 @@ public class CanadaItems {
             itemGroup.accept(THERMOS);
         });
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register((itemGroup) -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register((itemGroup) -> {
             itemGroup.accept(BEAVER_SPAWN_EGG);
             itemGroup.accept(MOOSE_SPAWN_EGG);
             itemGroup.accept(DUCK_SPAWN_EGG);
@@ -230,11 +232,10 @@ public class CanadaItems {
             itemGroup.accept(GOOSE_SPAWN_EGG);
         });
 
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COMBAT).register((itemGroup) -> {
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register((itemGroup) -> {
             itemGroup.accept(BEAVER_HELMET);
             itemGroup.accept(MOOSE_HELMET);
         });
 
-        CompostingChanceRegistry.INSTANCE.add(MAPLE_SAPLING, 0.3f);
     }
 }

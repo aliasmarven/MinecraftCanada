@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import xen42.canadamod.item.ThermosContentsComponent;
@@ -20,12 +20,12 @@ import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
 public class ThermosTooltipComponent implements ClientTooltipComponent {
-    private static final ResourceLocation BUNDLE_PROGRESS_BAR_BORDER_TEXTURE = ResourceLocation.withDefaultNamespace("container/bundle/bundle_progressbar_border");
-    private static final ResourceLocation BUNDLE_PROGRESS_BAR_FILL_TEXTURE = ResourceLocation.withDefaultNamespace("container/bundle/bundle_progressbar_fill");
-    private static final ResourceLocation BUNDLE_PROGRESS_BAR_FULL_TEXTURE = ResourceLocation.withDefaultNamespace("container/bundle/bundle_progressbar_full");
-    private static final ResourceLocation BUNDLE_SLOT_HIGHLIGHT_BACK_TEXTURE = ResourceLocation.withDefaultNamespace("container/bundle/slot_highlight_back");
-    private static final ResourceLocation BUNDLE_SLOT_HIGHLIGHT_FRONT_TEXTURE = ResourceLocation.withDefaultNamespace("container/bundle/slot_highlight_front");
-    private static final ResourceLocation BUNDLE_SLOT_BACKGROUND_TEXTURE = ResourceLocation.withDefaultNamespace("container/bundle/slot_background");
+    private static final Identifier BUNDLE_PROGRESS_BAR_BORDER_TEXTURE = Identifier.withDefaultNamespace("container/bundle/bundle_progressbar_border");
+    private static final Identifier BUNDLE_PROGRESS_BAR_FILL_TEXTURE = Identifier.withDefaultNamespace("container/bundle/bundle_progressbar_fill");
+    private static final Identifier BUNDLE_PROGRESS_BAR_FULL_TEXTURE = Identifier.withDefaultNamespace("container/bundle/bundle_progressbar_full");
+    private static final Identifier BUNDLE_SLOT_HIGHLIGHT_BACK_TEXTURE = Identifier.withDefaultNamespace("container/bundle/slot_highlight_back");
+    private static final Identifier BUNDLE_SLOT_HIGHLIGHT_FRONT_TEXTURE = Identifier.withDefaultNamespace("container/bundle/slot_highlight_front");
+    private static final Identifier BUNDLE_SLOT_BACKGROUND_TEXTURE = Identifier.withDefaultNamespace("container/bundle/slot_background");
     private static final Component BUNDLE_FULL = Component.translatable("item.minecraft.bundle.full");
     private static final Component BUNDLE_EMPTY = Component.translatable("item.minecraft.bundle.empty");
     private static final Component BUNDLE_EMPTY_DESCRIPTION = Component.translatable("item.canadamod.thermos.empty.description");
@@ -154,7 +154,7 @@ public class ThermosTooltipComponent implements ClientTooltipComponent {
             Component text = itemStack.getStyledHoverName();
             int i = textRenderer.width(text.getVisualOrderText());
             int j = x + width / 2 - 12;
-            drawContext.renderTooltip(textRenderer, text, j - i / 2, y - 15, (ResourceLocation)itemStack.get(DataComponents.TOOLTIP_STYLE));
+            drawContext.renderTooltip(textRenderer, text, j - i / 2, y - 15, (Identifier)itemStack.get(DataComponents.TOOLTIP_STYLE));
         }
 
     }
@@ -183,7 +183,7 @@ public class ThermosTooltipComponent implements ClientTooltipComponent {
         return Mth.clamp(Mth.mulAndTruncate(this.thermosContents.getOccupancy(), 94), 0, 94);
     }
 
-    private ResourceLocation getProgressBarFillTexture() {
+    private Identifier getProgressBarFillTexture() {
         return this.thermosContents.getOccupancy().compareTo(Fraction.ONE) >= 0 ? BUNDLE_PROGRESS_BAR_FULL_TEXTURE : BUNDLE_PROGRESS_BAR_FILL_TEXTURE;
     }
 

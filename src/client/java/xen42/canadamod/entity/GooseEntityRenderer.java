@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.ChickenRenderState;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import xen42.canadamod.CanadaMod;
 import xen42.canadamod.CanadaModClient;
@@ -17,8 +17,8 @@ public class GooseEntityRenderer extends MobRenderer<GooseEntity, ChickenRenderS
     }
 
     @Override
-    public ResourceLocation getTextureLocation(ChickenRenderState state) {
-        return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/goose/goose.png");
+    public Identifier getTextureLocation(ChickenRenderState state) {
+        return Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "textures/entity/goose/goose.png");
     }
 
     @Override

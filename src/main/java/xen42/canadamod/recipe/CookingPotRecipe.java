@@ -142,7 +142,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
         return true;
     }
 
-    public static class Serializer implements RecipeSerializer<CookingPotRecipe> {
+    public static class Serializer {
 		public static final MapCodec<CookingPotRecipe> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 					Codec.STRING.optionalFieldOf("group", "").forGetter(recipe -> recipe.group),
@@ -156,17 +156,6 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 		public static final StreamCodec<RegistryFriendlyByteBuf, CookingPotRecipe> PACKET_CODEC = StreamCodec.of(
 				CookingPotRecipe.Serializer::write, CookingPotRecipe.Serializer::read
 		);
-
-		@Override
-		public MapCodec<CookingPotRecipe> codec() {
-			return CODEC;
-		}
-
-		@Deprecated
-		@Override
-		public StreamCodec<RegistryFriendlyByteBuf, CookingPotRecipe> streamCodec() {
-			return PACKET_CODEC;
-		}
 
 		private static CookingPotRecipe read(RegistryFriendlyByteBuf buf) {
 			var string = buf.readUtf();

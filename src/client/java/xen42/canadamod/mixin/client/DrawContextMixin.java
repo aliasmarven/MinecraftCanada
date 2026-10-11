@@ -8,7 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,9 +23,9 @@ import xen42.canadamod.item.ThermosTooltipData;
 @Mixin(GuiGraphics.class)
 public class DrawContextMixin {
     @Inject(at = @At("HEAD"),
-        method = "renderTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;IILnet/minecraft/resources/ResourceLocation;)V",
+        method = "renderTooltip(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;IILnet/minecraft/resources/Identifier;)V",
         cancellable = true)
-	private void drawTooltip(Font textRenderer, List<Component> text, Optional<TooltipComponent> data, int x, int y, @Nullable ResourceLocation texture, CallbackInfo info) {
+	private void drawTooltip(Font textRenderer, List<Component> text, Optional<TooltipComponent> data, int x, int y, @Nullable Identifier texture, CallbackInfo info) {
         if (data.isPresent() && data.get() instanceof ThermosTooltipData thermosTooltipData) {
             var list = (List)text.stream().map(Component::getVisualOrderText).map(ClientTooltipComponent::create).collect(Util.toMutableList());
 

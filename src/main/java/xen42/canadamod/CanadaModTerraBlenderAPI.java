@@ -16,7 +16,7 @@ import terrablender.api.VanillaParameterOverlayBuilder;
 import java.util.function.Consumer;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import com.mojang.datafixers.util.Pair;
@@ -26,12 +26,12 @@ public class CanadaModTerraBlenderAPI implements TerraBlenderApi {
     @Override
     public void onTerraBlenderInitialized()
     {
-        Regions.register(new MapleForestRegion(ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_forest"), 2));
+        Regions.register(new MapleForestRegion(Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, "maple_forest"), 2));
     }
 
     public class MapleForestRegion extends Region
     {
-        public MapleForestRegion(ResourceLocation id, int weight)
+        public MapleForestRegion(Identifier id, int weight)
         {
             super(id, RegionType.OVERWORLD, weight);
         }

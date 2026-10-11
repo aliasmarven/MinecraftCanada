@@ -1,7 +1,7 @@
 package xen42.canadamod;
 
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -30,22 +30,22 @@ public class CanadaTags {
 	}
 
 	public static TagKey<Block> ofBlock(String name) {
-		return TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
+		return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
 	}
 
 	public static TagKey<Item> ofItem(String name) {
-		return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
+		return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
 	}
 
 	public static TagKey<Item> ofItemConventional(String name) {
-		return TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", name));
+		return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", name));
 	}
 
 	public static TagKey<EntityType<?>> ofEntity(String name) {
-		return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
+		return TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
 	}
 
 	public static TagKey<Structure> ofStructure(String name) {
-		return TagKey.create(Registries.STRUCTURE, ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
+		return TagKey.create(Registries.STRUCTURE, Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, name));
 	}
 }

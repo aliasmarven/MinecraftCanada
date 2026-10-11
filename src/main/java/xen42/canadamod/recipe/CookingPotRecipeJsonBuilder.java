@@ -15,7 +15,7 @@ import net.minecraft.data.recipes.RecipeBuilder;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -115,8 +115,8 @@ public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
 
     @Override
 	public void save(RecipeOutput exporter, String recipePath) {
-		ResourceLocation identifier = getDefaultRecipeId(this.getResult());
-		ResourceLocation identifier2 = ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, recipePath);
+		Identifier identifier = getDefaultRecipeId(this.getResult());
+		Identifier identifier2 = Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, recipePath);
 		if (identifier2.equals(identifier)) {
 			throw new IllegalStateException("Recipe " + recipePath + " should remove its 'save' argument as it is equal to default one");
 		} else {
@@ -124,7 +124,7 @@ public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
 		}
 	}
 
-    public static ResourceLocation getDefaultRecipeId(ItemLike item) {
-		return ResourceLocation.fromNamespaceAndPath(CanadaMod.MOD_ID, BuiltInRegistries.ITEM.getKey(item.asItem()).getPath());
+    public static Identifier getDefaultRecipeId(ItemLike item) {
+		return Identifier.fromNamespaceAndPath(CanadaMod.MOD_ID, BuiltInRegistries.ITEM.getKey(item.asItem()).getPath());
 	}
 }
