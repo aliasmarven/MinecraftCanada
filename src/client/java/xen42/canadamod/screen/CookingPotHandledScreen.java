@@ -28,7 +28,7 @@ public class CookingPotHandledScreen extends AbstractRecipeBookScreen<CookingPot
     }
 
     @Override
-    public void extractContents(
+    public void extractBackground(
             GuiGraphicsExtractor context,
             int mouseX, int mouseY, float deltaTicks) {
 
@@ -51,7 +51,7 @@ public class CookingPotHandledScreen extends AbstractRecipeBookScreen<CookingPot
             24, 16, 0, 0,
             i + 109, j + 34, l, 16);
 
-        super.extractContents(context, mouseX, mouseY, deltaTicks);
+        super.extractBackground(context, mouseX, mouseY, deltaTicks);
     }
 
 }
