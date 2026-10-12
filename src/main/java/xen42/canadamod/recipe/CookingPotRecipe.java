@@ -173,7 +173,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
             var requiresBottle = buf.readBoolean();
             var requiresBowl = buf.readBoolean();
 
-			return new CookingPotRecipe(string, result, ingredients, requiresBottle, requiresBowl);
+			return new CookingPotRecipe(string, result, ingredients, requiresBowl, requiresBottle);
 		}
 
 		private static void write(RegistryFriendlyByteBuf buf, CookingPotRecipe recipe) {

@@ -96,8 +96,8 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 			translationBuilder.add(CanadaBlocks.MAPLE_FENCE_GATE, "Maple Fence Gate");
 			translationBuilder.add(CanadaBlocks.MAPLE_PRESSURE_PLATE, "Maple Pressure Plate");
 
-			translationBuilder.add(MapleBoatEntity.MAPLE_BOAT, "Maple Boat");
-			translationBuilder.add(MapleBoatEntity.MAPLE_CHEST_BOAT, "Maple Boat with Chest");
+			translationBuilder.add("entity.canadamod.maple_boat", "Maple Boat");
+			translationBuilder.add("entity.canadamod.maple_chest_boat", "Maple Boat with Chest");
 			translationBuilder.add(CanadaItems.MAPLE_BOAT, "Maple Boat");
 			translationBuilder.add(CanadaItems.MAPLE_CHEST_BOAT, "Maple Boat with Chest");
 
@@ -156,6 +156,9 @@ public abstract class CanadaModLanguageProvider extends FabricLanguageProvider {
 			translationBuilder.add(CanadaTags.ItemTags.MAPLE_LOGS, "Maple Logs");
 			translationBuilder.add(CanadaTags.ItemTags.RAW_MEAT, "Red Meat");
 			translationBuilder.add(CanadaTags.ItemTags.SAP, "Sap");
+			translationBuilder.add("tag.item.c.cheese", "Cheese");
+			translationBuilder.add("tag.item.c.flour", "Flour");
+			translationBuilder.add("tag.item.c.rubber", "Rubber");
 			translationBuilder.add(CanadaTags.BlockTags.MAPLE_LOGS, "Maple Logs");
 			translationBuilder.addVillagerProfession(CanadaVillagers.SUGAR_SHACK_VILLAGER_KEY, "Lumberjack");
 

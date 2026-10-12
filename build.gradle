@@ -103,3 +103,16 @@ java {
 		languageVersion = JavaLanguageVersion.of(25)
 	}
 }
+
+// UCC 26.3: preserve verified generated-resource overrides.
+// Datagen can overwrite or remove working Maple Sign assets and
+// the manually corrected Maple Leaves loot table.
+// Restore these known-working resources after successful datagen runs.
+tasks.matching { it.name == 'runDatagen' }.configureEach {
+    doLast {
+        copy {
+            from('src/datagen-overrides')
+            into('src/main/generated')
+        }
+    }
+}

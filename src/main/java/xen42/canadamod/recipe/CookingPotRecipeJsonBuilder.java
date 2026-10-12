@@ -18,7 +18,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
@@ -28,7 +29,7 @@ import xen42.canadamod.CanadaMod;
 public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
 
 	private final Map<String, Criterion<?>> criteria = new LinkedHashMap<String, Criterion<?>>();
-	private final ItemStack result;
+	private final ItemStackTemplate result;
     @Nullable
     private String group;
     private final ArrayList<Ingredient> _inputsList;
@@ -37,7 +38,16 @@ public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
     private final HolderGetter<Item> _registryLookup;
 
     public CookingPotRecipeJsonBuilder(HolderGetter<Item> registryLookup, ItemLike result, int count) {
-        this.result = new ItemStack(result, count);
+        var itemKey = BuiltInRegistries.ITEM.getResourceKey(result.asItem())
+            .orElseThrow(() -> new IllegalStateException(
+                "Unregistered Cooking Pot recipe result: " + result
+            ));
+
+        this.result = new ItemStackTemplate(
+            registryLookup.getOrThrow(itemKey),
+            count,
+            DataComponentPatch.EMPTY
+        );
 
         this._registryLookup = registryLookup;
         _inputsList = new ArrayList<>();
@@ -73,11 +83,14 @@ public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
 
     @Override
     public ResourceKey<Recipe<?>> defaultId() {
-        return RecipeBuilder.getDefaultRecipeId(this.result);
+        return ResourceKey.create(
+            Registries.RECIPE,
+            getDefaultRecipeId(this.getResult())
+        );
     }
 
     public Item getResult() {
-        return this.result.getItem();
+        return this.result.item().value();
     }
 
     @Override
@@ -104,10 +117,7 @@ public class CookingPotRecipeJsonBuilder implements RecipeBuilder {
 
 		Advancement.Builder builder = exporter.advancement()
 			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(
-                net.minecraft.core.Holder.Reference.createStandAlone(
-                    new net.minecraft.core.HolderOwner<Recipe<?>>() {},
-                    recipeKey
-                )
+                exporter.lookup(Registries.RECIPE).getOrThrow(recipeKey)
             ))
 			.rewards(AdvancementRewards.Builder.recipe(recipeKey))
 			.requirements(AdvancementRequirements.Strategy.OR);
