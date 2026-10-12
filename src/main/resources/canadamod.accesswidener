@@ -1,39 +1,24 @@
 accessWidener	v2	official
 accessible	method	net/minecraft/world/level/block/state/properties/BlockSetType	register	(Lnet/minecraft/world/level/block/state/properties/BlockSetType;)Lnet/minecraft/world/level/block/state/properties/BlockSetType;
 accessible	method	net/minecraft/world/level/block/state/properties/WoodType	register	(Lnet/minecraft/world/level/block/state/properties/WoodType;)Lnet/minecraft/world/level/block/state/properties/WoodType;
-accessible	method	net/minecraft/world/entity/EntityType	register	(Ljava/lang/String;Lnet/minecraft/world/entity/EntityType$Builder;)Lnet/minecraft/world/entity/EntityType;
-accessible	method	net/minecraft/world/entity/EntityType	boatFactory	(Ljava/util/function/Supplier;)Lnet/minecraft/world/entity/EntityType$EntityFactory;
-accessible	method	net/minecraft/world/entity/EntityType	chestBoatFactory	(Ljava/util/function/Supplier;)Lnet/minecraft/world/entity/EntityType$EntityFactory;
 accessible	field	net/minecraft/world/level/block/entity/BlockEntity	type	Lnet/minecraft/world/level/block/entity/BlockEntityType;
 mutable	field	net/minecraft/world/level/block/entity/BlockEntity	type	Lnet/minecraft/world/level/block/entity/BlockEntityType;
 accessible	method	net/minecraft/core/particles/SimpleParticleType	<init>	(Z)V
-accessible	method	net/minecraft/client/particle/ParticleEngine	register	(Lnet/minecraft/core/particles/ParticleType;Lnet/minecraft/client/particle/ParticleEngine$SpriteParticleRegistration;)V
-accessible	method	net/minecraft/client/particle/FallingLeavesParticle	<init>	(Lnet/minecraft/client/multiplayer/ClientLevel;DDDLnet/minecraft/client/particle/SpriteSet;FFZZFF)V
 accessible	field	net/minecraft/client/gui/screens/recipebook/RecipeBookComponent	ghostSlots	Lnet/minecraft/client/gui/screens/recipebook/GhostSlots;
 accessible	class	net/minecraft/client/gui/screens/recipebook/GhostSlots$GhostSlot
 accessible	field	net/minecraft/client/gui/screens/recipebook/GhostSlots	ingredients	Lit/unimi/dsi/fastutil/objects/Reference2ObjectMap;
 accessible	field	net/minecraft/client/gui/screens/inventory/AbstractRecipeBookScreen	recipeBookComponent	Lnet/minecraft/client/gui/screens/recipebook/RecipeBookComponent;
 accessible	method	net/minecraft/client/gui/screens/recipebook/GhostSlots	setResult	(Lnet/minecraft/world/inventory/Slot;Lnet/minecraft/util/context/ContextMap;Lnet/minecraft/world/item/crafting/display/SlotDisplay;)V
 accessible	method	net/minecraft/client/gui/screens/recipebook/GhostSlots	setInput	(Lnet/minecraft/world/inventory/Slot;Lnet/minecraft/util/context/ContextMap;Lnet/minecraft/world/item/crafting/display/SlotDisplay;)V
-accessible	field	net/minecraft/world/item/SpawnEggItem	BY_ID	Ljava/util/Map;
-accessible	field	net/minecraft/world/item/SpawnEggItem	defaultType	Lnet/minecraft/world/entity/EntityType;
-mutable	field	net/minecraft/world/item/SpawnEggItem	defaultType	Lnet/minecraft/world/entity/EntityType;
 accessible	field	net/minecraft/world/level/block/entity/BlockEntity	type	Lnet/minecraft/world/level/block/entity/BlockEntityType;
 mutable	field	net/minecraft/world/level/block/entity/BlockEntity	type	Lnet/minecraft/world/level/block/entity/BlockEntityType;
-extendable	method	net/minecraft/world/level/block/entity/BrushableBlockEntity	unpackLootTable	(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)V
-accessible	method	net/minecraft/world/level/block/entity/BrushableBlockEntity	unpackLootTable	(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)V
 accessible	field	net/minecraft/world/level/block/entity/BrushableBlockEntity	item	Lnet/minecraft/world/item/ItemStack;
 accessible	field	net/minecraft/world/entity/ai/village/poi/PoiTypes	TYPE_BY_STATE	Ljava/util/Map;
-accessible	field	net/minecraft/world/item/crafting/FireworkStarRecipe	SHAPE_BY_ITEM	Ljava/util/Map;
-mutable	field	net/minecraft/world/item/crafting/FireworkStarRecipe	SHAPE_BY_ITEM	Ljava/util/Map;
 accessible	field	net/minecraft/client/gui/screens/recipebook/RecipeBookComponent	ghostSlots	Lnet/minecraft/client/gui/screens/recipebook/GhostSlots;
 accessible	class	net/minecraft/client/gui/screens/recipebook/GhostSlots$GhostSlot
 accessible	field	net/minecraft/client/gui/screens/recipebook/GhostSlots	ingredients	Lit/unimi/dsi/fastutil/objects/Reference2ObjectMap;
 accessible	field	net/minecraft/client/gui/screens/inventory/AbstractRecipeBookScreen	recipeBookComponent	Lnet/minecraft/client/gui/screens/recipebook/RecipeBookComponent;
-accessible	method	net/minecraft/world/item/component/BundleContents	getWeight	(Lnet/minecraft/world/item/ItemStack;)Lorg/apache/commons/lang3/math/Fraction;
-accessible	method	net/minecraft/client/gui/GuiGraphics	renderTooltipInternal	(Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;Lnet/minecraft/resources/ResourceLocation;)V
 accessible	method	net/minecraft/world/entity/player/Player	isEquipped	(Lnet/minecraft/world/item/Item;)Z
 accessible	field	net/minecraft/world/entity/Mob	goalSelector	Lnet/minecraft/world/entity/ai/goal/GoalSelector;
 accessible	class	net/minecraft/world/effect/MobEffect
 accessible	method	net/minecraft/world/effect/MobEffect	<init>	(Lnet/minecraft/world/effect/MobEffectCategory;I)V
-accessible	field	net/minecraft/world/entity/animal/PolarBear	warningSoundTicks	I
