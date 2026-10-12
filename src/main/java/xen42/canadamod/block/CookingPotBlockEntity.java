@@ -155,7 +155,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements S
         var inputRecipe = getRecipeFromInputs(blockEntity, world);
         var activeRecipe = getCurrentRecipe(blockEntity, world);
         var currentOutput = blockEntity.getItem(CookingPotScreenHandler.OUTPUT_SLOT);
-        var currentRecipeResult = inputRecipe == null ? ItemStack.EMPTY : inputRecipe.value().result;
+        var currentRecipeResult = inputRecipe == null ? ItemStack.EMPTY : inputRecipe.value().result.create();
 
         var canAcceptOutput = blockEntity.canAcceptOutput(currentOutput, currentRecipeResult);
 
@@ -264,7 +264,7 @@ public class CookingPotBlockEntity extends BaseContainerBlockEntity implements S
         var recipe = recipeEntry.value();
 
         if (recipe != null) {
-            var resultItem = recipe.result;
+            var resultItem = recipe.result.create();
 
             var currentOutput = blockEntity.getItem(CookingPotScreenHandler.OUTPUT_SLOT);
 

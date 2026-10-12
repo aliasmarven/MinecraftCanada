@@ -138,7 +138,7 @@ public class CookingPotScreenHandler extends RecipeBookMenu {
         }
 
         var outputSlot = getSlot(OUTPUT_SLOT);
-        if (!outputSlot.getItem().isEmpty() && !outputSlot.getItem().is(recipe.result.getItem())) {
+        if (!outputSlot.getItem().isEmpty() && !outputSlot.getItem().is(recipe.result.item().value())) {
             this.quickMoveStack(player, OUTPUT_SLOT);
         }
 

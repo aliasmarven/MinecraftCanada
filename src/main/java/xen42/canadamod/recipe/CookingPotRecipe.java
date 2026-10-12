@@ -8,6 +8,7 @@ import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.PlacementInfo;
@@ -28,13 +29,13 @@ import xen42.canadamod.CanadaBlocks;
 import xen42.canadamod.CanadaMod;
 
 public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
-    public final ItemStack result;
+    public final ItemStackTemplate result;
     public final String group;
 	public final List<Ingredient> ingredients;
     public final boolean requiresBowl;
     public final boolean requiresBottle;
 
-    public CookingPotRecipe(String group, ItemStack result, List<Ingredient> ingredients, boolean requiresBowl, boolean requiresBottle) {
+    public CookingPotRecipe(String group, ItemStackTemplate result, List<Ingredient> ingredients, boolean requiresBowl, boolean requiresBottle) {
         this.group = group;
         this.result = result;
         this.ingredients = ingredients;
@@ -42,9 +43,13 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
         this.requiresBottle = requiresBottle;
     }
 
+    public CookingPotRecipe(String group, ItemStack result, List<Ingredient> ingredients, boolean requiresBowl, boolean requiresBottle) {
+        this(group, ItemStackTemplate.fromStack(result), ingredients, requiresBowl, requiresBottle);
+    }
+
     @Override
     public ItemStack assemble(CookingPotRecipeInput input) {
-        return this.result.copy();
+        return this.result.create();
     }
 
 	@VisibleForTesting
@@ -95,7 +100,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
         var cookingPotItem = CanadaBlocks.COOKING_POT.asItem();
 		return List.of(
             new CookingPotRecipeDisplay(ingredientDisplays, containerDisplay,
-                new ItemStackSlotDisplay(net.minecraft.world.item.ItemStackTemplate.fromStack(this.result)), new SlotDisplay.ItemSlotDisplay(cookingPotItem))
+                new ItemStackSlotDisplay(this.result), new SlotDisplay.ItemSlotDisplay(cookingPotItem))
         );
 	}
 
@@ -146,7 +151,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 		public static final MapCodec<CookingPotRecipe> CODEC = RecordCodecBuilder.mapCodec(
 			instance -> instance.group(
 					Codec.STRING.optionalFieldOf("group", "").forGetter(recipe -> recipe.group),
-					ItemStack.CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
+					ItemStackTemplate.CODEC.fieldOf("result").forGetter(recipe -> recipe.result),
 					Ingredient.CODEC.listOf(1, 4).fieldOf("ingredients").forGetter(recipe -> recipe.ingredients),
                     Codec.BOOL.optionalFieldOf("requiresBowl", false).forGetter(recipe -> recipe.requiresBowl),
                     Codec.BOOL.optionalFieldOf("requiresBottle", false).forGetter(recipe -> recipe.requiresBottle)
@@ -159,7 +164,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 
 		private static CookingPotRecipe read(RegistryFriendlyByteBuf buf) {
 			var string = buf.readUtf();
-			var result = ItemStack.STREAM_CODEC.decode(buf);
+			var result = ItemStackTemplate.STREAM_CODEC.decode(buf);
             var ingredientsCount = buf.readInt();
             var ingredients = new ArrayList<Ingredient>();
             for (int i = 0; i < ingredientsCount; i++) {
@@ -173,7 +178,7 @@ public class CookingPotRecipe implements Recipe<CookingPotRecipeInput> {
 
 		private static void write(RegistryFriendlyByteBuf buf, CookingPotRecipe recipe) {
 			buf.writeUtf(recipe.group);
-			ItemStack.STREAM_CODEC.encode(buf, recipe.result);
+			ItemStackTemplate.STREAM_CODEC.encode(buf, recipe.result);
             buf.writeInt(recipe.ingredients.size());
             for (var ingredient : recipe.ingredients) {
 			    Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient);
