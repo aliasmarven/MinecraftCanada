@@ -187,6 +187,7 @@ public class CanadaMod implements ModInitializer {
 		CanadaItems.initialize();
 		MapleBoatEntity.initialize();
 		CanadaVillagers.initialize();
+		CanadaCampsiteLoot.initialize();
 		CanadaPlacedFeatures.onInitialize();
 
 		BiomeModifications.addFeature(BiomeSelectors.includeByKey(MAPLE_BIOME_KEY), GenerationStep.Decoration.VEGETAL_DECORATION, CanadaPlacedFeatures.MAPLE_FOREST_VEGETATION);
