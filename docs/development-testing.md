@@ -9,7 +9,7 @@ Original project:
 https://github.com/xen-42/MinecraftCanada
 
 Unofficial port:
-https://github.com/aliasmarven/MinecraftCanada
+https://github.com/aliasmarven/Unofficial-Canadian-Content
 
 ## Primary Development Environment
 
