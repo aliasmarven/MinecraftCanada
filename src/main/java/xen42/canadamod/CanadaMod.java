@@ -191,11 +191,11 @@ public class CanadaMod implements ModInitializer {
 
 		BiomeModifications.addFeature(BiomeSelectors.includeByKey(MAPLE_BIOME_KEY), GenerationStep.Decoration.VEGETAL_DECORATION, CanadaPlacedFeatures.MAPLE_FOREST_VEGETATION);
 
-		SpawnPlacements.register(BEAVER_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawn);
+		SpawnPlacements.register(BEAVER_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawnWetland);
 		SpawnPlacements.register(MOOSE_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawn);
-		SpawnPlacements.register(DUCK_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawn);
+		SpawnPlacements.register(DUCK_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawnWetland);
 		SpawnPlacements.register(GRIZZLY_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawn);
-		SpawnPlacements.register(GOOSE_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawn);
+		SpawnPlacements.register(GOOSE_ENTITY, SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, CanadaMod::canSpawnWetland);
 
 		var mooseBiomes = BiomeSelectors.includeByKey(MAPLE_BIOME_KEY)
 			.or(BiomeSelectors.includeByKey(Biomes.TAIGA))
@@ -220,6 +220,18 @@ public class CanadaMod implements ModInitializer {
 	private static boolean canSpawn(EntityType type, ServerLevelAccessor access, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
 		var ground = access.getBlockState(pos.below());
 		var goodGround = ground.is(BlockTags.DIRT) || ground.is(Blocks.GRASS_BLOCK) || ground.is(Blocks.PODZOL) || ground.is(Blocks.SNOW);
+		var goodLight = access.getMaxLocalRawBrightness(pos) > 8;
+		return goodGround && goodLight;
+	}
+
+	private static boolean canSpawnWetland(EntityType type, ServerLevelAccessor access, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
+		var ground = access.getBlockState(pos.below());
+		var goodGround = ground.is(BlockTags.DIRT)
+			|| ground.is(Blocks.GRASS_BLOCK)
+			|| ground.is(Blocks.PODZOL)
+			|| ground.is(Blocks.SNOW)
+			|| ground.is(Blocks.MUD)
+			|| ground.is(Blocks.CLAY);
 		var goodLight = access.getMaxLocalRawBrightness(pos) > 8;
 		return goodGround && goodLight;
 	}
