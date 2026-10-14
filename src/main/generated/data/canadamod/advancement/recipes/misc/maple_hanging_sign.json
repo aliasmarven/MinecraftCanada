@@ -17,7 +17,7 @@
       },
       "trigger": "minecraft:recipe_unlocked"
     },
-    "has_translation{key='tag.item.canadamod.maple_logs', fallback='#canadamod:maple_logs', args=[]}": {
+    "has_canadamod_maple_logs": {
       "conditions": {
         "items": [
           {
@@ -31,7 +31,7 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_translation{key='tag.item.canadamod.maple_logs', fallback='#canadamod:maple_logs', args=[]}",
+      "has_canadamod_maple_logs",
       "has_chain"
     ]
   ],

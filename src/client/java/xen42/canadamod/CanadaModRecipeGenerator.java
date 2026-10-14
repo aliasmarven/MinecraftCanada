@@ -287,6 +287,6 @@ public class CanadaModRecipeGenerator extends FabricRecipeProvider {
     }
 
     private String hasTag(TagKey<Item> tag) {
-        return "has_" + tag.getName();
+        return "has_" + tag.location().getNamespace() + "_" + tag.location().getPath().replace("/", "_");
     }
 }
