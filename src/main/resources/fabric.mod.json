@@ -1,50 +1,51 @@
 {
-	"schemaVersion": 1,
-	"id": "canadamod",
-	"version": "${version}",
-	"name": "Canadian Content",
-	"description": "Adds Canadian stuff to Minecraft - Moose, beavers, cooking pot for new foods, tree tapping for maple syrup and more.",
-	"authors": [
-		"xen-42"
-	],
-	"contact": {
-		"homepage": "https://github.com/xen-42/MinecraftCanada/releases",
-		"sources": "https://github.com/xen-42/MinecraftCanada",
-		"issues": "https://github.com/xen-42/MinecraftCanada/issues"
-	},
-	"license": "MIT",
-	"icon": "assets/canadamod/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"xen42.canadamod.CanadaMod"
-		],
-		"client": [
-			"xen42.canadamod.CanadaModClient"
-		],
-		"fabric-datagen": [
-			"xen42.canadamod.CanadaModDataGenerator"
-		],
-		"terrablender": [
-			"xen42.canadamod.CanadaModTerraBlenderAPI"
-		]
-	},
-	"accessWidener": "canadamod.accesswidener",
-	"mixins": [
-		"canadamod.mixins.json",
-		{
-			"config": "canadamod.client.mixins.json",
-			"environment": "client"
-		}
-	],
-	"depends": {
-		"fabricloader": ">=0.19.5",
-		"minecraft": "~26.3",
-		"java": ">=25",
-		"fabric-api": "*",
-		"terrablender": "26.3.0.0.9"
-	},
-	"suggests": {
-
-	}
+  "schemaVersion": 1,
+  "id": "canadamod",
+  "version": "${version}",
+  "name": "Unofficial Canadian Content",
+  "description": "Unofficial Minecraft Java 26.3 port of Canadian Content by xen-42. Adds moose, beavers, maple syrup, cooking, Canadian wildlife, and more.",
+  "authors": [
+    "xen-42"
+  ],
+  "contact": {
+    "homepage": "https://github.com/aliasmarven/MinecraftCanada",
+    "sources": "https://github.com/aliasmarven/MinecraftCanada",
+    "issues": "https://github.com/aliasmarven/MinecraftCanada/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/canadamod/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "xen42.canadamod.CanadaMod"
+    ],
+    "client": [
+      "xen42.canadamod.CanadaModClient"
+    ],
+    "fabric-datagen": [
+      "xen42.canadamod.CanadaModDataGenerator"
+    ],
+    "terrablender": [
+      "xen42.canadamod.CanadaModTerraBlenderAPI"
+    ]
+  },
+  "accessWidener": "canadamod.accesswidener",
+  "mixins": [
+    "canadamod.mixins.json",
+    {
+      "config": "canadamod.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*",
+    "terrablender": "26.3.0.0.9"
+  },
+  "suggests": {},
+  "contributors": [
+    "aliasmarven - unofficial Minecraft 26.3 port"
+  ]
 }
